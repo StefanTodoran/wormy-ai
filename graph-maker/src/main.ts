@@ -5,20 +5,7 @@ interface Email {
     recipient: string,
     content: string,
     order: number,
-}
-
-interface NewNode {
-    id: string,
-    position: Coordinate,
-}
-
-interface GraphNode {
-    id: string,
-    outgoing: string[],
-    position: Coordinate,
-    velocity: { dx: number, dy: number },
-    nodeElement: SVGCircleElement,
-    labelElement: SVGTextElement,
+    uuid: string,
 }
 
 interface Coordinate {
@@ -26,156 +13,189 @@ interface Coordinate {
     y: number,
 }
 
-class Graph {
-    public nodes: GraphNode[];
-    private canvas: SVGElement;
-    private edgeElements: SVGLineElement[];
+// class Graph {
+//     public nodes: GraphNode[];
+//     private canvas: SVGElement;
+//     private edgeElements: SVGLineElement[];
 
-    constructor(canvas: SVGElement) {
-        this.nodes = [];
-        this.edgeElements = [];
-        this.canvas = canvas;
-    }
+//     constructor(canvas: SVGElement) {
+//         this.nodes = [];
+//         this.edgeElements = [];
+//         this.canvas = canvas;
+//     }
 
-    public addNode(newNode: NewNode) {
-        const node = newNode as GraphNode;
-        node.position.x += (50 * Math.random()) - 25;
-        node.position.y += (50 * Math.random()) - 25;
-        node.velocity = { dx: 0, dy: 0 };
+//     public addNode(newNode: NewNode) {
+//         const node = newNode as GraphNode;
+//         node.position.x += (50 * Math.random()) - 25;
+//         node.position.y += (50 * Math.random()) - 25;
+//         node.velocity = { dx: 0, dy: 0 };
 
-        const position = this.convertCoords(node.position);
-        const nodeElem = createElement("circle", {
-            cx: position.x,
-            cy: position.y,
-            r: 20,
-        }) as SVGCircleElement;
-        // const textElem = createElement("text", {
-        //     cx: position.x,
-        //     cy: position.y,
-        //     r: 20,
-        // }) as SVGCircleElement;
+//         const position = this.convertCoords(node.position);
+//         const nodeElem = createElement("circle", {
+//             cx: position.x,
+//             cy: position.y,
+//             r: 20,
+//         }) as SVGCircleElement;
+//         // const textElem = createElement("text", {
+//         //     cx: position.x,
+//         //     cy: position.y,
+//         //     r: 20,
+//         // }) as SVGCircleElement;
 
-        node.nodeElement = nodeElem;
-        nodeElem.classList.add("graph-node");
-        this.canvas.appendChild(nodeElem);
-        this.nodes.push(node);
-    }
+//         node.nodeElement = nodeElem;
+//         nodeElem.classList.add("graph-node");
+//         this.canvas.appendChild(nodeElem);
+//         this.nodes.push(node);
+//     }
 
-    public convertCoords(coords: Coordinate) {
-        return {
-            x: (coords.x + this.canvas.clientWidth) / 2,
-            y: (coords.y + this.canvas.clientHeight) / 2,
-        }
-    }
+//     public convertCoords(coords: Coordinate) {
+//         return {
+//             x: (coords.x + this.canvas.clientWidth) / 2,
+//             y: (coords.y + this.canvas.clientHeight) / 2,
+//         }
+//     }
 
-    private updatePositions() {
-        this.nodes.forEach(nodeA => {
-            this.nodes.forEach(nodeB => {
-                if (nodeA === nodeB) return;
-                updateMomentumByRepullsion(nodeA, nodeB);
-            });
-        });
+//     private updatePositions() {
+//         this.nodes.forEach(nodeA => {
+//             this.nodes.forEach(nodeB => {
+//                 if (nodeA === nodeB) return;
+//                 updateMomentumByRepullsion(nodeA, nodeB);
+//             });
+//         });
 
-        this.nodes.forEach(node => {
-            node.position.x += node.velocity.dx;
-            node.position.y += node.velocity.dy;
-            
-            node.velocity = {
-              dx: node.velocity.dx * 0.9,
-              dy: node.velocity.dy * 0.9,
-            };
-        });
-    }
+//         this.nodes.forEach(node => {
+//             node.position.x += node.velocity.dx;
+//             node.position.y += node.velocity.dy;
 
-    private syncVisuals() {
-        this.nodes.forEach(node => {
-            const nodeElem = node.nodeElement;
+//             node.velocity = {
+//               dx: node.velocity.dx * 0.9,
+//               dy: node.velocity.dy * 0.9,
+//             };
+//         });
+//     }
 
-            const position = this.convertCoords(node.position);
-            nodeElem.setAttribute("cx", position.x.toString());
-            nodeElem.setAttribute("cy", position.y.toString());
-        });
-    }
+//     private syncVisuals() {
+//         this.nodes.forEach(node => {
+//             const nodeElem = node.nodeElement;
 
-    public doTimestep() {
-        this.updatePositions();
-        this.syncVisuals();
+//             const position = this.convertCoords(node.position);
+//             nodeElem.setAttribute("cx", position.x.toString());
+//             nodeElem.setAttribute("cy", position.y.toString());
+//         });
+//     }
 
-        window.requestAnimationFrame(() => this.doTimestep());
-        // setTimeout(() => this.doTimestep(), 1);
-    }
-}
+//     public doTimestep() {
+//         this.updatePositions();
+//         this.syncVisuals();
+
+//         window.requestAnimationFrame(() => this.doTimestep());
+//         // setTimeout(() => this.doTimestep(), 1);
+//     }
+// }
 
 window.addEventListener("load", init);
 
 // GLOBAL VARIABLES
 let emails: Email[] = [];
-let graph: Graph;
+// let graph: Graph;
 
 function init() {
-    const createNodeBtn = document.getElementById("create-node-btn")!;
-    createNodeBtn.addEventListener("click", createNewNode);
+    const addEntryBtn = document.getElementById("add-entry-btn")!;
+    addEntryBtn.addEventListener("click", addNewEntry);
 
-    const canvas = document.getElementById("canvas")! as unknown as SVGElement;
-    const resizeCanvas = () => {
-        canvas.setAttribute("width", window.innerWidth.toString());
-        canvas.setAttribute("height", window.innerHeight.toString());
-    };
+    // const canvas = document.getElementById("graph-canvas")! as unknown as HTMLCanvasElement;
+    // const resizeCanvas = () => {
+    //     canvas.setAttribute("width", (window.innerWidth / 2).toString());
+    //     canvas.setAttribute("height", window.innerHeight.toString());
+    // };
 
     // TODO: debounce this!
-    addEventListener("resize", resizeCanvas);
-    resizeCanvas();
+    // addEventListener("resize", resizeCanvas);
+    // resizeCanvas();
 
-    graph = new Graph(canvas);
-    graph.doTimestep();
+    // graph = new Graph(canvas);
+    // graph.doTimestep();
 }
 
-function createNewNode() {
-    const address = `foo${emails.length}@bar.com`;
-    graph.addNode({
-        id: address,
-        position: {
-            x: 0,
-            y: 0,
-        },
-    });
+// TODO: Load this from a JSON file generated with Python which contains sample email templates.
+const randomContents = [
+    "Hello World",
+    "Hi Mom",
+    "Foo Bar Baz",
+]
+
+function addNewEntry() {
+    const entry: Email = {
+        sender: `foo_${emails.length + 1}@bar.com`,
+        recipient: emails.length > 0 ? emails[emails.length - 1].sender : `foo_0@bar.com`,
+        order: emails.length,
+        content: pickRandomListItem(randomContents),
+        uuid: generateUniqueID(),
+    };
+
+    emails.push(entry);
+    const element = createEntryElement(entry.uuid);
+    const body = document.querySelector("tbody")!;
+    body.appendChild(element);
 }
 
-interface ElementProps {
-    [key: string]: number | string | boolean,
-}
-
-function createElement(type: string, props: ElementProps) {
-    const element = document.createElementNS("http://www.w3.org/2000/svg", type);
-    for (const prop in props) {
-        const hypenated = prop.replace(/[A-Z]/g, (letter: string) => `-${letter.toLowerCase()}`);
-        // @ts-expect-error Ignored because props[prop] gets converted to a string anyway.
-        element.setAttributeNS(null, hypenated, props[prop]);
+function createEntryElement(uuid: string): Node {
+    const template = document.getElementById("actions-template")! as HTMLTemplateElement;
+    const entry = template.content.cloneNode(true) as HTMLElement;
+    const target = emails.find(email => email.uuid === uuid);
+    if (!target) {
+        throw new Error(`Email with uuid ${uuid} does not exist!`);
     }
-    return element;
+
+    const senderCell = entry.querySelector(".cell-sender") as HTMLElement;
+    const recipientCell = entry.querySelector(".cell-recipient") as HTMLElement;
+    const contentsCell = entry.querySelector(".cell-contents") as HTMLElement;
+    senderCell.textContent = target.sender;
+    recipientCell.textContent = target.recipient;
+    contentsCell.textContent = target.content;
+    entry.querySelector(".cell-order")!.textContent = target.order.toString();
+
+    const goNextOnEnter = (target: HTMLElement) => (evt: KeyboardEvent) => {
+        if (evt.key !== "Enter") return;
+        target.focus();
+        evt.preventDefault();
+    }
+
+    senderCell.addEventListener("keydown", goNextOnEnter(recipientCell));
+    recipientCell.addEventListener("keydown", goNextOnEnter(contentsCell));
+    contentsCell.addEventListener("keydown", (evt: KeyboardEvent) => { if (evt.key === "Escape") contentsCell.blur(); });
+
+    addClickEvent(entry.querySelector(".edit-entry-btn")!, () => {
+        senderCell.contentEditable = "true";
+        recipientCell.contentEditable = "true";
+        contentsCell.contentEditable = "true";
+        senderCell.focus();
+    });
+    addClickEvent(entry.querySelector(".move-entry-btn")!, () => { });
+    addClickEvent(entry.querySelector(".delete-entry-btn")!, () => { });
+
+    return entry;
+}
+
+function addClickEvent(elem: HTMLElement, func: () => void) {
+    elem.addEventListener("click", func);
+    elem.addEventListener("keydown", (evt: KeyboardEvent) => {
+        if (evt.key === "Enter") func();
+    });
 }
 
 function calculateDistance(pointA: Coordinate, pointB: Coordinate) {
     return Math.sqrt((pointA.x - pointB.x) ** 2 + (pointA.y - pointB.y) ** 2);
 }
 
-function updateMomentumByRepullsion(nodeA: GraphNode, nodeB: GraphNode) {
-    const distance = calculateDistance(nodeA.position, nodeB.position);
-    // const minDistance = 1000;
+function generateUniqueID() {
+    return Date.now().toString(36) + Math.random().toString(36).substring(2);
+}
 
-    // if (distance < minDistance) {
-    if (distance == 0) return; // TODO: handle this edge case!
+function randomInt(min: number, max: number) { // min inclusive, max exclusive
+    return Math.max(min, Math.floor(Math.random() * max));
+}
 
-    const directionX = (nodeB.position.x - nodeA.position.x) / distance ** 2;
-    const directionY = (nodeB.position.y - nodeA.position.y) / distance ** 2;
-
-    nodeA.velocity = {
-        dx: nodeA.velocity.dx - directionX,
-        dy: nodeA.velocity.dy - directionY,
-    };
-    nodeB.velocity = {
-        dx: nodeB.velocity.dx + directionX,
-        dy: nodeB.velocity.dy + directionY,
-    };
-    // }
+function pickRandomListItem(arr: any[]) {
+    return arr[randomInt(0, arr.length)];
 }

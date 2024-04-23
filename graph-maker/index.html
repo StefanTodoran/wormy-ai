@@ -1,18 +1,54 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Email Graph Maker</title>
-  </head>
-  <body>
-    <svg xmlns="http://www.w3.org/2000/svg" id="canvas"></svg>
-    
-    <div class="buttons-container">
-      <button id="create-node-btn">Create Node</button>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Graph Maker</title>
+</head>
+
+<body>
+
+  <div id="wrapper">
+    <div id="table-wrap">
+      <table id="emails-table">
+        <thead>
+          <tr>
+            <th>Sender</th>
+            <th>Recipient</th>
+            <th>Order</th>
+            <th>Contents</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <!-- EMAILS GO HERE -->
+        </tbody>
+      </table>
+
+      <button id="add-entry-btn">Add Entry</button>
     </div>
-    
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+
+    <canvas id="graph-canvas"></canvas>
+  </div>
+
+  <template id="actions-template">
+    <tr>
+      <td class="cell-sender"></td>
+      <td class="cell-recipient"></td>
+      <td class="cell-order"></td>
+      <td class="cell-contents"></td>
+      <td>
+        <img tabindex="0" class="row-icon edit-entry-btn" src="./src/assets/edit-icon.svg" />
+        <img tabindex="0" class="row-icon move-entry-btn" src="./src/assets/move-icon.svg" />
+        <img tabindex="0" class="row-icon delete-entry-btn" src="./src/assets/delete-icon.svg" />
+      </td>
+    </tr>
+  </template>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
 </html>

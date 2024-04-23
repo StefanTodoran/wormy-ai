@@ -7,6 +7,12 @@
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
 
+  --border-color: #686868;
+  --fill-color: #262626;
+  --background-color: #1a1a1a;
+  --main-color-rgb: 100, 108, 255;
+  --main-color: rgb(var(--main-color-rgb));
+
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -21,6 +27,10 @@ body {
   min-height: 100vh;
 }
 
+body * {
+  transition: all 0.2s ease;
+}
+
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
@@ -33,7 +43,6 @@ h1 {
 }
 
 button {
-  --button-rgb: 100, 108, 255;
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
@@ -41,14 +50,13 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--background-color);
   cursor: pointer;
-  transition: all 0.25s;
 }
 
 button:hover {
-  border-color: rgb(var(--button-rgb));
-  filter: drop-shadow(0 0 .5em rgb(var(--button-rgb), 0.5));
+  border-color: var(--main-color);
+  filter: drop-shadow(0 0 .5em rgb(var(--main-color-rgb), 0.5));
 }
 
 button:focus,
@@ -60,16 +68,87 @@ button:active {
   transform: scale(0.975);
 }
 
-.graph-node {
-  fill: #1a1a1a;
-  stroke: transparent;
-  stroke-width: 1;
-  transition: all 0.25s ease;
+#wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
 }
 
-.graph-node:hover {
-  stroke: #646cff;
-  filter: drop-shadow(0 0 .5em #646cff80);
+#table-wrap {
+  background-color: var(--background-color);
+  border-radius: .5em;
+  padding: .5em 1em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: .5em;
+}
+
+th {
+  border-bottom: 1px solid var(--border-color);
+}
+
+tr:nth-child(even) > td {
+  background-color: var(--fill-color);
+}
+
+td:first-child,
+th:first-child {
+  border-radius: .35em 0 0 .35em;
+}
+td:last-child,
+th:last-child {
+  border-radius: 0 .35em .35em 0;
+}
+
+tr:hover > td {
+  /* background-color: rgba(255, 255, 255, 0.15); */
+  /* padding: .75em .5em; */
+}
+tr:hover>td:first-child,
+tr:hover>th:first-child {
+  border-radius: .55em 0 0 .55em;
+}
+tr:hover>td:last-child,
+tr:hover>th:last-child {
+  border-radius: 0 .55em .55em 0;
+}
+
+.cell-sender,
+.cell-recipient,
+.cell-order {
+  text-align: center;
+}
+
+.cell-contents {
+  padding-left: 1em;
+  min-width: 10em;
+}
+
+.row-icon {
+  border: 1px solid transparent;
+  background-color: var(--background-color);
+  padding: .5em;
+  border-radius: .5em;
+}
+
+tr:nth-child(even) .row-icon {
+  background-color: var(--fill-color);
+}
+
+.row-icon:hover {
+  border-color: var(--main-color);
+  filter: drop-shadow(0 0 .25em rgb(var(--main-color-rgb), 0.75));
   cursor: pointer;
 }
 
@@ -77,13 +156,6 @@ button:active {
   :root {
     color: #213547;
     background-color: #ffffff;
-  }
-
-  button {
-    background-color: #f9f9f9;
-  }
-
-  .graph-node {
-    fill: #f9f9f9;
+    /* TODO */
   }
 }
