@@ -1,0 +1,127 @@
+table {
+    border-collapse: collapse;
+    display: block;
+    max-height: 80vh;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    border-radius: .35em;
+    padding: 0 1px;
+    border: 1px solid rgba(var(--border-rgb), 0.15);
+    scroll-behavior: smooth;
+}
+
+th,
+td {
+    padding: .5em;
+}
+
+th {
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--fill-color);
+}
+
+td>input {
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    background: none;
+    font-family: inherit;
+    font-weight: 400;
+}
+
+td>input:disabled {
+    border-color: transparent;
+    color: var(--font-color) !important;
+}
+
+tr:nth-child(odd)>td {
+    background-color: var(--background-color);
+}
+
+tr:nth-child(even)>td {
+    background-color: var(--fill-color);
+}
+
+td:first-child,
+th:first-child {
+    border-radius: .35em 0 0 .35em;
+}
+
+td:last-child,
+th:last-child {
+    border-radius: 0 .35em .35em 0;
+}
+
+tr:hover>td:first-child,
+tr:hover>th:first-child {
+    border-radius: .55em 0 0 .55em;
+}
+
+tr:hover>td:last-child,
+tr:hover>th:last-child {
+    border-radius: 0 .55em .55em 0;
+}
+
+tr {
+    outline: 1px solid transparent;
+    border-radius: .55em;
+}
+
+tr.dragging,
+tr.editable {
+    outline: 1px solid var(--border-color);
+    /* filter: drop-shadow(0 0 .25em rgba(var(--border-rgb), 0.15)); */
+}
+
+/* tr.dragging>td,
+  tr.editable>td {
+    padding-top: 1em;
+    padding-bottom: 1em;
+  } */
+
+.cell-sender,
+.cell-recipient,
+.cell-order {
+    text-align: center;
+}
+
+.cell-contents {
+    padding-left: 1em;
+    min-width: 20em;
+}
+
+.row-icon {
+    border: 1px solid transparent;
+    background-color: var(--background-color);
+    padding: .5em;
+    margin: 0 .125em;
+    border-radius: .5em;
+    user-drag: none;
+    -webkit-user-drag: none;
+}
+
+tr:nth-child(even) .row-icon {
+    background-color: var(--fill-color);
+}
+
+.row-icon:focus,
+.row-icon:hover {
+    border-color: var(--main-color);
+    filter: drop-shadow(0 0 .25em rgb(var(--main-color-rgb), 0.75));
+    cursor: pointer;
+    outline: none;
+}
+
+@media (prefers-color-scheme: light) {
+    .edit-entry-btn {
+        content: url("../../assets/edit-icon-dark.svg");
+    }
+
+    .move-entry-btn {
+        content: url("../../assets/move-icon-dark.svg");
+    }
+
+    .delete-entry-btn {
+        content: url("../../assets/delete-icon-dark.svg");
+    }
+}

@@ -1,14 +1,18 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Open Sans", Inter, sans-serif;
   line-height: 1.5;
-  font-weight: 400;
+  font-weight: 500;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
 
   color-scheme: light dark;
   --font-color: rgba(255, 255, 255, 0.87);
   color: var(--font-color);
   background-color: #242424;
 
-  --border-color: #686868;
+  --border-rgb: 104, 104, 104;
+  --border-color: rgb(var(--border-rgb));
   --fill-color: #262626;
   --background-color: #1a1a1a;
   --main-color-rgb: 100, 108, 255;
@@ -34,8 +38,10 @@ body * {
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
+    --font-color: #213547;
     background-color: #ffffff;
-    /* TODO */
+    --border-color: #999999;
+    --fill-color: #ececec;
+    --background-color: #f3f3f3;
   }
 }
