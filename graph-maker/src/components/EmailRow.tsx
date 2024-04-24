@@ -11,6 +11,7 @@ import "./styles/EmailRow.css";
 interface Props {
     email: EmailEntry,
     order: number,
+    highlight: boolean,
     editable: boolean,
     startEditing: () => void,
     endEditing: () => void,
@@ -25,6 +26,7 @@ interface Props {
 export default function EmailRow({
     email,
     order,
+    highlight,
     editable,
     startEditing,
     endEditing,
@@ -40,6 +42,7 @@ export default function EmailRow({
     const senderInputRef = useRef<HTMLInputElement>(null);
     const recipientInputRef = useRef<HTMLInputElement>(null);
     const contentsTextareaRef = useRef<HTMLTextAreaElement>(null);
+    const editButtonRef = useRef<HTMLImageElement>(null);
     const dragButtonRef = useRef<HTMLImageElement>(null);
 
     useEffect(() => {
@@ -73,6 +76,7 @@ export default function EmailRow({
         const contentsDoneListener = (evt: KeyboardEvent) => {
             if (evt.key !== "Enter") return;
             exitContentsTextarea();
+            editButtonRef.current?.focus();
             evt.preventDefault();
             endEditing();
         };
@@ -147,6 +151,7 @@ export default function EmailRow({
     let className = "";
     if (dragging) className += " dragging";
     if (editable) className += " editable";
+    if (highlight) className += " highlight";
 
     return (
         <tr ref={rowRef} className={className}>
@@ -168,6 +173,7 @@ export default function EmailRow({
                     {...getButtonBehavior(triggerEditing)}
                     className="row-icon edit-entry-btn"
                     src={editIcon}
+                    ref={editButtonRef}
                 />
                 <img
                     {...getButtonBehavior(toggleDragging)}

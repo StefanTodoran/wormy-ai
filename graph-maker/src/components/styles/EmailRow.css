@@ -1,7 +1,7 @@
 table {
     border-collapse: collapse;
     display: block;
-    max-height: 80vh;
+    height: 80vh;
     overflow-y: scroll;
     overflow-x: hidden;
     border-radius: .35em;
@@ -45,7 +45,7 @@ td>textarea {
 td>input:disabled,
 td>textarea:disabled {
     border-color: transparent;
-    color: var(--font-color) !important;
+    color: var(--font-color-faded);
 }
 
 tr:nth-child(odd) {
@@ -83,18 +83,24 @@ tr.editable>td {
     height: 6em;
 }
 
-td>input {
-    height: 100%;
+tr.dragging>td>input,
+tr.dragging>td>textarea {
+    color: var(--font-color);
 }
 
-.cell-name>input {
-    max-width: 8em;
+td>input {
+    height: 100%;
 }
 
 .cell-sender,
 .cell-recipient,
 .cell-order {
     text-align: center;
+    width: 12em;
+}
+
+.cell-name>input {
+    width: 10em;
 }
 
 .cell-contents {
@@ -105,6 +111,10 @@ td>input {
 .cell-contents>textarea {
     width: 100%;
     height: 100%;
+}
+
+.highlight .cell-name>input {
+    color: var(--main-color);
 }
 
 .row-icon {

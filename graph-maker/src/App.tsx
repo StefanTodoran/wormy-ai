@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import EmailRow from "./components/EmailRow";
 import IconButton from "./components/IconButton";
+import GraphCanvas from "./components/GraphCanvas";
+
 import { downloadJSON, getFilledOutTemplate, pickRandomListItem, randomEmailAddress } from "./utils/misc";
 import { EmailEntry, Templates } from "./utils/types";
 
@@ -20,9 +22,17 @@ function App() {
     const [view, setView] = useState(AppView.TABLE);
     const [templates, setTemplates] = useState<Templates>();
 
-    fetch("./templates.json")
-        .then(res => res.json())
-        .then(json => setTemplates(json));
+    useEffect(() => {
+        fetch("./templates.json")
+            .then(res => res.json())
+            // .then(json => setTemplates(json))
+            .then(json => {
+                setTemplates(json);
+                console.log(json);
+            })
+            .catch(err => console.error(err));
+    }, [])
+
 
     const [emails, setEmails] = useState<EmailEntry[]>([]);
     const [editing, setEditing] = useState(-1);
@@ -47,10 +57,11 @@ function App() {
     };
 
     const addNewEmail = () => {
-        const name = pickRandomListItem(templates!.names);
+        const exclude = emails.length > 0 ? [emails[emails.length - 1].name] : [];
+        const name = pickRandomListItem(templates!.names, exclude);
 
-        // const existing
-        const sender = randomEmailAddress(name, templates!.domains);
+        const existing = emails.findIndex(email => email.name === name);
+        const sender = existing === -1 ? randomEmailAddress(name, templates!.domains) : emails[existing].sender;
 
         let recipient, recipientName;
         if (emails.length == 0) {
@@ -76,6 +87,9 @@ function App() {
 
     const updateTargetEmail = (targetIndex: number, newEmail: EmailEntry) => {
         const newEmails = [...emails];
+        const existingMatch = emails.find(email => email.name === newEmail.name);
+        if (existingMatch) newEmail.sender = existingMatch.sender;
+
         newEmails[targetIndex] = newEmail;
         setEmails(newEmails);
     };
@@ -135,6 +149,10 @@ function App() {
                                 key={idx}
                                 email={email}
                                 order={idx}
+                                highlight={
+                                    (editing !== -1 && idx !== editing && email.name === emails[editing].name) ||
+                                    (dragging !== -1 && idx !== dragging && email.name === emails[dragging].name)
+                                }
                                 editable={idx === editing}
                                 startEditing={() => changeEditing(idx)}
                                 endEditing={() => changeEditing(-1)}
@@ -146,6 +164,8 @@ function App() {
                                 swapDown={() => swapEmailOrder(idx, idx + 1)}
                             />)}
                         </tbody>
+
+                        {emails.length === 0 && <p id="no-emails">No emails to display.</p>}
                     </table>
 
                     <div>
@@ -159,7 +179,7 @@ function App() {
 
             {
                 view === AppView.GRAPH && <div id="canvas-wrap">
-                    <canvas id="graph-canvas"></canvas>
+                    <GraphCanvas emails={emails}/>
                     <IconButton src={TableIcon} text="View Table" onClick={() => setView(AppView.TABLE)} />
                 </div>
             }

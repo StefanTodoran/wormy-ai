@@ -7,7 +7,8 @@
   font-variation-settings: "wdth" 100;
 
   color-scheme: light dark;
-  --font-color: rgba(255, 255, 255, 0.87);
+  --font-color: #f8f8f8;
+  --font-color-faded: #b1b1b1;
   color: var(--font-color);
   background-color: #242424;
 
@@ -39,6 +40,7 @@ body * {
 @media (prefers-color-scheme: light) {
   :root {
     --font-color: #213547;
+    --font-color-faded: #364858;
     background-color: #ffffff;
     --border-color: #999999;
     --fill-color: #ececec;
