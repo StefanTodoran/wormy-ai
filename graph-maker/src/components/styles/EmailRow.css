@@ -5,14 +5,25 @@ table {
     overflow-y: scroll;
     overflow-x: hidden;
     border-radius: .35em;
-    padding: 0 1px;
+    padding: 1px;
     border: 1px solid rgba(var(--border-rgb), 0.15);
     scroll-behavior: smooth;
+}
+
+tbody:before {
+    content: "-";
+    display: block;
+    line-height: 3px;
+    color: transparent;
 }
 
 th,
 td {
     padding: .5em;
+}
+
+td {
+    height: 3em;
 }
 
 th {
@@ -21,24 +32,27 @@ th {
     background-color: var(--fill-color);
 }
 
-td>input {
+td>input,
+td>textarea {
     border: none;
     border-bottom: 1px solid var(--border-color);
     background: none;
     font-family: inherit;
     font-weight: 400;
+    resize: none;
 }
 
-td>input:disabled {
+td>input:disabled,
+td>textarea:disabled {
     border-color: transparent;
     color: var(--font-color) !important;
 }
 
-tr:nth-child(odd)>td {
+tr:nth-child(odd) {
     background-color: var(--background-color);
 }
 
-tr:nth-child(even)>td {
+tr:nth-child(even) {
     background-color: var(--fill-color);
 }
 
@@ -52,32 +66,30 @@ th:last-child {
     border-radius: 0 .35em .35em 0;
 }
 
-tr:hover>td:first-child,
-tr:hover>th:first-child {
-    border-radius: .55em 0 0 .55em;
-}
-
-tr:hover>td:last-child,
-tr:hover>th:last-child {
-    border-radius: 0 .55em .55em 0;
-}
-
 tr {
     outline: 1px solid transparent;
-    border-radius: .55em;
+    border-radius: .35em;
 }
 
 tr.dragging,
 tr.editable {
     outline: 1px solid var(--border-color);
+    box-shadow: inset 0px 0px 10px #ffffff33;
     /* filter: drop-shadow(0 0 .25em rgba(var(--border-rgb), 0.15)); */
 }
 
-/* tr.dragging>td,
-  tr.editable>td {
-    padding-top: 1em;
-    padding-bottom: 1em;
-  } */
+tr.dragging>td,
+tr.editable>td {
+    height: 6em;
+}
+
+td>input {
+    height: 100%;
+}
+
+.cell-name>input {
+    max-width: 8em;
+}
 
 .cell-sender,
 .cell-recipient,
@@ -87,7 +99,12 @@ tr.editable {
 
 .cell-contents {
     padding-left: 1em;
-    min-width: 20em;
+    min-width: 32em;
+}
+
+.cell-contents>textarea {
+    width: 100%;
+    height: 100%;
 }
 
 .row-icon {

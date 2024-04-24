@@ -1,17 +1,76 @@
-export function randomInt(min: number, max: number) { // min inclusive, max exclusive
+/**
+ * Min is inclusive, max is exclusive.
+ */
+export function randomInt(min: number, max: number) {
     return Math.max(min, Math.floor(Math.random() * max));
 }
 
-export function pickRandomListItem(arr: any[]) {
-    return arr[randomInt(0, arr.length)];
+export function pickRandomListItem<T>(arr: T[], excl: T[] = []): T {
+    const filtered = arr.filter(item => !excl.includes(item));
+    return filtered[randomInt(0, filtered.length)];
 }
 
-// TODO: Load this from a JSON file generated with Python which contains sample email templates.
-export const randomContents = [
-    "Hello World",
-    "Hi Mom",
-    "Foo Bar Baz",
-];
+/**
+ * Generates a string of random numbers of length n. Source:
+ * https://stackoverflow.com/questions/21816595/how-to-generate-a-random-number-of-fixed-length-using-javascript
+ */
+function generateRandomNumberString(n: number): string {
+    let add = 1, max = 12 - add; // 12 is the min safe number Math.random() can generate without it starting to pad the end with zeros.   
+
+    if (n > max) {
+        return generateRandomNumberString(max) + generateRandomNumberString(n - max);
+    }
+
+    max = Math.pow(10, n + add);
+    const min = max / 10; // Math.pow(10, n) basically
+    const number = Math.floor(Math.random() * (max - min + 1)) + min;
+
+    return ("" + number).substring(add);
+}
+
+export function randomEmailAddress(name: string, domains: string[]) {
+    return generateEmailAddress(
+        name,
+        Math.random() > 0.4,
+        Math.random() > 0.8,
+        Math.random() > 0.8,
+        pickRandomListItem(["", "_", "."]),
+        randomInt(0, 5),
+    ) + "@" + pickRandomListItem(domains);
+}
+
+function generateEmailAddress(
+    name: string,
+    useBothNames: boolean,
+    abbreviateFirstName: boolean,
+    abbreviateLastName: boolean,
+    useSeperator: string,
+    numberOfNumbers: number,
+) {
+    const parts = name.split(" ");
+    parts.push("");
+    let fname = parts[0];
+    let lname = parts[1];
+
+    if (abbreviateFirstName) fname = fname[0];
+    if (abbreviateLastName) lname = lname[0];
+
+    const numbers = generateRandomNumberString(numberOfNumbers);
+
+    if (useBothNames) return fname + useSeperator + lname + numbers;
+
+    if (Math.random() > 0.5)
+        return lname + useSeperator + numbers;
+    else
+        return fname + useSeperator + numbers;
+}
+
+export function getFilledOutTemplate(template: string, senderName: string, recipientName: string) {
+    let content = template;
+    content = content.replace(new RegExp("\<SENDER_NAME>", "g"), senderName);
+    content = content.replace(new RegExp("\<RECIPIENT_NAME>", "g"), recipientName);
+    return content;
+}
 
 export function getButtonBehavior(func: () => void) {
     return {

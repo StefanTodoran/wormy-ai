@@ -1,7 +1,7 @@
 import { useState } from "react";
-import EmailEntry from "./components/EmailEntry";
-import { pickRandomListItem, randomContents } from "./utils/misc";
-import { EmailData } from "./utils/types";
+import EmailRow from "./components/EmailRow";
+import { getFilledOutTemplate, pickRandomListItem, randomEmailAddress } from "./utils/misc";
+import { EmailEntry, Templates } from "./utils/types";
 
 import "./App.css";
 
@@ -12,8 +12,13 @@ enum AppView {
 
 function App() {
   const [view, setView] = useState(AppView.TABLE);
+  const [templates, setTemplates] = useState<Templates>();
 
-  const [emails, setEmails] = useState<EmailData[]>([]);
+  fetch("./templates.json")
+    .then(res => res.json())
+    .then(json => setTemplates(json));
+
+  const [emails, setEmails] = useState<EmailEntry[]>([]);
   const [editing, setEditing] = useState(-1);
   const [dragging, setDragging] = useState(-1);
 
@@ -36,15 +41,32 @@ function App() {
   };
 
   const addNewDummyEmail = () => {
-    const entry: EmailData = {
-      sender: `foo_${emails.length + 1}@bar.com`,
-      recipient: emails.length > 0 ? emails[emails.length - 1].sender : `foo_0@bar.com`,
-      content: pickRandomListItem(randomContents),
+    const name = pickRandomListItem(templates!.names);
+    const sender = randomEmailAddress(name, templates!.domains);
+    
+    let recipient, recipientName;
+    if (emails.length == 0) {
+      recipientName = pickRandomListItem(templates!.names, [name]);
+      recipient = randomEmailAddress(recipientName, templates!.domains);
+    } else {
+      recipientName = emails[emails.length - 1].name;
+      recipient = emails[emails.length - 1].sender;
+    }
+
+    const template = pickRandomListItem(templates!.contents).body;
+    const content = getFilledOutTemplate(template, name, recipientName);
+
+    const entry: EmailEntry = {
+      name: name,
+      sender: sender,
+      recipient: recipient,
+      content: content,
+      template: template,
     };
     setEmails([...emails, entry]);
   };
 
-  const updateTargetEmail = (targetIndex: number, newEmail: EmailData) => {
+  const updateTargetEmail = (targetIndex: number, newEmail: EmailEntry) => {
     const newEmails = [...emails];
     newEmails[targetIndex] = newEmail;
     setEmails(newEmails);
@@ -56,6 +78,9 @@ function App() {
     setEmails(newEmails);
     setDragging(-1);
     setEditing(-1);
+
+    const deleteButtons = document.querySelectorAll(".delete-entry-btn");
+    if (targetIndex > 0) (deleteButtons[targetIndex - 1] as HTMLElement).focus();
   };
 
   const swapEmailOrder = (targetIndex: number, swapIndex: number) => {
@@ -75,6 +100,7 @@ function App() {
           <table id="emails-table">
             <thead>
               <tr>
+                <th>Name</th>
                 <th>Sender</th>
                 <th>Recipient</th>
                 <th>Order</th>
@@ -84,9 +110,9 @@ function App() {
             </thead>
 
             <tbody>
-              {emails.map((email, idx) => <EmailEntry
+              {emails.map((email, idx) => <EmailRow
                 key={idx}
-                {...email}
+                email={email}
                 order={idx}
                 editable={idx === editing}
                 startEditing={() => changeEditing(idx)}
@@ -102,10 +128,10 @@ function App() {
           </table>
 
           <div>
-            <button onClick={() => {}}>Load Table</button>
-            <button onClick={() => {}}>Save Table</button>
             <button onClick={addNewDummyEmail}>Add Entry</button>
             <button onClick={() => setView(AppView.GRAPH)}>View Graph</button>
+            <button onClick={() => {}}>Load Table</button>
+            <button onClick={() => {}}>Save Table</button>
           </div>
         </div>
       }
