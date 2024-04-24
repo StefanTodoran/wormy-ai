@@ -89,4 +89,4 @@ export function downloadJSON(data: any, filename: string) {
     downloader.setAttribute("href", dataStr);
     downloader.setAttribute("download", `${filename}.json`);
     downloader.click();
-  }
+}

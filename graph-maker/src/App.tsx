@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import EmailRow from "./components/EmailRow";
 import IconButton from "./components/IconButton";
 import GraphCanvas from "./components/GraphCanvas";
@@ -20,8 +20,14 @@ enum AppView {
 
 function App() {
     const [view, setView] = useState(AppView.TABLE);
-    const [templates, setTemplates] = useState<Templates>();
+    const viewGraphButton = useRef<HTMLButtonElement>(null);
+    const viewTableButton = useRef<HTMLButtonElement>(null);
+    useEffect(() => {
+        viewGraphButton.current?.focus();
+        viewTableButton.current?.focus();
+    }, [view]);
 
+    const [templates, setTemplates] = useState<Templates>();
     useEffect(() => {
         fetch("./templates.json")
             .then(res => res.json())
@@ -32,7 +38,6 @@ function App() {
             })
             .catch(err => console.error(err));
     }, [])
-
 
     const [emails, setEmails] = useState<EmailEntry[]>([]);
     const [editing, setEditing] = useState(-1);
@@ -170,8 +175,8 @@ function App() {
 
                     <div>
                         <IconButton src={AddIcon} text="Add Entry" onClick={addNewEmail} />
-                        <IconButton src={GraphIcon} text="View Graph" onClick={() => setView(AppView.GRAPH)} />
-                        <IconButton src={UploadIcon} text="Load Table" onClick={() => {}} />
+                        <IconButton giveRef={viewGraphButton} src={GraphIcon} text="View Graph" onClick={() => setView(AppView.GRAPH)} />
+                        <IconButton src={UploadIcon} text="Load Table" onClick={() => { }} />
                         <IconButton src={DownloadIcon} text="Save Table" onClick={downloadTable} />
                     </div>
                 </div>
@@ -179,8 +184,8 @@ function App() {
 
             {
                 view === AppView.GRAPH && <div id="canvas-wrap">
-                    <GraphCanvas emails={emails}/>
-                    <IconButton src={TableIcon} text="View Table" onClick={() => setView(AppView.TABLE)} />
+                    <GraphCanvas emails={emails} />
+                    <IconButton giveRef={viewTableButton} src={TableIcon} text="View Table" onClick={() => setView(AppView.TABLE)} />
                 </div>
             }
 
