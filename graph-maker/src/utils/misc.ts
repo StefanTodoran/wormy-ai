@@ -67,8 +67,8 @@ function generateEmailAddress(
 
 export function getFilledOutTemplate(template: string, senderName: string, recipientName: string) {
     let content = template;
-    content = content.replace(new RegExp("\<SENDER_NAME>", "g"), senderName);
-    content = content.replace(new RegExp("\<RECIPIENT_NAME>", "g"), recipientName);
+    content = content.replace(new RegExp("\\<SENDER_NAME>", "g"), senderName);
+    content = content.replace(new RegExp("\\<RECIPIENT_NAME>", "g"), recipientName);
     return content;
 }
 
@@ -81,3 +81,12 @@ export function getButtonBehavior(func: () => void) {
         },
     };
 }
+
+export function downloadJSON(data: any, filename: string) {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+    const downloader = document.getElementById("downloader") as HTMLAnchorElement;
+
+    downloader.setAttribute("href", dataStr);
+    downloader.setAttribute("download", `${filename}.json`);
+    downloader.click();
+  }

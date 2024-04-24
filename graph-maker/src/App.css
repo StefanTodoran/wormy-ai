@@ -47,6 +47,8 @@ button:active {
   padding: 1em 1em .35em 1em;
 }
 
-#table-wrap>button {
-  margin-top: 1.25em;
+#table-wrap>div {
+  margin-top: 1em;
+  display: flex;
+  flex-direction: row;
 }

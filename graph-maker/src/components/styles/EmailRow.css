@@ -115,6 +115,8 @@ td>input {
     border-radius: .5em;
     user-drag: none;
     -webkit-user-drag: none;
+    height: 1.35em;
+    width: 1.35em;
 }
 
 tr:nth-child(even) .row-icon {
