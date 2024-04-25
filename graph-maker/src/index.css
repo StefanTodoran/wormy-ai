@@ -11,14 +11,15 @@
   --font-color-faded: #b1b1b1;
   color: var(--font-color);
   background-color: #242424;
-
+  
   --border-rgb: 104, 104, 104;
   --border-color: rgb(var(--border-rgb));
   --fill-color: #262626;
   --background-color: #1a1a1a;
   --main-color-rgb: 100, 108, 255;
   --main-color: rgb(var(--main-color-rgb));
-
+  --error-color: rgb(255, 118, 100);
+  
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;

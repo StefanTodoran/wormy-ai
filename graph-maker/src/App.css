@@ -43,6 +43,7 @@ button:active {
 }
 
 #table-wrap {
+    position: relative;
     background-color: var(--background-color);
     border-radius: .5em;
     padding: 1em 1em .35em 1em;
@@ -60,4 +61,8 @@ button:active {
     top: 45%;
     left: 50%;
     transform: translate(-50%, -50%);
+}
+
+#table-name {
+    text-align: right;
 }

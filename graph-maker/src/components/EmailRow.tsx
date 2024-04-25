@@ -152,6 +152,7 @@ export default function EmailRow({
     if (dragging) className += " dragging";
     if (editable) className += " editable";
     if (highlight) className += " highlight";
+    if (email.infected) className += " infected";
 
     return (
         <tr ref={rowRef} className={className}>

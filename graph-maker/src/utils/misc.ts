@@ -5,8 +5,14 @@ export function randomInt(min: number, max: number) {
     return Math.max(min, Math.floor(Math.random() * max));
 }
 
-export function pickRandomListItem<T>(arr: T[], excl: T[] = []): T {
-    const filtered = arr.filter(item => !excl.includes(item));
+/**
+ * @param arr Array to select a random item from.
+ * @param excl Array of items to exclude as possible choices.
+ * @param eql Whether to convert `arr` to a set first for equal weight.
+ */
+export function pickRandomListItem<T>(arr: T[], excl: T[] = [], eql?: boolean): T {
+    const _arr = eql ? [...new Set(arr)] : arr;
+    const filtered = _arr.filter(item => !excl.includes(item));
     return filtered[randomInt(0, filtered.length)];
 }
 
@@ -80,13 +86,4 @@ export function getButtonBehavior(func: () => void) {
             if (evt.key === "Enter") func();
         },
     };
-}
-
-export function downloadJSON(data: any, filename: string) {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
-    const downloader = document.getElementById("downloader") as HTMLAnchorElement;
-
-    downloader.setAttribute("href", dataStr);
-    downloader.setAttribute("download", `${filename}.json`);
-    downloader.click();
 }

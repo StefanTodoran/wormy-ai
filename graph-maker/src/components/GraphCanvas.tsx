@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { EmailEntry, GraphNode, Point } from "../utils/types";
 import { changeMomentumByRepulsion, doMomentumTimestep } from "../utils/physics";
 import { drawCircle, drawLine, drawText } from "../utils/drawing";
+import { useIsMounted } from "../utils/hooks";
 
 import "./styles/GraphCanvas.css";
 
@@ -11,6 +12,7 @@ interface Props {
 
 export default function GraphCanvas({ emails }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const isMounted = useIsMounted();
 
     const initNodes = (center: Point) => {
         const allSenders = emails.map(email => email.sender);
@@ -25,12 +27,16 @@ export default function GraphCanvas({ emails }: Props) {
                 label: sender,
                 outgoing: new Set(),
                 weights: {},
+                infected: false,
             });
         });
 
         newNodes.forEach(node => {
-            const contacts = emails
-                .filter(email => email.sender === node.label)
+            const sent = emails.filter(email => email.sender === node.label);
+            const infected = sent.findIndex(email => email.infected) !== -1;
+            node.infected = infected;
+
+            const contacts = sent
                 .map(email => email.recipient)
                 .map(recipient => newNodes.findIndex(node => node.label === recipient));
 
@@ -70,7 +76,7 @@ export default function GraphCanvas({ emails }: Props) {
         };
 
         const drawFrame = () => {
-            context.fillStyle = "rgba(0,0,0,0.5)";
+            context.fillStyle = "rgba(26,26,26,0.5)";
             context.fillRect(0, 0, dims.width, dims.height);
             // context.clearRect(0, 0, dims.width, dims.height);
 
@@ -88,19 +94,20 @@ export default function GraphCanvas({ emails }: Props) {
             });
 
             nodes.forEach(node => {
-                drawCircle(context, node.position, 20, {
-                    fillColor: "#666",
-                    strokeColor: "#333",
+                const size = 14 + 2 * node.outgoing.size;
+                drawCircle(context, node.position, size, {
+                    fillColor: node.infected ? "#685252" : "#666",
+                    strokeColor: node.infected ? "#352929" : "#333",
                     strokeWidth: 3,
                 });
 
                 drawText(context, node.position, node.label, {
-                    strokeColor: "#646cff",
+                    strokeColor: node.infected ? "#ff7664" : "#646cff",
                     centered: true,
                 });
             });
 
-            window.requestAnimationFrame(drawFrame);
+            if (isMounted.current) window.requestAnimationFrame(drawFrame);
         };
 
         window.requestAnimationFrame(drawFrame);

@@ -99,6 +99,10 @@ td>input {
     width: 12em;
 }
 
+.cell-order {
+    width: 3em;
+}
+
 .cell-name>input {
     width: 10em;
 }
@@ -115,6 +119,10 @@ td>input {
 
 .highlight .cell-name>input {
     color: var(--main-color);
+}
+
+.infected .cell-name>input {
+    color: var(--error-color);
 }
 
 .row-icon {

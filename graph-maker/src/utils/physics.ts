@@ -8,8 +8,8 @@ export function changeMomentumByRepulsion(nodeA: GraphNode, nodeB: GraphNode, at
     const directionY = (nodeB.position.y - nodeA.position.y) / distance ** 2;
 
     // TODO: Give nodes weight based on number of connections.
-    const massNodeA = 1;
-    const massNodeB = 1;
+    const massNodeA = 1 + 0.5 * nodeA.outgoing.size;
+    const massNodeB = 1 + 0.5 * nodeA.outgoing.size;
 
     // TODO: No magic numbers!
     let modifier = attract ? -multiplier * distance / 50 : 1;

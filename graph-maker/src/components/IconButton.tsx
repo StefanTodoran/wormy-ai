@@ -1,21 +1,25 @@
 import "./styles/IconButton.css";
 
 interface Props {
+    id?: string,
     giveRef?: React.RefObject<HTMLButtonElement>,
-    src: string,
+    src?: string,
     text: string,
     onClick: () => void,
+    disabled?: boolean,
 }
 
 export default function IconButton({
+    id,
     giveRef,
     src,
     text,
     onClick,
+    disabled,
 }: Props) {
     return (
-        <button ref={giveRef} className="icon-button" onClick={onClick}>
-            <img src={src}/>
+        <button id={id} ref={giveRef} className="icon-button" onClick={onClick} disabled={disabled}>
+            {src && <img src={src}/>}
             {text}
         </button>
     );

@@ -10,3 +10,8 @@
     height: 1.5em;
     margin-right: .5em;
 }
+
+.icon-button:disabled {
+    pointer-events: none;
+    opacity: 0.75;
+}

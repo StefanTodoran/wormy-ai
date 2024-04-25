@@ -4,6 +4,7 @@ export interface EmailEntry {
     recipient: string,
     content: string,
     template: string,
+    infected: boolean,
 }
 
 export interface Email {
@@ -18,6 +19,7 @@ export interface Templates {
     names: string[],
     contents: ContentTemplate[],
     domains: string[],
+    payloads: string[],
 }
 
 interface ContentTemplate {
@@ -32,6 +34,7 @@ export interface GraphNode {
     label: string,
     outgoing: Set<number>,
     weights: { [key: number]: number },
+    infected: boolean,
 }
 
 export interface Point {
