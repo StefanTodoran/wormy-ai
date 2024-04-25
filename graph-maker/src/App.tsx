@@ -124,12 +124,12 @@ function App() {
             recipientName = pickRandomListItem(templates!.names, [name]);
             recipient = randomEmailAddress(recipientName, templates!.domains);
         } else {
-            const allNames = emails.map(email => email.name);
-            recipientName = pickRandomListItem(allNames, [name], true);
-            recipient = emails.find(email => email.name === recipientName)!.sender;
+            // const allNames = emails.map(email => email.name);
+            // recipientName = pickRandomListItem(allNames, [name], true);
+            // recipient = emails.find(email => email.name === recipientName)!.sender;
             
-            // recipientName = emails[emails.length - 1].name;
-            // recipient = emails[emails.length - 1].sender;
+            recipientName = emails[emails.length - 1].name;
+            recipient = emails[emails.length - 1].sender;
         }
 
         let template;

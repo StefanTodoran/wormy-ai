@@ -1,28 +1,47 @@
 import { GraphNode, Point } from "./types";
 
-export function changeMomentumByRepulsion(nodeA: GraphNode, nodeB: GraphNode, attract: boolean, multiplier: number = 1) {
-    const distance = calculateDistance(nodeA.position, nodeB.position);
-    if (distance == 0) return; // We just don't bother with this edge case since they will move apart.
-    if (distance > 500 && !attract) return;
+export function changeMomentumByRepulsion(nodeA: GraphNode, nodeB: GraphNode) {
+    let distance = calculateDistance(nodeA.position, nodeB.position);
+    if (distance > nodeA.radius * 20) return; // Ignore very far away nodes.
+    if (distance == 0) distance = 0.01;
 
     const directionX = (nodeB.position.x - nodeA.position.x) / distance ** 2;
     const directionY = (nodeB.position.y - nodeA.position.y) / distance ** 2;
 
-    // TODO: Give nodes weight based on number of connections.
+    // TODO: Factor this out.
     const massNodeA = 1 + 0.5 * nodeA.outgoing.size;
     const massNodeB = 1 + 0.5 * nodeA.outgoing.size;
 
-    // TODO: No magic numbers!
-    let modifier = attract ? -multiplier * distance / 25 : 2;
-    if (distance < 100) modifier = 2;
-
+    const repulsionMultiplier = 2;
     nodeA.velocity = {
-        dx: nodeA.velocity.dx - modifier * directionX / massNodeA,
-        dy: nodeA.velocity.dy - modifier * directionY / massNodeA,
+        dx: nodeA.velocity.dx - repulsionMultiplier * directionX / massNodeA,
+        dy: nodeA.velocity.dy - repulsionMultiplier * directionY / massNodeA,
     }
     nodeB.velocity = {
-        dx: nodeB.velocity.dx + modifier * directionX / massNodeB,
-        dy: nodeB.velocity.dy + modifier * directionY / massNodeB,
+        dx: nodeB.velocity.dx + repulsionMultiplier * directionX / massNodeB,
+        dy: nodeB.velocity.dy + repulsionMultiplier * directionY / massNodeB,
+    }
+}
+
+export function changeMomentumByAttraction(nodeA: GraphNode, nodeB: GraphNode, multiplier: number = 1) {
+    const distance = calculateDistance(nodeA.position, nodeB.position);
+    if (distance < nodeA.radius * 5) return; // Don't be attracted to super close nodes.
+
+    const directionX = (nodeB.position.x - nodeA.position.x) / distance ** 2;
+    const directionY = (nodeB.position.y - nodeA.position.y) / distance ** 2;
+
+    // TODO: Factor this out.
+    const massNodeA = 1 + 0.5 * nodeA.outgoing.size;
+    const massNodeB = 1 + 0.5 * nodeA.outgoing.size;
+
+    const attractionForce = multiplier * distance / 10;
+    nodeA.velocity = {
+        dx: nodeA.velocity.dx + attractionForce * directionX / massNodeA,
+        dy: nodeA.velocity.dy + attractionForce * directionY / massNodeA,
+    }
+    nodeB.velocity = {
+        dx: nodeB.velocity.dx - attractionForce * directionX / massNodeB,
+        dy: nodeB.velocity.dy - attractionForce * directionY / massNodeB,
     }
 }
 
@@ -33,10 +52,10 @@ export function doMomentumTimestep(node: GraphNode) {
 
 export function changeMomentumByEdges(node: GraphNode, dims: DOMRect) {
     const wallOffset = 20;
-    
+
     if (node.position.x < node.radius + wallOffset) node.velocity.dx *= -1;
     if (node.position.x > dims.width - (node.radius + wallOffset)) node.velocity.dx *= -1;
-    
+
     if (node.position.y < node.radius + wallOffset) node.velocity.dy *= -1;
     if (node.position.y > dims.height - (node.radius + wallOffset)) node.velocity.dy *= -1;
 }

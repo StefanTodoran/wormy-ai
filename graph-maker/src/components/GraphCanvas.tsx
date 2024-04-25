@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { EmailEntry, GraphNode, Point } from "../utils/types";
-import { changeMomentumByEdges, changeMomentumByRepulsion, doMomentumTimestep } from "../utils/physics";
+import { changeMomentumByAttraction, changeMomentumByEdges, changeMomentumByRepulsion, doMomentumTimestep } from "../utils/physics";
 import { drawCircle, drawLine, drawText } from "../utils/drawing";
 import { useIsMounted } from "../utils/hooks";
 
@@ -25,7 +25,7 @@ export default function GraphCanvas({ emails }: Props) {
                 position: { x: center.x + 5 * (Math.random() - 0.5), y: center.y + 5 * (Math.random() - 0.5) },
                 velocity: { dx: 0, dy: 0 },
                 label: sender,
-                
+
                 // To be calculated later:
                 outgoing: new Set(),
                 weights: {},
@@ -48,7 +48,7 @@ export default function GraphCanvas({ emails }: Props) {
                 if (contact in node.weights) node.weights[contact] += 1;
                 else node.weights[contact] = 1;
 
-            node.radius = 14 + 2 * node.outgoing.size;
+                node.radius = 14 + 2 * node.outgoing.size;
             });
         });
 
@@ -71,7 +71,8 @@ export default function GraphCanvas({ emails }: Props) {
                     const nodeB = nodes[i];
                     if (nodeA === nodeB) return;
 
-                    changeMomentumByRepulsion(nodeA, nodeB, nodeA.outgoing.has(i), nodeA.weights[i]);
+                    if (nodeA.outgoing.has(i)) changeMomentumByAttraction(nodeA, nodeB, nodeA.weights[i]);
+                    else changeMomentumByRepulsion(nodeA, nodeB);
                 }
             });
 
@@ -105,6 +106,10 @@ export default function GraphCanvas({ emails }: Props) {
                     strokeColor: node.infected ? "#352929" : "#333",
                     strokeWidth: 3,
                 });
+
+                // TODO: Remove this, was for debugging.
+                // drawCircle(context, node.position, node.radius * 5, { strokeColor: "#99999911", strokeWidth: 1 });
+                // drawCircle(context, node.position, node.radius * 20, { strokeColor: "#99999911", strokeWidth: 1 });
 
                 drawText(context, node.position, node.label, {
                     strokeColor: node.infected ? "#ff7664" : "#646cff",
