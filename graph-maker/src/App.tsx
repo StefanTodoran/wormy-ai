@@ -4,7 +4,7 @@ import IconButton from "./components/IconButton";
 import GraphCanvas from "./components/GraphCanvas";
 import DropdownButton from "./components/DropdownButton";
 
-import { getFilledOutTemplate, pickRandomListItem, randomEmailAddress } from "./utils/misc";
+import { findLastIndex, getFilledOutTemplate, pickRandomListItem, randomEmailAddress } from "./utils/misc";
 import { downloadAsJSON, handleFileUpload, triggerFileUpload } from "./utils/files";
 import { EmailEntry, Templates } from "./utils/types";
 
@@ -54,8 +54,10 @@ function App() {
         let accumulatedDigits = "";
 
         const navigationHandler = (evt: KeyboardEvent) => {
-            if (evt.key === "b" || evt.key === "B") {
-                document.getElementById("first-menu-button")!.focus();
+            if (evt.ctrlKey && (evt.key === "b" || evt.key === "B")) {
+                // Bring focus to the first button.
+                document.getElementById("add-entry-btn")!.focus();
+                evt.preventDefault();
                 return;
             }
 
@@ -64,17 +66,17 @@ function App() {
 
             const digit = parseInt(evt.key);
             accumulatedDigits += digit;
-            
+
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
                 const emailElements = document.querySelectorAll("tbody > tr") as NodeListOf<HTMLElement>;
                 const targetIndex = parseInt(accumulatedDigits) - 1;
                 let target = emailElements[targetIndex];
                 accumulatedDigits = "";
-                
+
                 if (targetIndex < 0) return;
                 if (targetIndex >= emailElements.length) target = emailElements[emailElements.length - 1];
-                
+
                 // @ts-expect-error The element will exist.
                 target.querySelector(".edit-entry-btn").focus({ preventScroll: true });
                 target.scrollIntoView();
@@ -108,7 +110,7 @@ function App() {
         const name = pickRandomListItem(names, [], true);
         return name;
     };
-    
+
     const getNewSender = () => {
         const names = emails.map(email => email.name);
         const name = pickRandomListItem(templates!.names, names, true);
@@ -127,9 +129,11 @@ function App() {
             // const allNames = emails.map(email => email.name);
             // recipientName = pickRandomListItem(allNames, [name], true);
             // recipient = emails.find(email => email.name === recipientName)!.sender;
-            
-            recipientName = emails[emails.length - 1].name;
-            recipient = emails[emails.length - 1].sender;
+
+            const lastEmailIndex = findLastIndex(emails, email => email.name !== name);
+            const lastEmail = emails[lastEmailIndex];
+            recipientName = lastEmail.name;
+            recipient = lastEmail.sender;
         }
 
         let template;
@@ -204,6 +208,8 @@ function App() {
         return prettyName;
     };
 
+    const highlightEmail = emails[editing] || emails[dragging];
+
     return (
         <>
             {
@@ -226,10 +232,8 @@ function App() {
                                 key={idx}
                                 email={email}
                                 order={idx + 1}
-                                highlight={
-                                    (editing !== -1 && idx !== editing && email.name === emails[editing].name) ||
-                                    (dragging !== -1 && idx !== dragging && email.name === emails[dragging].name)
-                                }
+                                highlightSender={highlightEmail?.sender}
+                                highlightRecipient={highlightEmail?.recipient}
                                 editable={idx === editing}
                                 startEditing={() => changeEditing(idx)}
                                 endEditing={() => changeEditing(-1)}
@@ -247,22 +251,25 @@ function App() {
 
                     <div>
                         <DropdownButton
-                            id="first-menu-button"
+                            id="add-entry-btn"
                             src={AddIcon}
                             text="Add Entry"
                             options={[
                                 {
+                                    id: "new-sender-btn",
                                     src: NewSenderIcon,
                                     text: "New Sender",
                                     callback: () => addNewEmail(getNewSender()),
                                 },
                                 {
+                                    id: "existing-sender-btn",
                                     src: ExistingSenderIcon,
                                     text: "Existing Sender",
                                     callback: () => addNewEmail(getExistingSender()),
-                                    disabled: emails.length === 0,
+                                    disabled: emails.length < 2,
                                 },
                                 {
+                                    id: "infected-sender-btn",
                                     src: InfectedSenderIcon,
                                     text: "Infected Email",
                                     // TODO: Maybe the sender should be a special reserved sender?
@@ -271,26 +278,31 @@ function App() {
                             ]}
                         />
                         <DropdownButton
+                            id="manage-table-btn"
                             src={ManageIcon}
                             text="Manage Table"
                             options={[
                                 {
+                                    id: "upload-btn",
                                     src: UploadIcon,
                                     text: "Load Table",
                                     callback: triggerFileUpload,
                                 },
                                 {
+                                    id: "download-btn",
                                     src: DownloadIcon,
                                     text: "Save Table",
                                     callback: downloadTable,
                                     disabled: !tableName,
                                 },
                                 {
+                                    id: "clear-btn",
                                     src: ResetIcon,
                                     text: "Reset Table",
                                     callback: () => setEmails([]),
                                 },
                                 {
+                                    id: "rename-btn",
                                     src: EditIcon,
                                     text: tableName ? "Rename Table" : "Name Table",
                                     callback: renameTable,
@@ -298,10 +310,11 @@ function App() {
                             ]}
                         />
                         <IconButton
+                            id="view-graph-btn"
+                            giveRef={viewGraphButton}
                             src={GraphIcon}
                             text="View Graph"
                             onClick={() => setView(AppView.GRAPH)}
-                            giveRef={viewGraphButton}
                         />
                     </div>
                 </div>
@@ -310,7 +323,13 @@ function App() {
             {
                 view === AppView.GRAPH && <div id="canvas-wrap">
                     <GraphCanvas emails={emails} />
-                    <IconButton giveRef={viewTableButton} src={TableIcon} text="View Table" onClick={() => setView(AppView.TABLE)} />
+                    <IconButton
+                        id="view-table-btn"
+                        giveRef={viewTableButton}
+                        src={TableIcon}
+                        text="View Table"
+                        onClick={() => setView(AppView.TABLE)}
+                    />
                 </div>
             }
 

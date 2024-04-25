@@ -36,6 +36,8 @@ export interface GraphNode {
     weights: { [key: number]: number },
     infected: boolean,
     radius: number,
+    hovered: boolean,
+    dragging: boolean,
 }
 
 export interface Point {

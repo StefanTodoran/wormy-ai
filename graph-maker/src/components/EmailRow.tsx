@@ -11,7 +11,8 @@ import "./styles/EmailRow.css";
 interface Props {
     email: EmailEntry,
     order: number,
-    highlight: boolean,
+    highlightSender: string,
+    highlightRecipient: string,
     editable: boolean,
     startEditing: () => void,
     endEditing: () => void,
@@ -26,7 +27,8 @@ interface Props {
 export default function EmailRow({
     email,
     order,
-    highlight,
+    highlightSender,
+    highlightRecipient,
     editable,
     startEditing,
     endEditing,
@@ -58,7 +60,7 @@ export default function EmailRow({
 
         const orderedInputs = [nameInputRef, senderInputRef, recipientInputRef, contentsTextareaRef];
         const inputsListeners: any[] = []; // TODO: We could give this a type.
-        
+
         for (let i = 0; i < orderedInputs.length - 1; i++) {
             const input = orderedInputs[i];
             const nextInput = orderedInputs[i + 1];
@@ -82,15 +84,15 @@ export default function EmailRow({
         };
         contentsTextareaRef.current?.addEventListener("focusout", exitContentsTextarea);
         contentsTextareaRef.current?.addEventListener("keydown", contentsDoneListener);
-        
+
         return () => {
             for (let i = 0; i < orderedInputs.length - 1; i++) {
                 const input = orderedInputs[i];
                 const listener = inputsListeners[i];
-                
+
                 input.current?.removeEventListener("keydown", listener);
             }
-            
+
             contentsTextareaRef.current?.removeEventListener("focusout", exitContentsTextarea);
             contentsTextareaRef.current?.removeEventListener("keydown", contentsDoneListener);
         };
@@ -104,7 +106,7 @@ export default function EmailRow({
                 recipientInputRef.current?.blur();
                 contentsTextareaRef.current?.blur();
                 evt.preventDefault();
-                
+
                 if (dragging) toggleDragging();
                 endEditing();
             }
@@ -123,12 +125,12 @@ export default function EmailRow({
             }
         };
         rowRef.current?.addEventListener("keydown", wholeRowListener);
-        
+
         if (dragging) {
             dragButtonRef.current?.focus();
             dragButtonRef.current?.addEventListener("focusout", toggleDragging);
         }
-        
+
         return () => {
             rowRef.current?.removeEventListener("keydown", wholeRowListener);
             if (dragging) dragButtonRef.current?.removeEventListener("focusout", toggleDragging);
@@ -151,9 +153,12 @@ export default function EmailRow({
     let className = "";
     if (dragging) className += " dragging";
     if (editable) className += " editable";
-    if (highlight) className += " highlight";
     if (email.infected) className += " infected";
-
+    
+    if (highlightSender === email.sender) className += " highlight-sender";
+    if (highlightRecipient === email.sender) className += " highlight-sender-alt";
+    if ((dragging || editable) && highlightRecipient === email.recipient) className += " highlight-recipient";
+    
     return (
         <tr ref={rowRef} className={className}>
             <td className="cell-name">

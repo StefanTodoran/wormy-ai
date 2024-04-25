@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
 import { EmailEntry, GraphNode, Point } from "../utils/types";
-import { changeMomentumByAttraction, changeMomentumByEdges, changeMomentumByRepulsion, doMomentumTimestep } from "../utils/physics";
+import { changeMomentumByInteraction, changeMomentumByEdges, doMomentumTimestep } from "../utils/physics";
 import { drawCircle, drawLine, drawText } from "../utils/drawing";
+import { getCanvasCoordinates, isMouseOverCircle } from "../utils/misc";
 import { useIsMounted } from "../utils/hooks";
 
 import "./styles/GraphCanvas.css";
-import { isMouseOverCircle } from "../utils/misc";
 
 interface Props {
     emails: EmailEntry[],
@@ -23,7 +23,7 @@ export default function GraphCanvas({ emails }: Props) {
         uniqueSenders.forEach((sender, idx) => {
             newNodes.push({
                 id: idx,
-                position: { x: center.x + 5 * (Math.random() - 0.5), y: center.y + 5 * (Math.random() - 0.5) },
+                position: { x: center.x + 50 * (Math.random() - 0.5), y: center.y + 50 * (Math.random() - 0.5) },
                 velocity: { dx: 0, dy: 0 },
                 label: sender,
 
@@ -31,6 +31,8 @@ export default function GraphCanvas({ emails }: Props) {
                 outgoing: new Set(),
                 weights: {},
                 infected: false,
+                hovered: false,
+                dragging: false,
                 radius: 0,
             });
         });
@@ -67,17 +69,20 @@ export default function GraphCanvas({ emails }: Props) {
         const nodes: GraphNode[] = initNodes(center);
 
         const doTimestep = () => {
-            nodes.forEach(nodeA => {
-                for (let i = 0; i < nodes.length; i++) {
-                    const nodeB = nodes[i];
-                    if (nodeA === nodeB) return;
+            for (let i = 0; i < nodes.length - 1; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const nodeA = nodes[i];
+                    const nodeB = nodes[j];
 
-                    if (nodeA.outgoing.has(i)) changeMomentumByAttraction(nodeA, nodeB, nodeA.weights[i]);
-                    else changeMomentumByRepulsion(nodeA, nodeB);
+                    const areContacts = nodeA.outgoing.has(j) || nodeB.outgoing.has(i);
+                    const contactWeight = Math.max(nodeA.weights[j] || 1, nodeB.weights[i] || 1);
+
+                    changeMomentumByInteraction(nodeA, nodeB, areContacts, contactWeight);
                 }
-            });
+            }
 
             nodes.forEach(node => {
+                if (node.dragging) return;
                 changeMomentumByEdges(node, dims);
                 doMomentumTimestep(node);
             });
@@ -111,12 +116,17 @@ export default function GraphCanvas({ emails }: Props) {
                 // TODO: Remove this, was for debugging.
                 // drawCircle(context, node.position, node.radius * 5, { strokeColor: "#99999911", strokeWidth: 1 });
                 // drawCircle(context, node.position, node.radius * 20, { strokeColor: "#99999911", strokeWidth: 1 });
-                
-                // if (isMouseOverCircle(canvasRef.current, node.position, node.radius))
-                // drawCircle(context, node.position, node.radius * 5, { strokeColor: "#99999911", strokeWidth: 1 });
 
+                if (node.hovered || node.dragging) {
+                    drawCircle(context, node.position, node.radius * 2, {
+                        strokeColor: "#99999933", strokeWidth: 1,
+                    });
+                }
+
+                // const textPosition = { x: node.position.x, y: node.position.y - node.radius };
                 drawText(context, node.position, node.label, {
                     strokeColor: node.infected ? "#ff7664" : "#646cff",
+                    fontSize: node.hovered ? 12 : 10,
                     centered: true,
                 });
             });
@@ -124,7 +134,42 @@ export default function GraphCanvas({ emails }: Props) {
             if (isMounted.current) window.requestAnimationFrame(drawFrame);
         };
 
+        let hasDraggingTarget = false;
+        const handleMouseInteract = (evt: MouseEvent) => {
+            const mousePos = { x: evt.clientX, y: evt.clientY };
+
+            for (let i = 0; i < nodes.length; i++) {
+                if (!hasDraggingTarget) {
+                    nodes[i].hovered = isMouseOverCircle(canvasRef.current!, mousePos, nodes[i].position, nodes[i].radius);
+                }
+
+                if (nodes[i].hovered && evt.buttons) {
+                    nodes[i].dragging = true;
+                    hasDraggingTarget = true;
+                }
+                
+                if (nodes[i].dragging && !evt.buttons) {
+                    nodes[i].dragging = false;
+                    hasDraggingTarget = false;
+                }
+
+                if (nodes[i].dragging) {
+                    const adjustedPos = getCanvasCoordinates(canvasRef.current!, mousePos);
+                    nodes[i].position = adjustedPos;
+                }
+            }
+        };
+
         window.requestAnimationFrame(drawFrame);
+        canvasRef.current?.addEventListener("mousemove", handleMouseInteract);
+        canvasRef.current?.addEventListener("mousedown", handleMouseInteract);
+        canvasRef.current?.addEventListener("mouseup", handleMouseInteract);
+
+        return () => {
+            canvasRef.current?.removeEventListener("mousemove", handleMouseInteract);
+            canvasRef.current?.removeEventListener("mousedown", handleMouseInteract);
+            canvasRef.current?.removeEventListener("mouseup", handleMouseInteract);
+        };
     }, []);
 
     return (<canvas ref={canvasRef} id="graph-canvas"></canvas>);

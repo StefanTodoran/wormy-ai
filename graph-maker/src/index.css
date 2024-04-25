@@ -19,6 +19,7 @@
   --main-color-rgb: 100, 108, 255;
   --main-color: rgb(var(--main-color-rgb));
   --error-color: rgb(255, 118, 100);
+  --alt-color: rgb(224, 100, 255);
   
   font-synthesis: none;
   text-rendering: optimizeLegibility;

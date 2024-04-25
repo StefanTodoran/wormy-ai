@@ -117,11 +117,20 @@ td>input {
     height: 100%;
 }
 
-.highlight .cell-name>input {
+.highlight-sender:not(.infected) .cell-sender>input {
     color: var(--main-color);
 }
 
-.infected .cell-name>input {
+.highlight-sender-alt .cell-sender>input {
+    color: var(--alt-color);
+}
+
+.highlight-recipient .cell-recipient>input {
+    color: var(--alt-color);
+}
+
+.infected .cell-name>input,
+.infected .cell-recipient>input {
     color: var(--error-color);
 }
 
