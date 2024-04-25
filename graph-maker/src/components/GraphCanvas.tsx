@@ -5,6 +5,7 @@ import { drawCircle, drawLine, drawText } from "../utils/drawing";
 import { useIsMounted } from "../utils/hooks";
 
 import "./styles/GraphCanvas.css";
+import { isMouseOverCircle } from "../utils/misc";
 
 interface Props {
     emails: EmailEntry[],
@@ -110,6 +111,9 @@ export default function GraphCanvas({ emails }: Props) {
                 // TODO: Remove this, was for debugging.
                 // drawCircle(context, node.position, node.radius * 5, { strokeColor: "#99999911", strokeWidth: 1 });
                 // drawCircle(context, node.position, node.radius * 20, { strokeColor: "#99999911", strokeWidth: 1 });
+                
+                // if (isMouseOverCircle(canvasRef.current, node.position, node.radius))
+                // drawCircle(context, node.position, node.radius * 5, { strokeColor: "#99999911", strokeWidth: 1 });
 
                 drawText(context, node.position, node.label, {
                     strokeColor: node.infected ? "#ff7664" : "#646cff",

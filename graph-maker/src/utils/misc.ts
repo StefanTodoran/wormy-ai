@@ -1,3 +1,5 @@
+import { Point } from "./types";
+
 /**
  * Min is inclusive, max is exclusive.
  */
@@ -86,4 +88,21 @@ export function getButtonBehavior(func: () => void) {
             if (evt.key === "Enter") func();
         },
     };
+}
+
+export function isMouseOverCircle(
+    canvas: HTMLCanvasElement,
+    mousePos: Point,
+    circleCenter: Point,
+    radiusSize: number
+): boolean {
+    const rect = canvas.getBoundingClientRect();
+    const adjustedMouseX = mousePos.x - rect.left;
+    const adjustedMouseY = mousePos.y - rect.top;
+
+    const distX = adjustedMouseX - circleCenter.x;
+    const distY = adjustedMouseY - circleCenter.y;
+    const distance = Math.sqrt(distX * distX + distY * distY);
+
+    return distance <= radiusSize;
 }
