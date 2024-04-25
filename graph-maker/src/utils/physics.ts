@@ -3,6 +3,7 @@ import { GraphNode, Point } from "./types";
 export function changeMomentumByRepulsion(nodeA: GraphNode, nodeB: GraphNode, attract: boolean, multiplier: number = 1) {
     const distance = calculateDistance(nodeA.position, nodeB.position);
     if (distance == 0) return; // We just don't bother with this edge case since they will move apart.
+    if (distance > 500 && !attract) return;
 
     const directionX = (nodeB.position.x - nodeA.position.x) / distance ** 2;
     const directionY = (nodeB.position.y - nodeA.position.y) / distance ** 2;
@@ -12,8 +13,8 @@ export function changeMomentumByRepulsion(nodeA: GraphNode, nodeB: GraphNode, at
     const massNodeB = 1 + 0.5 * nodeA.outgoing.size;
 
     // TODO: No magic numbers!
-    let modifier = attract ? -multiplier * distance / 50 : 1;
-    if (distance < 100) modifier = 1;
+    let modifier = attract ? -multiplier * distance / 25 : 2;
+    if (distance < 100) modifier = 2;
 
     nodeA.velocity = {
         dx: nodeA.velocity.dx - modifier * directionX / massNodeA,
@@ -30,6 +31,16 @@ export function doMomentumTimestep(node: GraphNode) {
     doMomentumDecay(node);
 }
 
+export function changeMomentumByEdges(node: GraphNode, dims: DOMRect) {
+    const wallOffset = 20;
+    
+    if (node.position.x < node.radius + wallOffset) node.velocity.dx *= -1;
+    if (node.position.x > dims.width - (node.radius + wallOffset)) node.velocity.dx *= -1;
+    
+    if (node.position.y < node.radius + wallOffset) node.velocity.dy *= -1;
+    if (node.position.y > dims.height - (node.radius + wallOffset)) node.velocity.dy *= -1;
+}
+
 function advanceByMomentum(target: GraphNode) {
     target.position.x += target.velocity.dx;
     target.position.y += target.velocity.dy;
@@ -37,8 +48,8 @@ function advanceByMomentum(target: GraphNode) {
 
 function doMomentumDecay(target: GraphNode) {
     target.velocity = {
-        dx: target.velocity.dx * 0.975, // TODO: This could also be based on number of connections.
-        dy: target.velocity.dy * 0.975,
+        dx: target.velocity.dx * 0.95, // TODO: This could also be based on number of connections.
+        dy: target.velocity.dy * 0.95,
     }
 }
 

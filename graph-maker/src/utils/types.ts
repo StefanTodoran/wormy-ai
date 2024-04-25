@@ -35,6 +35,7 @@ export interface GraphNode {
     outgoing: Set<number>,
     weights: { [key: number]: number },
     infected: boolean,
+    radius: number,
 }
 
 export interface Point {

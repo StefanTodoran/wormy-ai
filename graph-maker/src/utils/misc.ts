@@ -37,9 +37,9 @@ function generateRandomNumberString(n: number): string {
 export function randomEmailAddress(name: string, domains: string[]) {
     return generateEmailAddress(
         name,
-        Math.random() > 0.4,
-        Math.random() > 0.8,
-        Math.random() > 0.8,
+        Math.random() > 0.5,
+        Math.random() > 0.85,
+        Math.random() > 0.85,
         pickRandomListItem(["", "_", "."]),
         randomInt(0, 5),
     ) + "@" + pickRandomListItem(domains);

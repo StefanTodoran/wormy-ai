@@ -131,7 +131,6 @@ td>input {
     padding: .5em;
     margin: 0 .125em;
     border-radius: .5em;
-    user-drag: none;
     -webkit-user-drag: none;
     height: 1.35em;
     width: 1.35em;

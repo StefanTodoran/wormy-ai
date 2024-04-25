@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { EmailEntry, GraphNode, Point } from "../utils/types";
-import { changeMomentumByRepulsion, doMomentumTimestep } from "../utils/physics";
+import { changeMomentumByEdges, changeMomentumByRepulsion, doMomentumTimestep } from "../utils/physics";
 import { drawCircle, drawLine, drawText } from "../utils/drawing";
 import { useIsMounted } from "../utils/hooks";
 
@@ -25,9 +25,12 @@ export default function GraphCanvas({ emails }: Props) {
                 position: { x: center.x + 5 * (Math.random() - 0.5), y: center.y + 5 * (Math.random() - 0.5) },
                 velocity: { dx: 0, dy: 0 },
                 label: sender,
+                
+                // To be calculated later:
                 outgoing: new Set(),
                 weights: {},
                 infected: false,
+                radius: 0,
             });
         });
 
@@ -44,6 +47,8 @@ export default function GraphCanvas({ emails }: Props) {
             contacts.forEach(contact => {
                 if (contact in node.weights) node.weights[contact] += 1;
                 else node.weights[contact] = 1;
+
+            node.radius = 14 + 2 * node.outgoing.size;
             });
         });
 
@@ -71,6 +76,7 @@ export default function GraphCanvas({ emails }: Props) {
             });
 
             nodes.forEach(node => {
+                changeMomentumByEdges(node, dims);
                 doMomentumTimestep(node);
             });
         };
@@ -94,8 +100,7 @@ export default function GraphCanvas({ emails }: Props) {
             });
 
             nodes.forEach(node => {
-                const size = 14 + 2 * node.outgoing.size;
-                drawCircle(context, node.position, size, {
+                drawCircle(context, node.position, node.radius, {
                     fillColor: node.infected ? "#685252" : "#666",
                     strokeColor: node.infected ? "#352929" : "#333",
                     strokeWidth: 3,

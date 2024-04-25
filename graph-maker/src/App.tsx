@@ -108,10 +108,10 @@ function App() {
         const name = pickRandomListItem(names, [], true);
         return name;
     };
-
+    
     const getNewSender = () => {
-        const exclude = emails.length > 0 ? [emails[emails.length - 1].name] : [];
-        const name = pickRandomListItem(templates!.names, exclude, true);
+        const names = emails.map(email => email.name);
+        const name = pickRandomListItem(templates!.names, names, true);
         return name;
     };
 
@@ -127,6 +127,9 @@ function App() {
             const allNames = emails.map(email => email.name);
             recipientName = pickRandomListItem(allNames, [name], true);
             recipient = emails.find(email => email.name === recipientName)!.sender;
+            
+            // recipientName = emails[emails.length - 1].name;
+            // recipient = emails[emails.length - 1].sender;
         }
 
         let template;
