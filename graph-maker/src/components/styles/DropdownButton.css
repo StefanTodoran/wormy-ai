@@ -1,0 +1,30 @@
+.dropdown-button-wrapper {
+    position: relative;
+}
+
+.dropdown-container {
+    position: absolute;
+    border: 1px solid var(--fill-color);
+    filter: drop-shadow(0 0 .25em #ffffff11);
+    background-color: var(--background-color);
+    bottom: 100%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    border-radius: .5em;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: .25em .5em;
+}
+
+.dropdown-container.closed {
+    visibility: hidden;
+    opacity: 0;
+    transform: translate(-50%, 50%) scale(0.8);
+}
+
+.dropdown-container .icon-button {
+    width: 100%;
+    white-space: nowrap;
+}
