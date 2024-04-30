@@ -59,6 +59,7 @@ export default function DropdownButton({
             <div className={"dropdown-container " + (dropdownOpen ? "open" : "closed")}>
                 {options.map((option, idx) =>
                     <IconButton
+                        key={idx}
                         id={option.id}
                         giveRef={idx === 0 ? firstOptionRef : undefined}
                         src={option.src}

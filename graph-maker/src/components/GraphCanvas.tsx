@@ -51,7 +51,7 @@ export default function GraphCanvas({ emails }: Props) {
                 if (contact in node.weights) node.weights[contact] += 1;
                 else node.weights[contact] = 1;
 
-                node.radius = 14 + 2 * node.outgoing.size;
+                node.radius = 15 + 3 * node.outgoing.size;
             });
         });
 
@@ -89,7 +89,10 @@ export default function GraphCanvas({ emails }: Props) {
         };
 
         const drawFrame = () => {
-            context.fillStyle = "rgba(26,26,26,0.5)";
+            const isDarkMode = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+            
+            if (isDarkMode) context.fillStyle = "rgba(26,26,26,0.5)";
+            else context.fillStyle = "rgba(243,243,243,0.5)";
             context.fillRect(0, 0, dims.width, dims.height);
             // context.clearRect(0, 0, dims.width, dims.height);
 
@@ -125,8 +128,10 @@ export default function GraphCanvas({ emails }: Props) {
 
                 // const textPosition = { x: node.position.x, y: node.position.y - node.radius };
                 drawText(context, node.position, node.label, {
-                    strokeColor: node.infected ? "#ff7664" : "#646cff",
-                    fontSize: node.hovered ? 12 : 10,
+                    strokeColor: isDarkMode ? (node.infected ? "#ff7664" : "#646cff") : "#fff",
+                    fillColor: isDarkMode ? "#fff" : (node.infected ? "#ff7664" : "#646cff"),
+                    fontSize: node.hovered ? 12 : 11,
+                    strokeWidth: 3,
                     centered: true,
                 });
             });

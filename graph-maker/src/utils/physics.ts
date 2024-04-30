@@ -24,8 +24,8 @@ function changeMomentumByRepulsion(nodeA: GraphNode, nodeB: GraphNode) {
     const directionY = (nodeB.position.y - nodeA.position.y) / distance ** 2;
 
     // TODO: Factor this out.
-    const massNodeA = 1 + 0.5 * nodeA.outgoing.size;
-    const massNodeB = 1 + 0.5 * nodeA.outgoing.size;
+    const massNodeA = 1 + 0.75 * nodeA.outgoing.size;
+    const massNodeB = 1 + 0.75 * nodeA.outgoing.size;
 
     const repulsionMultiplier = distance < nodeA.radius + nodeB.radius ? 20 : 2;
 
@@ -46,8 +46,8 @@ function changeMomentumByAttraction(nodeA: GraphNode, nodeB: GraphNode, multipli
     const directionY = (nodeB.position.y - nodeA.position.y) / distance ** 2;
 
     // TODO: Factor this out.
-    const massNodeA = 1 + 0.5 * nodeA.outgoing.size;
-    const massNodeB = 1 + 0.5 * nodeA.outgoing.size;
+    const massNodeA = 1 + 0.75 * nodeA.outgoing.size;
+    const massNodeB = 1 + 0.75 * nodeA.outgoing.size;
 
     const attractionForce = multiplier * (distance ** 2) / 500;
     nodeA.velocity = {

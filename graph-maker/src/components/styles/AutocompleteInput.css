@@ -1,0 +1,27 @@
+.auto-complete {
+    position: absolute;
+    font-size: 0.8rem;
+    padding: .25em .75em;
+    left: 50%;
+    transform: translateX(-50%);
+    top: calc(100% - .5em);
+    border: 1px solid var(--border-color);
+    filter: drop-shadow(0 0 .25em #ffffff11);
+    background-color: var(--background-color);
+    border-radius: .5em;
+    opacity: 0;
+    white-space: nowrap;
+}
+
+td:focus-within .auto-complete,
+td:focus .auto-complete {
+    opacity: 1;
+}
+
+/* .auto-complete span.already-written {
+    
+} */
+
+.auto-complete span.to-complete {
+    color: var(--main-color);
+}

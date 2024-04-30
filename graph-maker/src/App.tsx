@@ -46,6 +46,16 @@ function App() {
     }, [])
 
     const [emails, setEmails] = useState<EmailEntry[]>([]);
+    const names = emails.map(email => email.name);
+    const uniqueNames = [...new Set(names)];
+    
+    const emailsSet = new Set<string>();
+    emails.forEach(email => {
+        emailsSet.add(email.sender);
+        emailsSet.add(email.recipient);
+    });
+    const allEmails: string[] = [...emailsSet];
+    
     const [editing, setEditing] = useState(-1);
     const [dragging, setDragging] = useState(-1);
 
@@ -61,6 +71,9 @@ function App() {
                 return;
             }
 
+            const editableElements = ["INPUT", "TEXTAREA"];
+            if (editableElements.includes(document.activeElement?.nodeName!)) return;
+            
             const isNumber = /^[0-9]$/i.test(evt.key);
             if (!isNumber) return;
 
@@ -105,17 +118,8 @@ function App() {
         setEditing(-1);
     };
 
-    const getExistingSender = () => {
-        const names = emails.map(email => email.name);
-        const name = pickRandomListItem(names, [], true);
-        return name;
-    };
-
-    const getNewSender = () => {
-        const names = emails.map(email => email.name);
-        const name = pickRandomListItem(templates!.names, names, true);
-        return name;
-    };
+    const getExistingSender = () => pickRandomListItem(names, [], true);
+    const getNewSender = () => pickRandomListItem(templates!.names, names, true);
 
     const addNewEmail = (name: string, infected?: boolean) => {
         const existing = emails.findIndex(email => email.name === name);
@@ -126,8 +130,7 @@ function App() {
             recipientName = pickRandomListItem(templates!.names, [name]);
             recipient = randomEmailAddress(recipientName, templates!.domains);
         } else {
-            // const allNames = emails.map(email => email.name);
-            // recipientName = pickRandomListItem(allNames, [name], true);
+            // recipientName = pickRandomListItem(names, [name], true);
             // recipient = emails.find(email => email.name === recipientName)!.sender;
 
             const lastEmailIndex = findLastIndex(emails, email => email.name !== name);
@@ -154,8 +157,12 @@ function App() {
 
     const updateTargetEmail = (targetIndex: number, newEmail: EmailEntry) => {
         const newEmails = [...emails];
+
+        const prevEmail = emails[targetIndex];
         const existingMatch = emails.find(email => email.name === newEmail.name);
-        if (existingMatch) newEmail.sender = existingMatch.sender;
+        if (existingMatch && prevEmail.name !== newEmail.name) newEmail.sender = existingMatch.sender;
+        // We check the names don't match so that this autocomplete only happens when editing name,
+        // meaning it won't prevent directly editing the sender.
 
         newEmails[targetIndex] = newEmail;
         setEmails(newEmails);
@@ -234,6 +241,8 @@ function App() {
                                 order={idx + 1}
                                 highlightSender={highlightEmail?.sender}
                                 highlightRecipient={highlightEmail?.recipient}
+                                allEmails={allEmails}
+                                allNames={uniqueNames}
                                 editable={idx === editing}
                                 startEditing={() => changeEditing(idx)}
                                 endEditing={() => changeEditing(-1)}

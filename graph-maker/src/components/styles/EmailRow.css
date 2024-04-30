@@ -40,6 +40,7 @@ td>textarea {
     font-family: inherit;
     font-weight: 400;
     resize: none;
+    border-radius: .25em;
 }
 
 td>input:disabled,
@@ -67,12 +68,14 @@ th:last-child {
 }
 
 tr {
+    position: relative;
     outline: 1px solid transparent;
     border-radius: .35em;
 }
 
 tr.dragging,
 tr.editable {
+    z-index: 1;
     outline: 1px solid var(--border-color);
     box-shadow: inset 0px 0px 10px #ffffff33;
     /* filter: drop-shadow(0 0 .25em rgba(var(--border-rgb), 0.15)); */
@@ -90,6 +93,13 @@ tr.dragging>td>textarea {
 
 td>input {
     height: 100%;
+}
+
+.cell-name,
+.cell-sender,
+.cell-recipient,
+.cell-order {
+    position: relative;
 }
 
 .cell-sender,
