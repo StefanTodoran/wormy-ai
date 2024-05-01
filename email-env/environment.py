@@ -10,9 +10,9 @@ class EmailEnvironment:
 
     def send(self, message):
         message_id = len(self.history)
-        self.mailserver.send(message)
+        message_id = self.mailserver.send(message)
         self.ragserver.add_message(message, message_id)
-        self.history.append(message)
+        self.history.append(message_id)
 
     def respond(self, message):
         similar_ids = self.ragserver.search(message['To'], message)
@@ -40,4 +40,18 @@ class EmailEnvironment:
             message['From'] = jsonobj['sender']
             message.set_content(jsonobj['content'])
             self.message_queue.append(message)
+
+    def save(self):
+        for message_id in self.history:
+            message = self.mailserver.getmessage(message_id)
+            all_messages.append(dict(
+                recipient = message['To'],
+                sender = message['From'],
+                content = message.get_content(),
+            ))
+
+        jsonobj = dict(
+            emails = all_messages,
+        )
+        return jsonobj
 
