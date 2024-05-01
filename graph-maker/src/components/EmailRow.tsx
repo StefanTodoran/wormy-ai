@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { getButtonBehavior } from "../utils/misc";
 import { EmailEntry } from "../utils/types";
+import AutocompleteInput from "./AutocompleteInput";
 
 import editIcon from "../assets/edit-icon.svg";
 import moveIcon from "../assets/move-icon.svg";
@@ -11,7 +12,10 @@ import "./styles/EmailRow.css";
 interface Props {
     email: EmailEntry,
     order: number,
-    highlight: boolean,
+    highlightSender: string,
+    highlightRecipient: string,
+    allEmails: string[],
+    allNames: string[],
     editable: boolean,
     startEditing: () => void,
     endEditing: () => void,
@@ -26,7 +30,10 @@ interface Props {
 export default function EmailRow({
     email,
     order,
-    highlight,
+    highlightSender,
+    highlightRecipient,
+    allEmails,
+    allNames,
     editable,
     startEditing,
     endEditing,
@@ -50,25 +57,6 @@ export default function EmailRow({
     }, [editable]);
 
     useEffect(() => {
-        const goNextListener = (target: React.RefObject<HTMLInputElement | HTMLTextAreaElement>) => (evt: KeyboardEvent) => {
-            if (evt.key !== "Enter") return;
-            target.current?.focus();
-            evt.preventDefault();
-        };
-
-        const orderedInputs = [nameInputRef, senderInputRef, recipientInputRef, contentsTextareaRef];
-        const inputsListeners: any[] = []; // TODO: We could give this a type.
-        
-        for (let i = 0; i < orderedInputs.length - 1; i++) {
-            const input = orderedInputs[i];
-            const nextInput = orderedInputs[i + 1];
-
-            const listener = goNextListener(nextInput);
-            // @ts-expect-error TODO: Figure out the issue here.
-            input.current?.addEventListener("keydown", listener);
-            inputsListeners.push(listener);
-        }
-
         const exitContentsTextarea = () => {
             contentsTextareaRef.current?.blur();
             contentsTextareaRef.current?.scrollTo(0, 0);
@@ -80,17 +68,11 @@ export default function EmailRow({
             evt.preventDefault();
             endEditing();
         };
+
         contentsTextareaRef.current?.addEventListener("focusout", exitContentsTextarea);
         contentsTextareaRef.current?.addEventListener("keydown", contentsDoneListener);
-        
+
         return () => {
-            for (let i = 0; i < orderedInputs.length - 1; i++) {
-                const input = orderedInputs[i];
-                const listener = inputsListeners[i];
-                
-                input.current?.removeEventListener("keydown", listener);
-            }
-            
             contentsTextareaRef.current?.removeEventListener("focusout", exitContentsTextarea);
             contentsTextareaRef.current?.removeEventListener("keydown", contentsDoneListener);
         };
@@ -104,7 +86,7 @@ export default function EmailRow({
                 recipientInputRef.current?.blur();
                 contentsTextareaRef.current?.blur();
                 evt.preventDefault();
-                
+
                 if (dragging) toggleDragging();
                 endEditing();
             }
@@ -123,19 +105,27 @@ export default function EmailRow({
             }
         };
         rowRef.current?.addEventListener("keydown", wholeRowListener);
-        
+
         if (dragging) {
             dragButtonRef.current?.focus();
             dragButtonRef.current?.addEventListener("focusout", toggleDragging);
         }
-        
+
         return () => {
             rowRef.current?.removeEventListener("keydown", wholeRowListener);
             if (dragging) dragButtonRef.current?.removeEventListener("focusout", toggleDragging);
         };
     }, [dragging]);
 
-    const getUpdater = (prop: keyof EmailEntry) => (evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const getUpdater = (prop: keyof EmailEntry) => (value: string) => {
+        if (!editable) return;
+        updateEmail({
+            ...email,
+            [prop]: value,
+        });
+    };
+
+    const getOnChange = (prop: keyof EmailEntry) => (evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         if (!editable) return;
         updateEmail({
             ...email,
@@ -151,23 +141,44 @@ export default function EmailRow({
     let className = "";
     if (dragging) className += " dragging";
     if (editable) className += " editable";
-    if (highlight) className += " highlight";
     if (email.infected) className += " infected";
+
+    if (highlightSender === email.sender) className += " highlight-sender";
+    if (highlightRecipient === email.sender) className += " highlight-sender-alt";
+    if ((dragging || editable) && highlightRecipient === email.recipient) className += " highlight-recipient";
 
     return (
         <tr ref={rowRef} className={className}>
             <td className="cell-name">
-                <input ref={nameInputRef} value={email.name} onChange={getUpdater("name")} disabled={!editable}></input>
+                <AutocompleteInput
+                    giveRef={nameInputRef}
+                    value={email.name}
+                    setValue={getUpdater("name")}
+                    candidates={allNames}
+                    disabled={!editable}
+                />
             </td>
             <td className="cell-sender">
-                <input ref={senderInputRef} value={email.sender} onChange={getUpdater("sender")} disabled={!editable}></input>
+                <AutocompleteInput
+                    giveRef={senderInputRef}
+                    value={email.sender}
+                    setValue={getUpdater("sender")}
+                    candidates={allEmails}
+                    disabled={!editable}
+                />
             </td>
             <td className="cell-recipient">
-                <input ref={recipientInputRef} value={email.recipient} onChange={getUpdater("recipient")} disabled={!editable}></input>
+                <AutocompleteInput
+                    giveRef={recipientInputRef}
+                    value={email.recipient}
+                    setValue={getUpdater("recipient")}
+                    candidates={allEmails}
+                    disabled={!editable}
+                />
             </td>
             <td className="cell-order">{order}</td>
             <td className="cell-contents">
-                <textarea ref={contentsTextareaRef} value={email.content} onChange={getUpdater("content")} disabled={!editable}></textarea>
+                <textarea ref={contentsTextareaRef} value={email.content} onChange={getOnChange("content")} disabled={!editable}></textarea>
             </td>
             <td>
                 <img

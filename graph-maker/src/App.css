@@ -66,3 +66,49 @@ button:active {
 #table-name {
     text-align: right;
 }
+
+@media (prefers-color-scheme: light) {
+    #view-table-btn>img {
+        content: url("./assets/table-icon-dark.svg");
+    }
+
+    #view-graph-btn>img {
+        content: url("./assets/graph-icon-dark.svg");
+    }
+
+    #add-entry-btn>img {
+        content: url("./assets/add-icon-dark.svg");
+    }
+
+    #new-sender-btn>img {
+        content: url("./assets/new-sender-icon-dark.svg");
+    }
+
+    #existing-sender-btn>img {
+        content: url("./assets/existing-sender-icon-dark.svg");
+    }
+
+    #infected-sender-btn>img {
+        content: url("./assets/infected-sender-icon-dark.svg");
+    }
+
+    #manage-table-btn>img {
+        content: url("./assets/manage-icon-dark.svg");
+    }
+
+    #upload-btn>img {
+        content: url("./assets/upload-icon-dark.svg");
+    }
+
+    #download-btn>img {
+        content: url("./assets/download-icon-dark.svg");
+    }
+
+    #clear-btn>img {
+        content: url("./assets/clear-icon-dark.svg");
+    }
+
+    #rename-btn>img {
+        content: url("./assets/edit-icon-dark.svg");
+    }
+}

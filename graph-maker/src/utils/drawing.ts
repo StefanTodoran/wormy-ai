@@ -28,13 +28,13 @@ export function drawText(context: CanvasRenderingContext2D, position: Point, tex
     const y = position.y;
 
     if (style.strokeColor) {
-        context.miterLimit = 2;
+        // context.miterLimit = 2;
         context.lineWidth = style.strokeWidth || 2;
         context.strokeStyle = style.strokeColor;
         context.strokeText(text, x, y);
     }
 
-    context.fillStyle = "#fff";
+    context.fillStyle = style.fillColor || "#fff";
     context.fillText(text, x, y);
 }
 

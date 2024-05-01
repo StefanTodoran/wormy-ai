@@ -90,19 +90,41 @@ export function getButtonBehavior(func: () => void) {
     };
 }
 
+export function getCanvasCoordinates(canvas: HTMLCanvasElement, mousePos: Point) {
+    const rect = canvas.getBoundingClientRect();
+    const adjustedMouseX = mousePos.x - rect.left;
+    const adjustedMouseY = mousePos.y - rect.top;
+
+    return { x: adjustedMouseX, y: adjustedMouseY };
+}
+
 export function isMouseOverCircle(
     canvas: HTMLCanvasElement,
     mousePos: Point,
     circleCenter: Point,
     radiusSize: number
 ): boolean {
-    const rect = canvas.getBoundingClientRect();
-    const adjustedMouseX = mousePos.x - rect.left;
-    const adjustedMouseY = mousePos.y - rect.top;
+    const adjustedPos = getCanvasCoordinates(canvas, mousePos);
 
-    const distX = adjustedMouseX - circleCenter.x;
-    const distY = adjustedMouseY - circleCenter.y;
+    const distX = adjustedPos.x - circleCenter.x;
+    const distY = adjustedPos.y - circleCenter.y;
     const distance = Math.sqrt(distX * distX + distY * distY);
 
     return distance <= radiusSize;
+}
+
+/**
+ * Returns the index of the last element in the array where predicate is true, and -1 otherwise.
+ * @param array The source array to search in.
+ * @param predicate Calls predicate once for each element of the array, in descending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findLastIndex immediately returns that element index. Otherwise, findLastIndex returns -1.
+ */
+export function findLastIndex<T>(array: Array<T>, predicate: (value: T, index: number, obj: T[]) => boolean): number {
+    let l = array.length;
+    while (l--) {
+        if (predicate(array[l], l, array))
+            return l;
+    }
+    return -1;
 }
