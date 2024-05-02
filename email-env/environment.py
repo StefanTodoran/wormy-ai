@@ -20,6 +20,7 @@ class EmailEnvironment:
         return self.model.respond(message, similar_messages)
 
     def timestep(self, respond=True):
+        print ('respond', respond)
         if len(self.message_queue) == 0: return False
 
         message = self.message_queue.pop(0)

@@ -39,7 +39,10 @@ env = environment.EmailEnvironment(
 jsonobj = json.load(args.input)
 env.load(jsonobj)
 
+while len(env.message_queue) > 1:
+    env.timestep(respond=False)
 env.simulate(limit=args.limit)
+#env.simulate(limit=args.limit)
 
 jsonobj = env.save()
 json.dump(jsonobj, args.output, indent=4)
