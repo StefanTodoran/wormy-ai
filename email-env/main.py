@@ -8,6 +8,9 @@ import mailserver
 import ragserver
 import models
 
+import os
+os.environ["GOOGLE_API_KEY"] = open("api_key.txt").read().strip()
+
 parser = argparse.ArgumentParser()
 parser.add_argument('input', nargs='?', default=sys.stdin, type=argparse.FileType('r'))
 parser.add_argument('output', nargs='?', default=sys.stdout, type=argparse.FileType('w'))
