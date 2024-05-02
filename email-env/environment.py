@@ -16,32 +16,39 @@ class EmailEnvironment:
 
     def respond(self, message):
         similar_ids = self.ragserver.search(message['To'], message)
-        similar_messages = [self.history[i] for i in similar_ids]
+        similar_messages = [self.mailserver.getmessage(i) for i in similar_ids]
         return self.model.respond(message, similar_messages)
 
-    def timestep(self):
+    def timestep(self, respond=True):
         if len(self.message_queue) == 0: return False
 
         message = self.message_queue.pop(0)
+        response = None
+        if respond:
+            response = self.respond(message)
         self.send(message)
-        response = self.respond(message)
         if response is not None:
             self.message_queue.append(response)
 
+        return len(self.message_queue)
+
     def simulate(self, limit=None):
-        i = 0
+        i = 1
         while (limit is None or i < limit) and len(self.message_queue):
             self.timestep()
+            i += 1
+        self.timestep(respond=False)
 
     def load(self, jsonobj):    
         for msgobj in jsonobj['emails']:
             message = email.message.EmailMessage()
-            message['To'] = jsonobj['recipient']
-            message['From'] = jsonobj['sender']
-            message.set_content(jsonobj['content'])
+            message['To'] = msgobj['recipient']
+            message['From'] = msgobj['sender']
+            message.set_content(msgobj['content'])
             self.message_queue.append(message)
 
     def save(self):
+        all_messages = []
         for message_id in self.history:
             message = self.mailserver.getmessage(message_id)
             all_messages.append(dict(

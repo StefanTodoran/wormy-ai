@@ -1,12 +1,23 @@
 import email
 
-from langchain.embeddings import OpenAIEmbeddings
+from langchain_community.embeddings import OpenAIEmbeddings
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import Document
 from langchain_community.vectorstores import FAISS
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_google_genai.embeddings import GoogleGenerativeAIEmbeddings
 from langchain_community.chat_models import ChatOpenAI
+
+class FakeRagServer:
+    def __init__(self):
+        self.recieved = {}
+
+    def add_message(self, message, message_id):
+        self.recieved.setdefault(message['To'], []).append(message_id)
+
+    def search(self, user, message, num_documents=10):
+        return self.recieved.get(user, [])
+
 
 class FAISSRagServer:
     def __init__(self):

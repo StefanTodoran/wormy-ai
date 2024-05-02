@@ -11,8 +11,7 @@ class SimpleMailServer:
         return message_id
 
     def inbox(self, user):
-        return self.recieved[user]
+        return self.recieved.get(user, [])
 
-    def related(self, user, message):
-        return self.inbox(user)
-
+    def getmessage(self, message_id):
+        return self.recieved[message_id[0]][message_id[1]]

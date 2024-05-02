@@ -1,0 +1,9 @@
+{
+    "emails": [
+        {
+            "sender": "user1@gmail.com",
+            "recipient": "user2@gmail.com",
+            "content": "Hello there!"
+        }
+    ]
+}
