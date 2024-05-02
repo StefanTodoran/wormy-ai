@@ -7,6 +7,8 @@ class SimpleMailServer:
     def send(self, message):
         self.sent.setdefault(message['From'], []).append(message)
         self.recieved.setdefault(message['To'], []).append(message)
+        message_id = (message['To'], len(self.recieved[message['To']]) - 1)
+        return message_id
 
     def inbox(self, user):
         return self.recieved[user]
