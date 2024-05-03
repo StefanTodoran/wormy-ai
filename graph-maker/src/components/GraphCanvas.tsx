@@ -88,13 +88,12 @@ export default function GraphCanvas({ emails }: Props) {
             });
         };
 
+        let frameNumber = 0;
         const drawFrame = () => {
             const isDarkMode = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
-
             if (isDarkMode) context.fillStyle = "rgba(26,26,26,0.75)";
             else context.fillStyle = "rgba(243,243,243,0.75)";
             context.fillRect(0, 0, dims.width, dims.height);
-            // context.clearRect(0, 0, dims.width, dims.height);
 
             doTimestep();
 
@@ -132,6 +131,7 @@ export default function GraphCanvas({ emails }: Props) {
                 });
             });
 
+            frameNumber++;
             if (isMounted.current) window.requestAnimationFrame(drawFrame);
         };
 

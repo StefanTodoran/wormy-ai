@@ -38,6 +38,7 @@ export function drawText(context: CanvasRenderingContext2D, position: Point, tex
     context.fillText(text, x, y);
 }
 
+// @ts-ignore Unused function, but we may need it in the future.
 function drawLine(context: CanvasRenderingContext2D, positionA: Point, positionB: Point, style: DrawStyle) {
     context.lineWidth = style.strokeWidth || 1;
     context.strokeStyle = style.strokeColor || "#fff";

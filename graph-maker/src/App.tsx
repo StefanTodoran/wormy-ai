@@ -224,7 +224,7 @@ function App() {
             {
                 view === AppView.TABLE &&
                 <div id="table-wrap">
-                    <table id="emails-table">
+                    <table id="emails-table" className={emails.length === 0 ? "empty" : ""}>
                         <thead>
                             <tr>
                                 <th>Name</th>

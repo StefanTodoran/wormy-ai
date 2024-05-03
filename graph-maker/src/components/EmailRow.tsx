@@ -180,7 +180,7 @@ export default function EmailRow({
             <td className="cell-contents">
                 <textarea ref={contentsTextareaRef} value={email.content} onChange={getOnChange("content")} disabled={!editable}></textarea>
             </td>
-            <td>
+            <td className="cell-buttons">
                 <img
                     {...getButtonBehavior(triggerEditing)}
                     className="row-icon edit-entry-btn"
