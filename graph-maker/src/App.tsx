@@ -202,6 +202,7 @@ function App() {
                 sender: email.sender,
                 recipient: email.recipient,
                 content: email.content,
+                infected: email.infected,
                 order: idx,
             };
         });
@@ -224,7 +225,7 @@ function App() {
             {
                 view === AppView.TABLE &&
                 <div id="table-wrap">
-                    <table id="emails-table" className={emails.length === 0 ? "empty" : ""}>
+                    <table id="emails-table">
                         <thead>
                             <tr>
                                 <th>Name</th>

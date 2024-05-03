@@ -78,9 +78,6 @@ table {
     padding: .5em;
     border: 1px solid rgba(var(--border-rgb), 0.15);
     scroll-behavior: smooth;
-}
-
-table.empty {
     width: 100%;
 }
 
