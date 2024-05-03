@@ -189,8 +189,10 @@ function App() {
     };
 
     const renameTable = () => {
-        const newName = window.prompt("Enter workflow name:");
-        if (newName) setTableName(newName);
+        const rawName = window.prompt("Enter workflow name:");
+        if (!rawName) return;
+        const newName = rawName.replace(/ /g,"_").toLowerCase();
+        setTableName(newName);
     };
 
     const downloadTable = () => {

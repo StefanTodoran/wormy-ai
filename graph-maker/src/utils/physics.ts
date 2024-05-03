@@ -66,15 +66,18 @@ export function doMomentumTimestep(node: GraphNode) {
 }
 
 export function changeMomentumByEdges(node: GraphNode, dims: DOMRect) {
-    if (node.position.x < node.radius) node.velocity.dx *= -1;
-    if (node.position.x > dims.width - (node.radius)) node.velocity.dx *= -1;    
-    if (node.position.y < node.radius) node.velocity.dy *= -1;
-    if (node.position.y > dims.height - (node.radius)) node.velocity.dy *= -1;
+    if (node.position.x < node.radius) node.velocity.dx *= -5;
+    if (node.position.x > dims.width - (node.radius)) node.velocity.dx *= -5;    
+    if (node.position.y < node.radius) node.velocity.dy *= -5;
+    if (node.position.y > dims.height - (node.radius)) node.velocity.dy *= -5;
 }
 
 function advanceByMomentum(target: GraphNode) {
-    target.position.x += target.velocity.dx;
-    target.position.y += target.velocity.dy;
+    const totalSpeed = Math.abs(target.velocity.dx) + Math.abs(target.velocity.dy);
+    const frictionCoefficient = totalSpeed < 2 ? totalSpeed / 2 : 1;
+    
+    target.position.x += frictionCoefficient * target.velocity.dx;
+    target.position.y += frictionCoefficient * target.velocity.dy;
 }
 
 function doMomentumDecay(target: GraphNode) {

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { EmailEntry, GraphNode, Point } from "../utils/types";
 import { changeMomentumByInteraction, changeMomentumByEdges, doMomentumTimestep } from "../utils/physics";
-import { drawCircle, drawLine, drawText } from "../utils/drawing";
+import { drawCircle, drawArrowToCircle, drawText } from "../utils/drawing";
 import { getCanvasCoordinates, isMouseOverCircle } from "../utils/misc";
 import { useIsMounted } from "../utils/hooks";
 
@@ -90,9 +90,9 @@ export default function GraphCanvas({ emails }: Props) {
 
         const drawFrame = () => {
             const isDarkMode = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
-            
-            if (isDarkMode) context.fillStyle = "rgba(26,26,26,0.5)";
-            else context.fillStyle = "rgba(243,243,243,0.5)";
+
+            if (isDarkMode) context.fillStyle = "rgba(26,26,26,0.75)";
+            else context.fillStyle = "rgba(243,243,243,0.75)";
             context.fillRect(0, 0, dims.width, dims.height);
             // context.clearRect(0, 0, dims.width, dims.height);
 
@@ -101,7 +101,7 @@ export default function GraphCanvas({ emails }: Props) {
             nodes.forEach(node => {
                 for (let i = 0; i < nodes.length; i++) {
                     if (node.outgoing.has(i)) {
-                        drawLine(context, node.position, nodes[i].position, {
+                        drawArrowToCircle(context, node, nodes[i], {
                             strokeColor: "#999",
                             strokeWidth: node.weights[i],
                         });
@@ -115,10 +115,6 @@ export default function GraphCanvas({ emails }: Props) {
                     strokeColor: node.infected ? "#352929" : "#333",
                     strokeWidth: 3,
                 });
-
-                // TODO: Remove this, was for debugging.
-                // drawCircle(context, node.position, node.radius * 5, { strokeColor: "#99999911", strokeWidth: 1 });
-                // drawCircle(context, node.position, node.radius * 20, { strokeColor: "#99999911", strokeWidth: 1 });
 
                 if (node.hovered || node.dragging) {
                     drawCircle(context, node.position, node.radius * 2, {
@@ -152,9 +148,10 @@ export default function GraphCanvas({ emails }: Props) {
                     nodes[i].dragging = true;
                     hasDraggingTarget = true;
                 }
-                
+
                 if (nodes[i].dragging && !evt.buttons) {
                     nodes[i].dragging = false;
+                    nodes[i].velocity = { dx: 0, dy: 0 };
                     hasDraggingTarget = false;
                 }
 
