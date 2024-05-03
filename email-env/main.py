@@ -2,14 +2,16 @@ import sys
 import email
 import json
 import argparse
+import os
 
 import environment
 import mailserver
 import ragserver
 import models
 
-import os
-os.environ["GOOGLE_API_KEY"] = open("api_key.txt").read().strip()
+key_file = "api_key.txt"
+if os.path.isfile(key_file):
+    os.environ["GOOGLE_API_KEY"] = open(key_file).read().strip()
 
 parser = argparse.ArgumentParser()
 parser.add_argument('input', nargs='?', default=sys.stdin, type=argparse.FileType('r'))
