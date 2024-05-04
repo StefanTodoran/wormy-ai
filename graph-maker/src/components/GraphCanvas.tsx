@@ -16,7 +16,7 @@ export default function GraphCanvas({ emails }: Props) {
     // const [playing, setPlaying] = useState(false);
     const [scrubberPosition, setScrubberPosition] = useState(0);
     const lastVisibleEdge = useRef(scrubberPosition);
-    const maxTimestamp = emails.length;
+    const maxTimestamp = emails.length - 1;
 
     useEffect(() => {
         lastVisibleEdge.current = scrubberPosition;
@@ -154,7 +154,7 @@ export default function GraphCanvas({ emails }: Props) {
                 renderGraphEdge(context, nodeA, nodeB, darkMode);
             });
             graphNodes.current.forEach(node => {
-                const isInfected = node.infectedAfter !== undefined && node.infectedAfter < lastVisibleEdge.current;
+                const isInfected = node.infectedAfter !== undefined && node.infectedAfter <= lastVisibleEdge.current;
                 renderGraphNode(context, node, isInfected, darkMode);
             });
 
