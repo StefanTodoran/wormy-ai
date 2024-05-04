@@ -1,0 +1,68 @@
+.controls-container {
+    position: absolute;
+    top: 1em;
+    left: 50%;
+    transform: translateX(-50%);
+    --controls-color: white;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.controls-button {
+    height: 1em;
+    width: 1em;
+    margin: 0 .75em;
+    cursor: pointer;
+}
+
+.controls-button:hover {
+    filter: drop-shadow(0 0 .25em var(--controls-color));
+}
+
+.controls-button:active {
+    transition: transform 0.025s linear;
+    transform: scale(0.8);
+}
+
+.controls-button.inverted {
+    transform: scaleX(-1);
+}
+
+.progress-bar-container {
+    position: relative;
+    width: 45vw;
+    height: .25em;
+    border: 1px solid var(--controls-color);
+    border-radius: .5em;
+}
+
+.progress-bar {
+    height: 100%;
+    width: calc(100% * var(--progress));
+    background-color: var(--controls-color);
+}
+
+.scrubber {
+    --size: .75em;
+    height: var(--size);
+    width: var(--size);
+    border-radius: var(--size);
+    border: 1px solid var(--controls-color);
+    background-color: var(--background-color);
+    position: absolute;
+    top: calc(var(--size) / -2.2);
+    left: calc(calc(100% * var(--progress)) - calc(var(--size) / 2));
+}
+
+.scrubber:hover {
+    transform: scale(1.25);
+    cursor: pointer;
+}
+
+@media (prefers-color-scheme: light) {
+    .controls-container {
+        --controls-color: black;
+    }
+}

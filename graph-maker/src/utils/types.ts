@@ -28,16 +28,24 @@ interface ContentTemplate {
 }
 
 export interface GraphNode {
-    id: number,
+    name: string,
+    address: string,
+    infected: boolean,
+    contacts: { [key: number]: number },
+
     position: Point,
     velocity: Vector,
-    label: string,
-    outgoing: Set<number>,
-    weights: { [key: number]: number },
-    infected: boolean,
+    mass: number,
     radius: number,
+
     hovered: boolean,
     dragging: boolean,
+}
+
+export interface GraphEdge {
+    to: number,
+    from: number,
+    order: number,
 }
 
 export interface Point {

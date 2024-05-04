@@ -66,7 +66,8 @@ function App() {
         const navigationHandler = (evt: KeyboardEvent) => {
             if (evt.ctrlKey && (evt.key === "b" || evt.key === "B")) {
                 // Bring focus to the first button.
-                document.getElementById("add-entry-btn")!.focus();
+                const firstButton = document.getElementById("add-entry-btn") || document.getElementById("view-table-btn");
+                firstButton!.focus();
                 evt.preventDefault();
                 return;
             }

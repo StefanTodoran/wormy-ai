@@ -1,61 +1,101 @@
-import { useEffect, useRef } from "react";
-import { EmailEntry, GraphNode, Point } from "../utils/types";
-import { changeMomentumByInteraction, changeMomentumByEdges, doMomentumTimestep } from "../utils/physics";
-import { drawCircle, drawArrowToCircle, drawText } from "../utils/drawing";
-import { getCanvasCoordinates, isMouseOverCircle } from "../utils/misc";
+import { useEffect, useRef, useState } from "react";
+import { EmailEntry, GraphEdge, GraphNode, Point } from "../utils/types";
+import { changeMomentumByInteraction, changeMomentumByBorder, doMomentumTimestep } from "../utils/physics";
+import { getCanvasCoordinates, isDarkMode, isMouseOverCircle } from "../utils/misc";
+import { renderGraphEdge, renderGraphNode } from "../utils/drawing";
 import { useIsMounted } from "../utils/hooks";
 
 import "./styles/GraphCanvas.css";
+import PlayPauseControls from "./PlayPauseControls";
 
 interface Props {
     emails: EmailEntry[],
 }
 
 export default function GraphCanvas({ emails }: Props) {
+    // const [playing, setPlaying] = useState(false);
+    const [scrubberPosition, setScrubberPosition] = useState(0);
+    const lastVisibleNode = useRef(scrubberPosition);
+    const maxTimestamp = emails.length - 1;
+
+    useEffect(() => {
+        lastVisibleNode.current = scrubberPosition;
+    }, [scrubberPosition]);
+
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const isMounted = useIsMounted();
 
-    const initNodes = (center: Point) => {
-        const allSenders = emails.map(email => email.sender);
-        const uniqueSenders = [...new Set(allSenders)];
+    const graphNodes = useRef<GraphNode[]>([]);
+    const graphEdges = useRef<GraphEdge[]>([]);
 
+    const initNodes = (center: Point) => {
+        const processedNames = new Set<string>();
         const newNodes: GraphNode[] = [];
-        uniqueSenders.forEach((sender, idx) => {
+
+        for (let i = 0; i < emails.length; i++) {
+            const email = emails[i];
+            if (processedNames.has(email.name)) continue;
+
             newNodes.push({
-                id: idx,
-                position: { x: center.x + 50 * (Math.random() - 0.5), y: center.y + 50 * (Math.random() - 0.5) },
+                // idx: i,
+                name: email.name,
+                address: email.sender,
+                contacts: {},
+
+                position: { x: center.x, y: center.y },
                 velocity: { dx: 0, dy: 0 },
-                label: sender,
+                mass: 1,
 
                 // To be calculated later:
-                outgoing: new Set(),
-                weights: {},
                 infected: false,
                 hovered: false,
                 dragging: false,
                 radius: 0,
             });
-        });
+        }
 
+        const infectedEmails = emails.filter(email => email.infected);
         newNodes.forEach(node => {
-            const sent = emails.filter(email => email.sender === node.label);
-            const infected = sent.findIndex(email => email.infected) !== -1;
+            const spread = newNodes.length * 2;
+            node.position.x += spread * (Math.random() - 0.5);
+            node.position.y += spread * (Math.random() - 0.5);
+
+            const infected = infectedEmails.findIndex(email => email.recipient === node.address) !== -1;
             node.infected = infected;
 
+            const sent = emails.filter(email => email.sender === node.address);
             const contacts = sent
                 .map(email => email.recipient)
-                .map(recipient => newNodes.findIndex(node => node.label === recipient));
+                .map(recipient => newNodes.findIndex(node => node.address === recipient));
 
-            node.outgoing = new Set(contacts);
             contacts.forEach(contact => {
-                if (contact in node.weights) node.weights[contact] += 1;
-                else node.weights[contact] = 1;
-
-                node.radius = 15 + 3 * node.outgoing.size;
+                if (contact in node.contacts) node.contacts[contact] += 1;
+                else node.contacts[contact] = 1;
             });
+
+            node.radius = 15 + 3 * Object.keys(contacts).length;
         });
 
         return newNodes;
+    };
+
+    const initEdges = (nodes: GraphNode[]) => {
+        const newEdges = emails.reduce(function (result: GraphEdge[], email, idx) {
+            const senderIndex = nodes.findIndex(node => node.address === email.sender);
+            const recipientIndex = nodes.findIndex(node => node.address === email.recipient);
+
+            if (recipientIndex !== -1) {
+                result.push({
+                    to: senderIndex,
+                    from: recipientIndex,
+                    order: idx,
+                });
+            }
+
+            return result;
+        }, []);
+
+        return newEdges;
     };
 
     useEffect(() => {
@@ -66,72 +106,49 @@ export default function GraphCanvas({ emails }: Props) {
         canvasRef.current!.height = dims.height;
 
         const center = { x: dims.width / 2, y: dims.height / 2 };
-        const nodes: GraphNode[] = initNodes(center);
+        graphNodes.current = initNodes(center);
+        graphEdges.current = initEdges(graphNodes.current);
 
+        // The timestep function handles the graph's physics.
         const doTimestep = () => {
-            for (let i = 0; i < nodes.length - 1; i++) {
-                for (let j = i + 1; j < nodes.length; j++) {
-                    const nodeA = nodes[i];
-                    const nodeB = nodes[j];
+            for (let i = 0; i < graphNodes.current.length - 1; i++) {
+                for (let j = i + 1; j < graphNodes.current.length; j++) {
+                    const edgeIndex = findMatchingEdgeIndex(graphEdges.current, i, j);
 
-                    const areContacts = nodeA.outgoing.has(j) || nodeB.outgoing.has(i);
-                    const contactWeight = Math.max(nodeA.weights[j] || 1, nodeB.weights[i] || 1);
+                    const nodeA = graphNodes.current[i];
+                    const nodeB = graphNodes.current[j];
+
+                    const areContacts = edgeIndex < lastVisibleNode.current && edgeIndex !== -1;
+                    const contactWeight = Math.max(nodeA.contacts[j] || 1, nodeB.contacts[i] || 1);
 
                     changeMomentumByInteraction(nodeA, nodeB, areContacts, contactWeight);
                 }
             }
 
-            nodes.forEach(node => {
+            graphNodes.current.forEach(node => {
                 if (node.dragging) return;
-                changeMomentumByEdges(node, dims);
+                changeMomentumByBorder(node, dims);
                 doMomentumTimestep(node);
             });
         };
 
-        let frameNumber = 0;
         const drawFrame = () => {
-            const isDarkMode = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
-            if (isDarkMode) context.fillStyle = "rgba(26,26,26,0.75)";
+            const darkMode = isDarkMode();
+            if (darkMode) context.fillStyle = "rgba(26,26,26,0.75)";
             else context.fillStyle = "rgba(243,243,243,0.75)";
-            context.fillRect(0, 0, dims.width, dims.height);
+            context.fillRect(0, 0, dims.width, dims.height); // Clear prev frame
 
             doTimestep();
+            graphEdges.current.forEach((edge, idx) => {
+                if (idx >= lastVisibleNode.current) return;
 
-            nodes.forEach(node => {
-                for (let i = 0; i < nodes.length; i++) {
-                    if (node.outgoing.has(i)) {
-                        drawArrowToCircle(context, node, nodes[i], {
-                            strokeColor: "#999",
-                            strokeWidth: node.weights[i],
-                        });
-                    }
-                }
+                const nodeA = graphNodes.current[edge.from];
+                const nodeB = graphNodes.current[edge.to];
+
+                renderGraphEdge(context, nodeA, nodeB, darkMode);
             });
+            graphNodes.current.forEach(node => renderGraphNode(context, node, darkMode));
 
-            nodes.forEach(node => {
-                drawCircle(context, node.position, node.radius, {
-                    fillColor: node.infected ? "#685252" : "#666",
-                    strokeColor: node.infected ? "#352929" : "#333",
-                    strokeWidth: 3,
-                });
-
-                if (node.hovered || node.dragging) {
-                    drawCircle(context, node.position, node.radius * 2, {
-                        strokeColor: "#99999933", strokeWidth: 1,
-                    });
-                }
-
-                // const textPosition = { x: node.position.x, y: node.position.y - node.radius };
-                drawText(context, node.position, node.label, {
-                    strokeColor: isDarkMode ? (node.infected ? "#ff7664" : "#646cff") : "#fff",
-                    fillColor: isDarkMode ? "#fff" : (node.infected ? "#ff7664" : "#646cff"),
-                    fontSize: node.hovered ? 12 : 11,
-                    strokeWidth: 3,
-                    centered: true,
-                });
-            });
-
-            frameNumber++;
             if (isMounted.current) window.requestAnimationFrame(drawFrame);
         };
 
@@ -139,25 +156,25 @@ export default function GraphCanvas({ emails }: Props) {
         const handleMouseInteract = (evt: MouseEvent) => {
             const mousePos = { x: evt.clientX, y: evt.clientY };
 
-            for (let i = 0; i < nodes.length; i++) {
+            for (let i = 0; i < graphNodes.current.length; i++) {
                 if (!hasDraggingTarget) {
-                    nodes[i].hovered = isMouseOverCircle(canvasRef.current!, mousePos, nodes[i].position, nodes[i].radius);
+                    graphNodes.current[i].hovered = isMouseOverCircle(canvasRef.current!, mousePos, graphNodes.current[i].position, graphNodes.current[i].radius);
                 }
 
-                if (nodes[i].hovered && evt.buttons) {
-                    nodes[i].dragging = true;
+                if (graphNodes.current[i].hovered && evt.buttons === 1) {
+                    graphNodes.current[i].dragging = true;
                     hasDraggingTarget = true;
                 }
 
-                if (nodes[i].dragging && !evt.buttons) {
-                    nodes[i].dragging = false;
-                    nodes[i].velocity = { dx: 0, dy: 0 };
+                if (graphNodes.current[i].dragging && !evt.buttons) {
+                    graphNodes.current[i].dragging = false;
+                    graphNodes.current[i].velocity = { dx: 0, dy: 0 };
                     hasDraggingTarget = false;
                 }
 
-                if (nodes[i].dragging) {
+                if (graphNodes.current[i].dragging) {
                     const adjustedPos = getCanvasCoordinates(canvasRef.current!, mousePos);
-                    nodes[i].position = adjustedPos;
+                    graphNodes.current[i].position = adjustedPos;
                 }
             }
         };
@@ -174,5 +191,24 @@ export default function GraphCanvas({ emails }: Props) {
         };
     }, []);
 
-    return (<canvas ref={canvasRef} id="graph-canvas"></canvas>);
+    return (
+        <>
+            <canvas ref={canvasRef} id="graph-canvas"></canvas>
+            <PlayPauseControls
+                // playing={playing}
+                // setPlaying={setPlaying}
+                scrubberPosition={scrubberPosition}
+                setScrubberPosition={setScrubberPosition}
+                maxTimestamp={maxTimestamp}
+            />
+        </>
+    );
+}
+
+function findMatchingEdgeIndex(edges: GraphEdge[], indexA: number, indexB: number) {
+    const edgeIndex = edges.findIndex(edge =>
+        (edge.to === indexA && edge.from === indexB) ||
+        (edge.to === indexB && edge.from === indexA)
+    );
+    return edgeIndex;
 }

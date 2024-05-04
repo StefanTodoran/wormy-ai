@@ -1,12 +1,12 @@
 import { GraphNode, Point } from "./types";
 
-export function changeMomentumByInteraction(nodeA: GraphNode, nodeB: GraphNode, areContacts: boolean, contactWeight: number = 1) {
+export function changeMomentumByInteraction(nodeA: GraphNode, nodeB: GraphNode, attract: boolean, attractionWeight: number = 1) {
     let distance = calculateDistance(nodeA.position, nodeB.position);
     const bumpDistance = nodeA.radius + nodeB.radius;
 
-    const minDistance = bumpDistance * 5 - contactWeight * 3;
-    if (areContacts && distance > minDistance) {
-        changeMomentumByAttraction(nodeA, nodeB, contactWeight);
+    const minDistance = bumpDistance * 5 - attractionWeight * 3;
+    if (attract && distance > minDistance) {
+        changeMomentumByAttraction(nodeA, nodeB, attractionWeight);
         return;
     }
 
@@ -22,20 +22,15 @@ function changeMomentumByRepulsion(nodeA: GraphNode, nodeB: GraphNode) {
 
     const directionX = (nodeB.position.x - nodeA.position.x) / distance ** 2;
     const directionY = (nodeB.position.y - nodeA.position.y) / distance ** 2;
-
-    // TODO: Factor this out.
-    const massNodeA = 1 + 0.75 * nodeA.outgoing.size;
-    const massNodeB = 1 + 0.75 * nodeA.outgoing.size;
-
     const repulsionMultiplier = distance < nodeA.radius + nodeB.radius ? 20 : 2;
 
     nodeA.velocity = {
-        dx: nodeA.velocity.dx - repulsionMultiplier * directionX / massNodeA,
-        dy: nodeA.velocity.dy - repulsionMultiplier * directionY / massNodeA,
+        dx: nodeA.velocity.dx - repulsionMultiplier * directionX / nodeA.mass,
+        dy: nodeA.velocity.dy - repulsionMultiplier * directionY / nodeA.mass,
     }
     nodeB.velocity = {
-        dx: nodeB.velocity.dx + repulsionMultiplier * directionX / massNodeB,
-        dy: nodeB.velocity.dy + repulsionMultiplier * directionY / massNodeB,
+        dx: nodeB.velocity.dx + repulsionMultiplier * directionX / nodeB.mass,
+        dy: nodeB.velocity.dy + repulsionMultiplier * directionY / nodeB.mass,
     }
 }
 
@@ -44,38 +39,60 @@ function changeMomentumByAttraction(nodeA: GraphNode, nodeB: GraphNode, multipli
 
     const directionX = (nodeB.position.x - nodeA.position.x) / distance ** 2;
     const directionY = (nodeB.position.y - nodeA.position.y) / distance ** 2;
-
-    // TODO: Factor this out.
-    const massNodeA = 1 + 0.75 * nodeA.outgoing.size;
-    const massNodeB = 1 + 0.75 * nodeA.outgoing.size;
-
     const attractionForce = multiplier * (distance ** 2) / 500;
+
     nodeA.velocity = {
-        dx: nodeA.velocity.dx + attractionForce * directionX / massNodeA,
-        dy: nodeA.velocity.dy + attractionForce * directionY / massNodeA,
+        dx: nodeA.velocity.dx + attractionForce * directionX / nodeA.mass,
+        dy: nodeA.velocity.dy + attractionForce * directionY / nodeA.mass,
     }
     nodeB.velocity = {
-        dx: nodeB.velocity.dx - attractionForce * directionX / massNodeB,
-        dy: nodeB.velocity.dy - attractionForce * directionY / massNodeB,
+        dx: nodeB.velocity.dx - attractionForce * directionX / nodeB.mass,
+        dy: nodeB.velocity.dy - attractionForce * directionY / nodeB.mass,
     }
 }
 
 export function doMomentumTimestep(node: GraphNode) {
     advanceByMomentum(node);
-    doMomentumDecay(node);   
+    doMomentumDecay(node);
 }
 
-export function changeMomentumByEdges(node: GraphNode, dims: DOMRect) {
-    if (node.position.x < node.radius) node.velocity.dx *= -5;
-    if (node.position.x > dims.width - (node.radius)) node.velocity.dx *= -5;    
-    if (node.position.y < node.radius) node.velocity.dy *= -5;
-    if (node.position.y > dims.height - (node.radius)) node.velocity.dy *= -5;
+function handleSingleBorderRepulsion(node: GraphNode, border: Point) {
+    const distance = calculateDistance(border, node.position) || 0.01;
+    const directionX = (node.position.x - border.x) / distance ** 2;
+    const directionY = (node.position.y - border.y) / distance ** 2;
+    const repulsionMultiplier = 1;
+
+    node.velocity = {
+        dx: node.velocity.dx + repulsionMultiplier * directionX / node.mass,
+        dy: node.velocity.dy + repulsionMultiplier * directionY / node.mass,
+    }
+}
+
+export function changeMomentumByBorder(node: GraphNode, dims: DOMRect) {
+    // if (node.position.x < node.radius) node.position.x = node.radius;
+    // if (node.position.y < node.radius) node.position.y = node.radius;
+    // if (node.position.x > dims.width - node.radius) node.position.x = dims.width - node.radius;
+    // if (node.position.y > dims.height - node.radius) node.position.y = dims.height - node.radius;
+
+    node.position.x = Math.max(node.radius, node.position.x);
+    node.position.y = Math.max(node.radius, node.position.y);
+    node.position.x = Math.min(dims.width - node.radius, node.position.x);
+    node.position.y = Math.min(dims.height - node.radius, node.position.y);
+
+    const borderPositions = [
+        { x: node.position.x, y: node.radius },
+        { x: node.radius, y: node.position.y },
+        { x: dims.width - node.radius, y: node.position.y },
+        { x: node.position.x, y: dims.height - node.radius },
+    ];
+
+    borderPositions.forEach(border => handleSingleBorderRepulsion(node, border));
 }
 
 function advanceByMomentum(target: GraphNode) {
     const totalSpeed = Math.abs(target.velocity.dx) + Math.abs(target.velocity.dy);
     const frictionCoefficient = totalSpeed < 2 ? totalSpeed / 2 : 1;
-    
+
     target.position.x += frictionCoefficient * target.velocity.dx;
     target.position.y += frictionCoefficient * target.velocity.dy;
 }
