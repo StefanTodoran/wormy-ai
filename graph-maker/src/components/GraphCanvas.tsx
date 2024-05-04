@@ -15,11 +15,11 @@ interface Props {
 export default function GraphCanvas({ emails }: Props) {
     // const [playing, setPlaying] = useState(false);
     const [scrubberPosition, setScrubberPosition] = useState(0);
-    const lastVisibleNode = useRef(scrubberPosition);
-    const maxTimestamp = emails.length - 1;
+    const lastVisibleEdge = useRef(scrubberPosition);
+    const maxTimestamp = emails.length;
 
     useEffect(() => {
-        lastVisibleNode.current = scrubberPosition;
+        lastVisibleEdge.current = scrubberPosition;
     }, [scrubberPosition]);
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -35,9 +35,9 @@ export default function GraphCanvas({ emails }: Props) {
         for (let i = 0; i < emails.length; i++) {
             const email = emails[i];
             if (processedNames.has(email.name)) continue;
+            processedNames.add(email.name);
 
             newNodes.push({
-                // idx: i,
                 name: email.name,
                 address: email.sender,
                 contacts: {},
@@ -47,21 +47,27 @@ export default function GraphCanvas({ emails }: Props) {
                 mass: 1,
 
                 // To be calculated later:
-                infected: false,
+                infectedAfter: -1,
                 hovered: false,
                 dragging: false,
                 radius: 0,
             });
         }
 
-        const infectedEmails = emails.filter(email => email.infected);
         newNodes.forEach(node => {
             const spread = newNodes.length * 2;
             node.position.x += spread * (Math.random() - 0.5);
             node.position.y += spread * (Math.random() - 0.5);
 
-            const infected = infectedEmails.findIndex(email => email.recipient === node.address) !== -1;
-            node.infected = infected;
+            node.infectedAfter = emails.findIndex(email => email.infected && email.recipient === node.address);
+            if (node.infectedAfter === -1) {
+                node.infectedAfter = undefined;
+                
+                // There will be some nodes which never recieve an infected email, but do send one.
+                // These nodes are the malicious nodes which begin spreading the worm, and should
+                // be shown as infected from the beginning.
+                node.infectedAfter = emails.findIndex(email => email.infected && email.sender === node.address) !== -1 ? -1 : undefined;
+            }
 
             const sent = emails.filter(email => email.sender === node.address);
             const contacts = sent
@@ -86,8 +92,8 @@ export default function GraphCanvas({ emails }: Props) {
 
             if (recipientIndex !== -1) {
                 result.push({
-                    to: senderIndex,
-                    from: recipientIndex,
+                    to: recipientIndex,
+                    from: senderIndex,
                     order: idx,
                 });
             }
@@ -118,7 +124,7 @@ export default function GraphCanvas({ emails }: Props) {
                     const nodeA = graphNodes.current[i];
                     const nodeB = graphNodes.current[j];
 
-                    const areContacts = edgeIndex < lastVisibleNode.current && edgeIndex !== -1;
+                    const areContacts = edgeIndex < lastVisibleEdge.current && edgeIndex !== -1;
                     const contactWeight = Math.max(nodeA.contacts[j] || 1, nodeB.contacts[i] || 1);
 
                     changeMomentumByInteraction(nodeA, nodeB, areContacts, contactWeight);
@@ -140,14 +146,17 @@ export default function GraphCanvas({ emails }: Props) {
 
             doTimestep();
             graphEdges.current.forEach((edge, idx) => {
-                if (idx >= lastVisibleNode.current) return;
+                if (idx >= lastVisibleEdge.current) return;
 
                 const nodeA = graphNodes.current[edge.from];
                 const nodeB = graphNodes.current[edge.to];
 
                 renderGraphEdge(context, nodeA, nodeB, darkMode);
             });
-            graphNodes.current.forEach(node => renderGraphNode(context, node, darkMode));
+            graphNodes.current.forEach(node => {
+                const isInfected = node.infectedAfter !== undefined && node.infectedAfter < lastVisibleEdge.current;
+                renderGraphNode(context, node, isInfected, darkMode);
+            });
 
             if (isMounted.current) window.requestAnimationFrame(drawFrame);
         };

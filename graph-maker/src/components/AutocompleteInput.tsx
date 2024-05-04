@@ -31,8 +31,6 @@ export default function AutocompleteInput({
         const autoCompleteListener = (evt: KeyboardEvent) => {
             if (evt.key !== "Enter") return;
             if (!autoComplete.current) return;
-            
-            console.log(evt.key, autoComplete.current);
             setValue(autoComplete.current);
             evt.preventDefault();
         };

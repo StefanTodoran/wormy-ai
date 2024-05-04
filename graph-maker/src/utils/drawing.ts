@@ -99,10 +99,10 @@ export function renderGraphEdge(context: CanvasRenderingContext2D, nodeA: GraphN
     });
 }
 
-export function renderGraphNode(context: CanvasRenderingContext2D, node: GraphNode, darkMode: boolean) {
+export function renderGraphNode(context: CanvasRenderingContext2D, node: GraphNode, isInfected: boolean, darkMode: boolean) {
     drawCircle(context, node.position, node.radius, {
-        fillColor: node.infected ? "#685252" : "#666",
-        strokeColor: node.infected ? "#352929" : "#333",
+        fillColor: isInfected ? "#685252" : "#666",
+        strokeColor: isInfected ? "#352929" : "#333",
         strokeWidth: 3,
     });
 
@@ -112,8 +112,8 @@ export function renderGraphNode(context: CanvasRenderingContext2D, node: GraphNo
         });
     }
 
-    const textStrokeColor = darkMode ? (node.infected ? "#ff7664" : "#646cff") : "#fff";
-    const textFillColor = darkMode ? "#fff" : (node.infected ? "#ff7664" : "#646cff");
+    const textStrokeColor = darkMode ? (isInfected ? "#ff7664" : "#646cff") : "#fff";
+    const textFillColor = darkMode ? "#fff" : (isInfected ? "#ff7664" : "#646cff");
 
     const labelPosition = { x: node.position.x, y: node.position.y - node.radius * 0.1 };
     drawText(context, labelPosition, node.address, {

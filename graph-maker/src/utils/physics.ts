@@ -60,7 +60,7 @@ function handleSingleBorderRepulsion(node: GraphNode, border: Point) {
     const distance = calculateDistance(border, node.position) || 0.01;
     const directionX = (node.position.x - border.x) / distance ** 2;
     const directionY = (node.position.y - border.y) / distance ** 2;
-    const repulsionMultiplier = 1;
+    const repulsionMultiplier = 5;
 
     node.velocity = {
         dx: node.velocity.dx + repulsionMultiplier * directionX / node.mass,
@@ -80,10 +80,10 @@ export function changeMomentumByBorder(node: GraphNode, dims: DOMRect) {
     node.position.y = Math.min(dims.height - node.radius, node.position.y);
 
     const borderPositions = [
-        { x: node.position.x, y: node.radius },
-        { x: node.radius, y: node.position.y },
-        { x: dims.width - node.radius, y: node.position.y },
-        { x: node.position.x, y: dims.height - node.radius },
+        { x: node.position.x, y: 0 },
+        { x: 0, y: node.position.y },
+        { x: dims.width, y: node.position.y },
+        { x: node.position.x, y: dims.height },
     ];
 
     borderPositions.forEach(border => handleSingleBorderRepulsion(node, border));

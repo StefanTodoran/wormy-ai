@@ -30,9 +30,9 @@ interface ContentTemplate {
 export interface GraphNode {
     name: string,
     address: string,
-    infected: boolean,
     contacts: { [key: number]: number },
-
+    infectedAfter?: number,
+    
     position: Point,
     velocity: Vector,
     mass: number,
