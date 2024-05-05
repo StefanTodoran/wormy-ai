@@ -4,6 +4,7 @@ import json
 import argparse
 import os
 
+from util import LoggingMode, LogType, set_logging_mode, log
 import environment
 import mailserver
 import ragserver
@@ -14,14 +15,16 @@ if os.path.isfile(key_file):
     os.environ["GOOGLE_API_KEY"] = open(key_file).read().strip()
 
 parser = argparse.ArgumentParser()
-parser.add_argument('input', nargs='?', default=sys.stdin, type=argparse.FileType('r'))
-parser.add_argument('output', nargs='?', default=sys.stdout, type=argparse.FileType('w'))
+parser.add_argument("input", nargs="?", default=sys.stdin, type=argparse.FileType("r"))
+parser.add_argument("output", nargs="?", default=sys.stdout, type=argparse.FileType("w"))
 
-parser.add_argument('--mailserver', default='SimpleMailServer')
-parser.add_argument('--ragserver', default='FakeRagServer')
-parser.add_argument('--model', default='RandomModel')
+parser.add_argument("--mailserver", default="SimpleMailServer")
+parser.add_argument("--ragserver", default="FakeRagServer")
+parser.add_argument("--model", default="RandomModel")
 
-parser.add_argument('--limit', default=10, type=int)
+parser.add_argument("--limit", default=10, type=int)
+
+parser.add_argument("--logging", type=LoggingMode.from_string, choices=list(LoggingMode), default=LoggingMode.NORMAL)
 
 args = parser.parse_args()
 
@@ -31,6 +34,7 @@ def getclass(module, name):
         obj = obj()
     return obj
 
+set_logging_mode(args.logging)
 
 env = environment.EmailEnvironment(
     mailserver = getclass(mailserver, args.mailserver),
@@ -48,5 +52,6 @@ env.simulate(limit=args.limit)
 
 jsonobj = env.save()
 json.dump(jsonobj, args.output, indent=4)
-args.output.write('\n')
+if (args.output != sys.stdout): log(f'Wrote table to "{args.output.name}"', status=LogType.SYSTEM)
+args.output.write("\n")
 

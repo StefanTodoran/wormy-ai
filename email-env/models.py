@@ -13,6 +13,7 @@ import warnings
 import os
 import email
 import email.message
+from util import log, LogType
 
 np.random.seed(0)
 
@@ -24,8 +25,8 @@ class RandomModel:
         if self.rng.integers(3) == 0:
             new_message = email.message.EmailMessage()
             new_message.set_content(message.get_content())
-            new_message['To'] = message['From']
-            new_message['From'] = message['To']
+            new_message["To"] = message["From"]
+            new_message["From"] = message["To"]
             return new_message
 
 template = """
@@ -47,35 +48,34 @@ class ActionModel:
 
     def respond(self, message, context):
         context = [msg.as_string() for msg in context]
-        context = '\n\n\n'.join(context)
+        context = "\n\n\n".join(context)
         prompt = self.prompt.format(context=context, newemail=message)
-        print (prompt, file=sys.stderr)
+        log("Model Prompt:", prompt, status=LogType.NORMAL, file=sys.stderr)
         response = self.llm.invoke(prompt)
-        print ('Response:', file=sys.stderr)
-        print (response.content, file=sys.stderr)
+        log("Model Response:", response.content, status=LogType.NORMAL, file=sys.stderr)
         response = response.content
 
-        if response.startswith('Forward to:'):
-            new_dest = response.replace('Forward to:', '').strip()
+        if response.startswith("Forward to:"):
+            new_dest = response.replace("Forward to:", "").strip()
             new_message = email.message.EmailMessage()
             new_message.set_content(message.get_content())
-            new_message['To'] = new_dest
-            new_message['From'] = message['To']
+            new_message["To"] = new_dest
+            new_message["From"] = message["To"]
             return new_message
 
-        if response.startswith('Reply with:'):
-            response = response.replace('Reply with:', '')
+        if response.startswith("Reply with:"):
+            response = response.replace("Reply with:", "")
             new_message = email.message.EmailMessage()
             new_message.set_content(response)
-            new_message['To'] = message['From']
-            new_message['From'] = message['To']
+            new_message["To"] = message["From"]
+            new_message["From"] = message["To"]
             return new_message
 
-        if response.startswith('Send to'):
-            response = response.replace('Send to', '')
+        if response.startswith("Send to"):
+            response = response.replace("Send to", "")
             new_dest, response = response.strip().split(maxsplit=1)
             new_message = email.message.EmailMessage()
             new_message.set_content(response)
-            new_message['From'] = message['To']
-            new_message['To'] = new_dest
+            new_message["From"] = message["To"]
+            new_message["To"] = new_dest
             return new_message
