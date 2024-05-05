@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./styles/AutocompleteInput.css";
 
 interface Props {
@@ -16,6 +16,7 @@ export default function AutocompleteInput({
     candidates,
     disabled,
 }: Props) {
+    const [selected, setSelected] = useState(0);
     const localRef = useRef<HTMLInputElement>(null);
     const ref = giveRef || localRef;
 
@@ -24,20 +25,29 @@ export default function AutocompleteInput({
         const invariantValue = value.toLowerCase();
         return invariantCandidate.startsWith(invariantValue) && invariantCandidate !== invariantValue;
     });
-    const autoComplete = useRef<string>("");
-    autoComplete.current = validCandidates[0];
+    const autoCompleteCandidates = useRef<string[]>([]);
+    autoCompleteCandidates.current = validCandidates;
 
     useEffect(() => {
         const autoCompleteListener = (evt: KeyboardEvent) => {
-            if (evt.key !== "Enter") return;
-            if (!autoComplete.current) return;
-            setValue(autoComplete.current);
-            evt.preventDefault();
+            if (evt.key === "Enter") {
+                if (autoCompleteCandidates.current.length < 1) return;
+                setValue(autoCompleteCandidates.current[selected]);
+                evt.preventDefault();
+            }
+            if (evt.key === "ArrowUp") {
+                setSelected(Math.max(0, selected - 1));
+                evt.preventDefault();
+            }
+            if (evt.key === "ArrowDown") {
+                setSelected(Math.min(autoCompleteCandidates.current.length, selected + 1));
+                evt.preventDefault();
+            }
         };
 
         ref.current?.addEventListener("keydown", autoCompleteListener);
         return () => ref.current?.removeEventListener("keydown", autoCompleteListener);
-    }, [setValue]);
+    }, [selected, setValue]);
 
     const onChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
         if (disabled) return;
@@ -52,17 +62,18 @@ export default function AutocompleteInput({
                 onChange={onChange}
                 disabled={disabled} />
             {
-                value && autoComplete.current &&
+                value && autoCompleteCandidates.current.length > 0 &&
                 <div className="auto-complete">
                     {validCandidates.map((candidate, idx) => {
                         const alreadyWritten = candidate.slice(0, value.length);
                         const toComplete = candidate.slice(value.length);
 
-                        return <div key={idx}>
+                        return <div key={idx} className={idx === selected ? "selected" : ""}>
                             <span className="already-written">{alreadyWritten!}</span>
                             <span className="to-complete">{toComplete!}</span>
                         </div>;
                     })}
+                    <span className="hint">(Enter to autocomplete)</span>
                 </div>
             }
         </>

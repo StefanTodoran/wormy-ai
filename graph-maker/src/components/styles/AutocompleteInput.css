@@ -25,3 +25,18 @@ td:focus .auto-complete {
 .auto-complete span.to-complete {
     color: var(--main-color);
 }
+
+.auto-complete span.hint {
+    font-size: 0.8em;
+    opacity: 0.8;
+}
+
+tr:last-of-type .auto-complete,
+tr:last-child .auto-complete {
+    top: unset;
+    bottom: calc(100% - .5em);
+}
+
+.auto-complete .selected span {
+    text-decoration: underline;
+}

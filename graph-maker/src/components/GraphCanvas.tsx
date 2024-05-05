@@ -59,14 +59,17 @@ export default function GraphCanvas({ emails }: Props) {
             node.position.x += spread * (Math.random() - 0.5);
             node.position.y += spread * (Math.random() - 0.5);
 
-            node.infectedAfter = emails.findIndex(email => email.infected && email.recipient === node.address);
-            if (node.infectedAfter === -1) {
-                node.infectedAfter = undefined;
-                
-                // There will be some nodes which never recieve an infected email, but do send one.
-                // These nodes are the malicious nodes which begin spreading the worm, and should
-                // be shown as infected from the beginning.
-                node.infectedAfter = emails.findIndex(email => email.infected && email.sender === node.address) !== -1 ? -1 : undefined;
+            // const firstInfectionSent = emails.findIndex(email => email.infected && email.sender === node.address);
+            // const firstInfectionRecieved = emails.findIndex(email => email.infected && email.recipient === node.address);
+            
+            const firstInfectionSent = findIndexOrNone(emails, email => email.infected && email.sender === node.address);
+            const firstInfectionRecieved = findIndexOrNone(emails, email => email.infected && email.recipient === node.address);
+            node.infectedAfter = firstInfectionRecieved;
+            
+            if (firstInfectionSent && !firstInfectionRecieved || (firstInfectionSent && firstInfectionRecieved && firstInfectionSent < firstInfectionRecieved)) {
+                // There will be some nodes which send an infected email before ever recieving one, or which never recieve an infected email.
+                // These nodes are the malicious nodes which begin spreading the worm, and should be shown as infected from the beginning.
+                node.infectedAfter = -1;
             }
 
             const sent = emails.filter(email => email.sender === node.address);
@@ -212,6 +215,11 @@ export default function GraphCanvas({ emails }: Props) {
             />
         </>
     );
+}
+
+function findIndexOrNone<T>(arr: T[], predicate: (value: T, index: number, obj: T[]) => void) {
+    const index = arr.findIndex(predicate);
+    return index === -1 ? undefined : index;
 }
 
 function findMatchingEdgeIndex(edges: GraphEdge[], indexA: number, indexB: number) {

@@ -135,6 +135,7 @@ export default function EmailRow({
 
     const triggerEditing = () => {
         startEditing();
+        rowRef.current?.scrollIntoView();
         if (!editable) senderInputRef.current?.focus();
     };
 
