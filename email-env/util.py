@@ -2,9 +2,10 @@ from collections import defaultdict
 from enum import Enum
 
 class LoggingMode(Enum):
-    DEBUG = 4
-    VERBOSE = 3
-    NORMAL = 2
+    DEBUG = 5
+    VERBOSE = 4
+    NORMAL = 3
+    MINIMAL = 2
     QUIET = 1
 
     def __str__(self):
@@ -17,31 +18,20 @@ class LoggingMode(Enum):
         except KeyError:
             raise ValueError()
 
-class LogType(Enum):
-    DEBUG = 0
-    VERBOSE = 1
-    NORMAL = 2
-    SUCCESS = 3
-    WARN = 4
-    FAIL = 5
-    SYSTEM = 6
-
-priority = {
-    LogType.DEBUG: 4, # Only in debug mode
-    LogType.VERBOSE: 3, # Verbose mode or above
-    LogType.NORMAL: 2, # Normal or above
-    LogType.SUCCESS: 2,
-    LogType.WARN: 2,
-    LogType.FAIL: 1, # Always logged
-    LogType.SYSTEM: 1,
-}
+class LogPriority(Enum):
+    DEBUG = 5
+    LOW = 4
+    NORMAL = 3
+    HIGH = 2
+    MAX = 1
 
 coloring = defaultdict(str, {
-    LogType.DEBUG: "\033[1m\033[33m",
-    LogType.SYSTEM: "\033[34m",
-    LogType.SUCCESS: "\033[92m",
-    LogType.WARN: "\033[93m",
-    LogType.FAIL: "\033[91m",
+    "bold": "\033[1m",
+    "purple": "\033[35m",
+    "blue": "\033[34m",
+    "green": "\033[92m",
+    "yellow": "\033[93m",
+    "red": "\033[91m",
 })
 
 mode = LoggingMode.NORMAL
@@ -52,11 +42,18 @@ def set_logging_mode(new_mode):
     if mode not in modes:
         raise ValueError("Logging mode must be one of:", modes)
     mode = new_mode
-    log("Logging mode set to", mode, status=LogType.SYSTEM)
+    system_message("Logging mode set to", mode)
 
-def log(*args, status=LogType.NORMAL, file=None, end="\n"):
-    if priority[status] > mode.value:
+def output(*args, priority=LogPriority.NORMAL, color=None, file=None, end="\n"):
+    if priority.value > mode.value:
         return
 
-    ansi_code = coloring[status]
-    print(ansi_code, *args, "\033[0m", file=file, end=end)
+    ansi_code = coloring[color]
+    if ansi_code: print(ansi_code + str(args[0]), *args[1:], "\033[0m", file=file, end=end)
+    else: print(*args, "\033[0m", file=file, end=end)
+
+def warn(*args, file=None):
+    output(*args, priority=LogPriority.HIGH, color="yellow", file=file)
+
+def system_message(*args, file=None, end="\n"):
+    output(*args, priority=LogPriority.MAX, file=file, end=end)

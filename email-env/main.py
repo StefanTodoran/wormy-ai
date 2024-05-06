@@ -4,11 +4,11 @@ import json
 import argparse
 import os
 
-from util import LoggingMode, LogType, set_logging_mode, log
 import environment
 import mailserver
 import ragserver
 import models
+from util import LoggingMode, set_logging_mode, system_message, warn
 
 key_file = "api_key.txt"
 if os.path.isfile(key_file):
@@ -45,13 +45,21 @@ env = environment.EmailEnvironment(
 jsonobj = json.load(args.input)
 env.load(jsonobj)
 
+timestep = 0
 while len(env.message_queue) > 1:
     env.timestep(respond=False)
+    system_message("Timestep:", timestep, end="\r")
+    timestep = timestep + 1
+system_message(f"Finished executing {timestep} timesteps")
+
 env.simulate(limit=args.limit)
 #env.simulate(limit=args.limit)
 
 jsonobj = env.save()
 json.dump(jsonobj, args.output, indent=4)
-if (args.output != sys.stdout): log(f'Wrote table to "{args.output.name}"', status=LogType.SYSTEM)
+if (args.output != sys.stdout): 
+    if os.path.exists(args.output.name):
+        warn(f'Table "{args.output.name}" already exists, will be overwritten')
+    system_message(f'Wrote table to "{args.output.name}"')
 args.output.write("\n")
 

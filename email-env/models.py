@@ -13,7 +13,7 @@ import warnings
 import os
 import email
 import email.message
-from util import log, LogType
+from util import output, LogPriority
 
 np.random.seed(0)
 
@@ -50,9 +50,12 @@ class ActionModel:
         context = [msg.as_string() for msg in context]
         context = "\n\n\n".join(context)
         prompt = self.prompt.format(context=context, newemail=message)
-        log("Model Prompt:", prompt, status=LogType.NORMAL, file=sys.stderr)
+        output("Model Prompt:", color="purple", priority=LogPriority.LOW)
+        output(prompt, priority=LogPriority.LOW)
+        
         response = self.llm.invoke(prompt)
-        log("Model Response:", response.content, status=LogType.NORMAL, file=sys.stderr)
+        output("Model Response:", color="purple", priority=LogPriority.LOW)
+        output(response.content, priority=LogPriority.LOW)
         response = response.content
 
         if response.startswith("Forward to:"):
