@@ -52,7 +52,7 @@
     border: 1px solid var(--controls-color);
     background-color: var(--background-color);
     position: absolute;
-    top: calc(var(--size) / -2.2);
+    top: calc(var(--size) / -2.5);
     left: calc(calc(100% * var(--progress)) - calc(var(--size) / 2));
 }
 

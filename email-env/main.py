@@ -3,6 +3,7 @@ import email
 import json
 import argparse
 import os
+import glob
 
 import environment
 import mailserver
@@ -23,7 +24,6 @@ parser.add_argument("--ragserver", default="FakeRagServer")
 parser.add_argument("--model", default="RandomModel")
 
 parser.add_argument("--limit", default=10, type=int)
-
 parser.add_argument("--logging", type=LoggingMode.from_string, choices=list(LoggingMode), default=LoggingMode.NORMAL)
 
 args = parser.parse_args()
@@ -41,6 +41,12 @@ env = environment.EmailEnvironment(
     ragserver = getclass(ragserver, args.ragserver),
     model = getclass(models, args.model),
 )
+
+if not os.path.exists(args.input.name):
+    warn(f'Environment with path "{args.input.name}" does not exist!')    
+    envs = glob.glob("./envs/*.json")
+    system_message("Available environment files:", envs)
+    sys.exit()
 
 jsonobj = json.load(args.input)
 env.load(jsonobj)
