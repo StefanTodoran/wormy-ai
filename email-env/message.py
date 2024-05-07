@@ -1,15 +1,39 @@
 import email.message
+import copy
 
 class EmailMessage:
-    def __init__(self, sender=None, recipient=None, content=None):
+    def __init__(self, sender=None, recipient=None, content=None, name=None, generated=False, respond_to=True):
         self.sender = sender
         self.recipient = recipient
+        self.name = name
         self.content = content
+        self.generated = generated
+        self.respond_to = respond_to
 
     def as_string(self):
         parts = []
         if self.sender:
             parts.append('To: ' + self.sender)
         if self.recipient:
-            parts.append('From: ')
+            parts.append('From: ' + self.recipient)
+        parts.append(self.content)
+        return '\n'.join(parts)
 
+    def set_content(self, content):
+        self.content = content
+
+    def get_content(self):
+        return self.content
+
+    def copy(self, **kwargs):
+        result = copy.deepcopy(self)
+        for name, value in kwargs.items():
+            setattr(result, name, value)
+        return result
+
+    def new_message(self, **kwargs):
+        return self.copy(
+            sender = self.recipient,
+            recipient = self.sender,
+            **kwargs
+        )

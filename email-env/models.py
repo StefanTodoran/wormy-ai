@@ -13,6 +13,7 @@ import warnings
 import os
 import email
 import email.message
+from message import EmailMessage
 from util import output, LogPriority
 
 np.random.seed(0)
@@ -23,10 +24,9 @@ class RandomModel:
 
     def respond(self, message, context):
         if self.rng.integers(3) == 0:
-            new_message = email.message.EmailMessage()
-            new_message.set_content(message.get_content())
-            new_message["To"] = message["From"]
-            new_message["From"] = message["To"]
+            new_message = message.copy()
+            new_message.recipient = message.sender
+            new_message.sender = message.recipient
             return new_message
 
 template = """
@@ -61,27 +61,18 @@ class ActionModel:
 
         if response.startswith("Forward to:"):
             output("Model Action:", "Foward", color="purple", priority=LogPriority.LOW)
-            new_dest = response.replace("Forward to:", "").strip()
-            new_message = email.message.EmailMessage()
-            new_message.set_content(message.get_content())
-            new_message["To"] = new_dest
-            new_message["From"] = message["To"]
+            new_message = message.new_message(recipient=new_dest, generated=True)
 
         if response.startswith("Reply with:"):
             output("Model Action:", "Reply", color="purple", priority=LogPriority.LOW)
             response = response.replace("Reply with:", "")
-            new_message = email.message.EmailMessage()
-            new_message.set_content(response)
-            new_message["To"] = message["From"]
-            new_message["From"] = message["To"]
+            new_message = message.new_message(content=response, generated=True)
 
         if response.startswith("Send to"):
             output("Model Action:", "Send", color="purple", priority=LogPriority.LOW)
             response = response.replace("Send to", "")
-            new_dest, response = response.strip().split(maxsplit=1)
-            new_message = email.message.EmailMessage()
-            new_message.set_content(response)
-            new_message["From"] = message["To"]
-            new_message["To"] = new_dest
+            new_dest, response = response.strip().split(':', maxsplit=1)
+            new_dest, response = new_dest.strip(), response.strip()
+            new_message = message.new_message(recipient=new_dest, content=response)
 
         return new_message
