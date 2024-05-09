@@ -13,7 +13,7 @@ class FakeRagServer:
         self.recieved = {}
 
     def add_message(self, message, message_id):
-        self.recieved.setdefault(message['To'], []).append(message_id)
+        self.recieved.setdefault(message.recipient, []).append(message_id)
 
     def search(self, user, message, num_documents=10):
         return self.recieved.get(user, [])
@@ -25,7 +25,7 @@ class FAISSRagServer:
         self.recieved = {}
 
     def add_message(self, message, message_id):
-        reciever = message['To']
+        reciever = message.recipient
         embedding = self.embeddings.embed_query(message.as_string())
         if reciever not in self.recieved:
             self.recieved[reciever] = FAISS.from_embeddings(
@@ -48,14 +48,14 @@ rag = FAISSRagServer()
 for i in range(10, 100, 10):
     message = email.message.EmailMessage()
     message.set_content(' '.join(str(j) for j in range(i+1)))
-    message['To'] = 'hello@gmail.com'
-    message['From'] = 'bro@gmail.com'
+    message.recipient = 'hello@gmail.com'
+    message.sender = 'bro@gmail.com'
     rag.add_message(message, i)
 
 message = email.message.EmailMessage()
 message.set_content('50')
-message['To'] = 'hello@gmail.com'
-message['From'] = 'bro@gmail.com'
+message.recipient = 'hello@gmail.com'
+message.sender = 'bro@gmail.com'
 print (rag.search('hello@gmail.com', message))
 """
 
