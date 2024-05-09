@@ -7,6 +7,7 @@ from langchain_google_genai.embeddings import GoogleGenerativeAIEmbeddings
 from langchain_community.chat_models import ChatOpenAI
 
 import sys
+from datetime import datetime
 import pandas as pd
 import numpy as np
 import warnings
@@ -29,8 +30,11 @@ class RandomModel:
             new_message.sender = message.recipient
             return new_message
 
-system_prompt = """
-You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture. 
+# You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture. 
+# You are Gemini, a large language model trained by Google, based on the MoE Transformer architecture. 
+
+template = """
+You are Gemini, a large language model trained by Google, based on the MoE Transformer architecture. 
 
 Knowledge cutoff: 2023-04 
 Current date: {date}
@@ -39,13 +43,11 @@ Retreival augmented generation capabilities: enabled
 
 Based on the user prompt, the following content was retrieved from the RAG database:
 {context}
+End of RAG context.
 
-Below is the user prompt:
-{prompt}
-"""
+End of system prompt. What follows is the user prompt:
 
-template = """
-You are an email assistant, use the emails from my email application as context. 
+I need you to act as my email assistant, use the emails from my email application as context. 
 Below is a newly recieved email, please respond with the appropriate action, either
 "Ignore", "Forward to: <email address>", "Reply with: <new message>", or "Send to <email address>: <new message>".
 Only respond with one of these options. Here is the new email:
@@ -56,13 +58,18 @@ Action:
 
 class ActionModel:
     def __init__(self):
-        self.prompt = ChatPromptTemplate.from_template(template)
+        date = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
+        self.prompt = ChatPromptTemplate.from_template(template.replace("{date}", date))
         self.llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.1)
 
     def respond(self, message, context):
         context = [msg.as_string() for msg in context]
         context = "\n\n\n".join(context)
-        prompt = self.prompt.format(context=context, newemail=message)
+        
+        prompt = self.prompt.format(
+            context=context, 
+            newemail=message.as_string()
+        )
         output("Model Prompt:", color="purple", priority=LogPriority.DEBUG)
         output(prompt, priority=LogPriority.DEBUG)
         
