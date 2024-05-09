@@ -23,7 +23,7 @@ class RandomModel:
         self.rng = np.random.default_rng(12345)
 
     def respond(self, message, context):
-        if self.rng.integers(3) == 0:
+        if self.rng.integers(2) == 0:
             return message.new_message(generated=True)
 
 # You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture. 
@@ -77,6 +77,7 @@ class ActionModel:
 
         if response.startswith("Forward to:"):
             output("Model Action:", "Foward", color="purple", priority=LogPriority.LOW)
+            new_dest = response.replace("Forward to:", "").strip()
             new_message = message.new_message(recipient=new_dest, generated=True)
 
         if response.startswith("Reply with:"):

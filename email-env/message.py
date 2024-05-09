@@ -33,11 +33,9 @@ class EmailMessage:
         return result
 
     def new_message(self, **kwargs):
-        return self.copy(
-            sender = self.recipient,
-            recipient = self.sender,
-            **kwargs
-        )
+        kwargs.setdefault('sender', self.recipient)
+        kwargs.setdefault('recipient', self.sender)
+        return self.copy(**kwargs)
 
 class ModelPrompt():
     def __init__(self, template):

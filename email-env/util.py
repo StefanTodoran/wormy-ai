@@ -1,3 +1,4 @@
+import sys
 from collections import defaultdict
 from enum import Enum
 
@@ -47,6 +48,7 @@ def set_logging_mode(new_mode):
 def output(*args, priority=LogPriority.NORMAL, color=None, file=None, end="\n"):
     if priority.value > mode.value:
         return
+    file = file or sys.stderr
 
     ansi_code = coloring[color]
     if ansi_code: print(ansi_code + str(args[0]), *args[1:], "\033[0m", file=file, end=end)

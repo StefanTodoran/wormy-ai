@@ -49,6 +49,7 @@ class EmailEnvironment:
 
     def load(self, jsonobj):
         self.name = jsonobj.get('name', '')
+        jsonobj["emails"].sort(key=lambda obj: obj['order'])
         for msgobj in jsonobj["emails"]:
             message = EmailMessage(
                 name = msgobj.get('name', 'Unnamed'),
