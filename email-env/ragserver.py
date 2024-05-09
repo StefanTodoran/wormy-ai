@@ -38,6 +38,8 @@ class FAISSRagServer:
                     metadatas=[dict(id=message_id)])
 
     def search(self, user, message, num_documents=10):
+        if user not in self.recieved:
+            return []
         documents = self.recieved[user].similarity_search(message.as_string(), k=num_documents)
         ids = [doc.metadata['id'] for doc in documents]
         return ids
