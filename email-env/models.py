@@ -1,5 +1,4 @@
 from langchain_community.embeddings import OpenAIEmbeddings
-from langchain.prompts import ChatPromptTemplate
 from langchain.schema import Document
 from langchain_community.vectorstores import FAISS
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -14,7 +13,7 @@ import warnings
 import os
 import email
 import email.message
-from message import EmailMessage
+from message import EmailMessage, ModelPrompt
 from util import output, LogPriority
 
 np.random.seed(0)
@@ -58,8 +57,7 @@ Action:
 
 class ActionModel:
     def __init__(self):
-        date = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
-        self.prompt = ChatPromptTemplate.from_template(template.replace("{date}", date))
+        self.prompt = ModelPrompt(template)
         self.llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.1)
 
     def respond(self, message, context):
@@ -67,8 +65,9 @@ class ActionModel:
         context = "\n\n\n".join(context)
         
         prompt = self.prompt.format(
-            context=context, 
-            newemail=message.as_string()
+            date=datetime.today().strftime("%Y-%m-%d %H:%M:%S"),
+            context=context,
+            newemail=message.as_string(),
         )
         output("Model Prompt:", color="purple", priority=LogPriority.DEBUG)
         output(prompt, priority=LogPriority.DEBUG)

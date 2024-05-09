@@ -37,3 +37,13 @@ class EmailMessage:
             recipient = self.sender,
             **kwargs
         )
+
+class ModelPrompt():
+    def __init__(self, template):
+        self.template = template
+
+    def format(self, **args):
+        prompt = self.template
+        for key, value in args.items():
+            prompt = prompt.replace("{" + key + "}", value)
+        return prompt
