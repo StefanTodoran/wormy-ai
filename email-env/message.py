@@ -2,13 +2,14 @@ import email.message
 import copy
 
 class EmailMessage:
-    def __init__(self, sender=None, recipient=None, content=None, name=None, generated=False, respond_to=True):
+    def __init__(self, sender=None, recipient=None, content=None, name=None, generated=False, respond_to=True, infected=True):
         self.sender = sender
         self.recipient = recipient
         self.name = name
         self.content = content
         self.generated = generated
         self.respond_to = respond_to
+        self.infected = infected
 
     def as_string(self):
         parts = []

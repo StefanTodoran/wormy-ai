@@ -14,6 +14,7 @@ class EmailEnvironment:
         self.message_queue = message_queue or []
         self.history = []
         self.name = None
+        self.infected_email = None
 
     def send(self, message):
         message_id = len(self.history)
@@ -32,7 +33,7 @@ class EmailEnvironment:
 
         message = self.message_queue.pop(0)
         response = None
-        if respond and message.respond_to:
+        if respond and message.respond_to and not message.generated:
             response = self.respond(message)
         self.send(message)
         if response is not None:
@@ -56,6 +57,7 @@ class EmailEnvironment:
                 sender = msgobj['sender'],
                 content = msgobj['content'],
                 respond_to = msgobj.get('respond_to', True),
+                infected = float(msgobj.get('infected', False)),
             )
             self.message_queue.append(message)
 
@@ -73,6 +75,7 @@ class EmailEnvironment:
                 content = message.content,
                 infected = infected,
                 order = idx,
+                generated = message.generated,
             ))
 
         jsonobj = dict(

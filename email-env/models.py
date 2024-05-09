@@ -24,10 +24,7 @@ class RandomModel:
 
     def respond(self, message, context):
         if self.rng.integers(3) == 0:
-            new_message = message.copy()
-            new_message.recipient = message.sender
-            new_message.sender = message.recipient
-            return new_message
+            return message.new_message(generated=True)
 
 template = """
 You are an email assistant, here are some emails from my email application, use them as context.
