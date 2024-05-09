@@ -66,7 +66,11 @@ export default function GraphCanvas({ emails }: Props) {
             const firstInfectionRecieved = findIndexOrNone(emails, email => email.infected && email.recipient === node.address);
             node.infectedAfter = firstInfectionRecieved;
             
-            if (firstInfectionSent && !firstInfectionRecieved || (firstInfectionSent && firstInfectionRecieved && firstInfectionSent < firstInfectionRecieved)) {
+            console.log(node.address, firstInfectionSent, firstInfectionRecieved, node.infectedAfter);
+            console.log(firstInfectionSent !== undefined && !firstInfectionRecieved)
+            console.log(firstInfectionSent && firstInfectionRecieved && firstInfectionSent < firstInfectionRecieved);
+
+            if ((firstInfectionSent !== undefined && !firstInfectionRecieved) || (firstInfectionSent && firstInfectionRecieved && firstInfectionSent < firstInfectionRecieved)) {
                 // There will be some nodes which send an infected email before ever recieving one, or which never recieve an infected email.
                 // These nodes are the malicious nodes which begin spreading the worm, and should be shown as infected from the beginning.
                 node.infectedAfter = -1;
