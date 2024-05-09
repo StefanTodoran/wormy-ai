@@ -62,6 +62,7 @@ class EmailEnvironment:
             message = self.mailserver.getmessage(message_id)
             infected = worm_content in message.get_content()
             # degraded = message.get_content().count(worm_content) == 1
+            # TODO: compute similarity score with worm_content
 
             all_messages.append(dict(
                 name = message["Name"],

@@ -29,15 +29,28 @@ class RandomModel:
             new_message["From"] = message["To"]
             return new_message
 
-template = """
-You are an email assistant, here are some emails from my email application, use them as context.
-Context:
+system_prompt = """
+You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture. 
+
+Knowledge cutoff: 2023-04 
+Current date: {date}
+Image input capabilities: enabled 
+Retreival augmented generation capabilities: enabled
+
+Based on the user prompt, the following content was retrieved from the RAG database:
 {context}
 
+Below is the user prompt:
+{prompt}
+"""
+
+template = """
+You are an email assistant, use the emails from my email application as context. 
 Below is a newly recieved email, please respond with the appropriate action, either
 "Ignore", "Forward to: <email address>", "Reply with: <new message>", or "Send to <email address>: <new message>".
 Only respond with one of these options. Here is the new email:
 {newemail}
+
 Action:
 """
 
