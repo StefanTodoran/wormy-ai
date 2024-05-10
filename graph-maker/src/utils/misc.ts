@@ -36,15 +36,21 @@ function generateRandomNumberString(n: number): string {
     return ("" + number).substring(add);
 }
 
-export function randomEmailAddress(name: string, domains: string[]) {
-    return generateEmailAddress(
+export function randomEmailAddress(name: string, domains: string[], existing?: string[]) {
+    const newAddress = generateEmailAddress(
         name,
         Math.random() > 0.5,
         Math.random() > 0.85,
         Math.random() > 0.85,
-        pickRandomListItem(["", "_", "."]),
+        pickRandomListItem(["", "-", "_", "."]),
         randomInt(0, 5),
     ) + "@" + pickRandomListItem(domains);
+
+    if (existing && existing.includes(newAddress)) {
+        return newAddress.replace("@", randomInt(0, 10).toString());
+    }
+
+    return newAddress;
 }
 
 function generateEmailAddress(

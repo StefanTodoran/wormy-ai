@@ -56,6 +56,15 @@
     left: calc(calc(100% * var(--progress)) - calc(var(--size) / 2));
 }
 
+.scrubber::after {
+    content: var(--timestep);
+    font-size: 0.8em;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
 .scrubber:hover {
     transform: scale(1.25);
     cursor: pointer;

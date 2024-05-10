@@ -8,7 +8,6 @@ export interface EmailEntry {
 }
 
 export interface Email {
-    name: string,
     sender: string,
     recipient: string,
     content: string,
@@ -28,10 +27,10 @@ interface ContentTemplate {
 }
 
 export interface GraphNode {
-    name: string,
     address: string,
     contacts: { [key: number]: number },
     infectedAfter?: number,
+    sentCount: number[],
     
     position: Point,
     velocity: Vector,

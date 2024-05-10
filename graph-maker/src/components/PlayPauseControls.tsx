@@ -73,7 +73,7 @@ export default function PlayPauseControls({
                 ref={progressBarRef}
             >
                 <div className="progress-bar" />
-                <div className="scrubber" />
+                <div className="scrubber" style={{ "--timestep": '"' + scrubberPosition + '"' } as React.CSSProperties}/>
             </div>
 
             <SkipIcon

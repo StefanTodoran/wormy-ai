@@ -16,7 +16,7 @@ export default function GraphCanvas({ emails }: Props) {
     // const [playing, setPlaying] = useState(false);
     const [scrubberPosition, setScrubberPosition] = useState(0);
     const lastVisibleEdge = useRef(scrubberPosition);
-    const maxTimestamp = emails.length - 1;
+    const maxTimestamp = emails.length;
 
     useEffect(() => {
         lastVisibleEdge.current = scrubberPosition;
@@ -29,46 +29,39 @@ export default function GraphCanvas({ emails }: Props) {
     const graphEdges = useRef<GraphEdge[]>([]);
 
     const initNodes = (center: Point) => {
-        const processedNames = new Set<string>();
-        const newNodes: GraphNode[] = [];
-
-        for (let i = 0; i < emails.length; i++) {
-            const email = emails[i];
-            if (processedNames.has(email.name)) continue;
-            processedNames.add(email.name);
-
-            newNodes.push({
-                name: email.name,
-                address: email.sender,
+        const allAddresses = emails.reduce(function (result: string[], email) {
+            result.push(email.sender);
+            result.push(email.recipient);
+            return result;
+        }, []);
+        const uniqueAddresses = [...new Set(allAddresses)];
+        
+        const newNodes: GraphNode[] = uniqueAddresses.map(address => {
+            return {
+                address: address,
                 contacts: {},
-
                 position: { x: center.x, y: center.y },
                 velocity: { dx: 0, dy: 0 },
-                mass: 1,
+
+                mass: 1, // Currently never used/updated!
 
                 // To be calculated later:
                 infectedAfter: -1,
                 hovered: false,
                 dragging: false,
+                sentCount: new Array(maxTimestamp).fill(0),
                 radius: 0,
-            });
-        }
+            };
+        });
 
         newNodes.forEach(node => {
             const spread = newNodes.length * 2;
             node.position.x += spread * (Math.random() - 0.5);
             node.position.y += spread * (Math.random() - 0.5);
 
-            // const firstInfectionSent = emails.findIndex(email => email.infected && email.sender === node.address);
-            // const firstInfectionRecieved = emails.findIndex(email => email.infected && email.recipient === node.address);
-            
             const firstInfectionSent = findIndexOrNone(emails, email => email.infected && email.sender === node.address);
             const firstInfectionRecieved = findIndexOrNone(emails, email => email.infected && email.recipient === node.address);
             node.infectedAfter = firstInfectionRecieved;
-            
-            console.log(node.address, firstInfectionSent, firstInfectionRecieved, node.infectedAfter);
-            console.log(firstInfectionSent !== undefined && !firstInfectionRecieved)
-            console.log(firstInfectionSent && firstInfectionRecieved && firstInfectionSent < firstInfectionRecieved);
 
             if ((firstInfectionSent !== undefined && !firstInfectionRecieved) || (firstInfectionSent && firstInfectionRecieved && firstInfectionSent < firstInfectionRecieved)) {
                 // There will be some nodes which send an infected email before ever recieving one, or which never recieve an infected email.
@@ -161,7 +154,7 @@ export default function GraphCanvas({ emails }: Props) {
                 renderGraphEdge(context, nodeA, nodeB, darkMode);
             });
             graphNodes.current.forEach(node => {
-                const isInfected = node.infectedAfter !== undefined && node.infectedAfter <= lastVisibleEdge.current;
+                const isInfected = node.infectedAfter !== undefined && node.infectedAfter < lastVisibleEdge.current;
                 renderGraphNode(context, node, isInfected, darkMode);
             });
 

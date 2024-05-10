@@ -15,7 +15,7 @@ interface Props {
     highlightSender: string,
     highlightRecipient: string,
     allEmails: string[],
-    allNames: string[],
+    // allNames: string[],
     editable: boolean,
     startEditing: () => void,
     endEditing: () => void,
@@ -33,7 +33,7 @@ export default function EmailRow({
     highlightSender,
     highlightRecipient,
     allEmails,
-    allNames,
+    // allNames,
     editable,
     startEditing,
     endEditing,
@@ -45,7 +45,7 @@ export default function EmailRow({
     swapDown,
 }: Props) {
     const rowRef = useRef<HTMLTableRowElement>(null);
-    const nameInputRef = useRef<HTMLInputElement>(null);
+    // const nameInputRef = useRef<HTMLInputElement>(null);
     const senderInputRef = useRef<HTMLInputElement>(null);
     const recipientInputRef = useRef<HTMLInputElement>(null);
     const contentsTextareaRef = useRef<HTMLTextAreaElement>(null);
@@ -53,7 +53,8 @@ export default function EmailRow({
     const dragButtonRef = useRef<HTMLImageElement>(null);
 
     useEffect(() => {
-        if (editable) nameInputRef.current?.focus();
+        // if (editable) nameInputRef.current?.focus();
+        if (editable) senderInputRef.current?.focus();
     }, [editable]);
 
     useEffect(() => {
@@ -150,7 +151,7 @@ export default function EmailRow({
 
     return (
         <tr ref={rowRef} className={className}>
-            <td className="cell-name">
+            {/* <td className="cell-name">
                 <AutocompleteInput
                     giveRef={nameInputRef}
                     value={email.name}
@@ -158,7 +159,7 @@ export default function EmailRow({
                     candidates={allNames}
                     disabled={!editable}
                 />
-            </td>
+            </td> */}
             <td className="cell-sender">
                 <AutocompleteInput
                     giveRef={senderInputRef}
