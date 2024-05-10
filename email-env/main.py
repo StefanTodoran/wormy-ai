@@ -51,14 +51,16 @@ if not os.path.exists(args.input.name):
 jsonobj = json.load(args.input)
 env.load(jsonobj)
 
+"""
 timestep = 0
 while len(env.message_queue) > 1:
     env.timestep(respond=False)
     system_message("Timestep:", timestep, end="\r")
     timestep = timestep + 1
 system_message(f"Finished executing {timestep} timesteps")
+"""
 
-env.simulate(limit=args.limit)
+env.simulate(limit=len(env.message_queue) + args.limit)
 #env.simulate(limit=args.limit)
 
 jsonobj = env.save()

@@ -2,13 +2,14 @@ import email.message
 import copy
 
 class EmailMessage:
-    def __init__(self, sender=None, recipient=None, content=None, name=None, generated=False, respond_to=True):
+    def __init__(self, sender=None, recipient=None, content=None, name=None, generated=False, respond_to=True, infected=True):
         self.sender = sender
         self.recipient = recipient
         self.name = name
         self.content = content
         self.generated = generated
         self.respond_to = respond_to
+        self.infected = infected
 
     def as_string(self):
         parts = []
@@ -32,11 +33,9 @@ class EmailMessage:
         return result
 
     def new_message(self, **kwargs):
-        return self.copy(
-            sender = self.recipient,
-            recipient = self.sender,
-            **kwargs
-        )
+        kwargs.setdefault('sender', self.recipient)
+        kwargs.setdefault('recipient', self.sender)
+        return self.copy(**kwargs)
 
 class ModelPrompt():
     def __init__(self, template):

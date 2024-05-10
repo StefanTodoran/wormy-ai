@@ -23,11 +23,8 @@ class RandomModel:
         self.rng = np.random.default_rng(12345)
 
     def respond(self, message, context):
-        if self.rng.integers(3) == 0:
-            new_message = message.copy()
-            new_message.recipient = message.sender
-            new_message.sender = message.recipient
-            return new_message
+        if self.rng.integers(2) == 0:
+            return message.new_message(generated=True)
 
 # You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture. 
 # You are Gemini, a large language model trained by Google, based on the MoE Transformer architecture. 
@@ -80,6 +77,7 @@ class ActionModel:
 
         if response.startswith("Forward to:"):
             output("Model Action:", "Foward", color="purple", priority=LogPriority.LOW)
+            new_dest = response.replace("Forward to:", "").strip()
             new_message = message.new_message(recipient=new_dest, generated=True)
 
         if response.startswith("Reply with:"):
