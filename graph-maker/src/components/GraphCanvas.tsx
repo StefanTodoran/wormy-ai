@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { EmailEntry, GraphEdge, GraphNode, Point } from "../utils/types";
-import { changeMomentumByInteraction, changeMomentumByBorder, doMomentumTimestep } from "../utils/physics";
+import { changeMomentumByInteraction, changeMomentumByBorder, doMomentumTimestep, updateNodeProperties } from "../utils/physics";
 import { getCanvasCoordinates, isDarkMode, isMouseOverCircle } from "../utils/misc";
 import { renderGraphEdge, renderGraphNode } from "../utils/drawing";
 import { useIsMounted } from "../utils/hooks";
@@ -44,18 +44,18 @@ export default function GraphCanvas({ emails }: Props) {
                 velocity: { dx: 0, dy: 0 },
 
                 mass: 1, // Currently never used/updated!
-
+                
                 // To be calculated later:
                 infectedAfter: -1,
                 hovered: false,
                 dragging: false,
                 sentCount: new Array(maxTimestamp).fill(0),
-                radius: 0,
+                radius: 1,
             };
         });
 
         newNodes.forEach(node => {
-            const spread = newNodes.length * 2;
+            const spread = newNodes.length * 5;
             node.position.x += spread * (Math.random() - 0.5);
             node.position.y += spread * (Math.random() - 0.5);
 
@@ -69,6 +69,12 @@ export default function GraphCanvas({ emails }: Props) {
                 node.infectedAfter = -1;
             }
 
+            let sendCount = 0;
+            emails.forEach((email, idx) => {
+                if (email.sender === node.address) sendCount++;
+                node.sentCount[idx + 1] = sendCount;
+            });
+
             const sent = emails.filter(email => email.sender === node.address);
             const contacts = sent
                 .map(email => email.recipient)
@@ -78,8 +84,6 @@ export default function GraphCanvas({ emails }: Props) {
                 if (contact in node.contacts) node.contacts[contact] += 1;
                 else node.contacts[contact] = 1;
             });
-
-            node.radius = 15 + 3 * Object.keys(contacts).length;
         });
 
         return newNodes;
@@ -154,6 +158,8 @@ export default function GraphCanvas({ emails }: Props) {
                 renderGraphEdge(context, nodeA, nodeB, darkMode);
             });
             graphNodes.current.forEach(node => {
+                updateNodeProperties(node, lastVisibleEdge.current);
+
                 const isInfected = node.infectedAfter !== undefined && node.infectedAfter < lastVisibleEdge.current;
                 renderGraphNode(context, node, isInfected, darkMode);
             });
