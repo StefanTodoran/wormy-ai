@@ -124,7 +124,8 @@ td>input {
     color: var(--alt-color);
 }
 
-.infected .cell-name>input,
+/* .infected .cell-name>input, */
+.infected .cell-sender>input,
 .infected .cell-recipient>input {
     color: var(--error-color);
 }

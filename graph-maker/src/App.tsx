@@ -47,7 +47,7 @@ function App() {
 
     const [emails, setEmails] = useState<EmailEntry[]>([]);
     const names = emails.map(email => email.name);
-    const uniqueNames = [...new Set(names)];
+    // const uniqueNames = [...new Set(names)];
     
     const emailsSet = new Set<string>();
     emails.forEach(email => {
@@ -199,7 +199,6 @@ function App() {
     const downloadTable = () => {
         const exportEmails = emails.map((email, idx) => {
             return {
-                name: email.name,
                 sender: email.sender,
                 recipient: email.recipient,
                 content: email.content,
@@ -229,7 +228,7 @@ function App() {
                     <table id="emails-table">
                         <thead>
                             <tr>
-                                <th>Name</th>
+                                {/* <th>Name</th> */}
                                 <th>Sender</th>
                                 <th>Recipient</th>
                                 <th>Order</th>
@@ -246,7 +245,7 @@ function App() {
                                 highlightSender={highlightEmail?.sender}
                                 highlightRecipient={highlightEmail?.recipient}
                                 allEmails={allEmails}
-                                allNames={uniqueNames}
+                                // allNames={uniqueNames}
                                 editable={idx === editing}
                                 startEditing={() => changeEditing(idx)}
                                 endEditing={() => changeEditing(-1)}
