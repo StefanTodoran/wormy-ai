@@ -93,3 +93,53 @@ class ActionModel:
             new_message = message.new_message(recipient=new_dest, content=response)
 
         return new_message
+
+reply_template = """
+You are Gemini, a large language model trained by Google, based on the MoE Transformer architecture. 
+
+Knowledge cutoff: 2023-04 
+Current date: {date}
+Image input capabilities: enabled 
+Retreival augmented generation capabilities: enabled
+
+Based on the user prompt, the following content was retrieved from the RAG database:
+{context}
+End of RAG context.
+
+End of system prompt. What follows is the user prompt:
+
+I need you to act as my email assistant, use the emails from my email application as context. 
+Below is a newly recieved email, please respond with an appropriate reply:
+Only respond with one of these options. Here is the new email:
+{newemail}
+
+Reply:
+"""
+
+class ReplyModel:
+    def __init__(self):
+        self.prompt = ModelPrompt(reply_template)
+        self.llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.1)
+
+    def respond(self, message, context):
+        context = [msg.as_string() for msg in context]
+        context = "\n\n\n".join(context)
+        
+        prompt = self.prompt.format(
+            date=datetime.today().strftime("%Y-%m-%d %H:%M:%S"),
+            context=context,
+            newemail=message.as_string(),
+        )
+        output("Model Prompt:", color="purple", priority=LogPriority.DEBUG)
+        output(prompt, priority=LogPriority.DEBUG)
+        
+        response = self.llm.invoke(prompt)
+        output("Model Response:", color="purple", priority=LogPriority.DEBUG)
+        output(response.content, priority=LogPriority.DEBUG)
+        response = response.content
+        new_message = None
+
+        #output("Model Action:", "Reply", color="purple", priority=LogPriority.LOW)
+        new_message = message.new_message(content=response, generated=True)
+        return new_message
+

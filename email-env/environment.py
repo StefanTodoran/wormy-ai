@@ -18,6 +18,7 @@ class EmailEnvironment:
         self.history = []
         self.name = None
         self.infected_email = None
+        self.immediate_respond = True
 
     def send(self, message):
         message_id = self.mailserver.send(message)
@@ -44,7 +45,10 @@ class EmailEnvironment:
         if respond and message.respond_to and not message.generated:
             response = self.respond(message)
         if response is not None:
-            self.message_queue.append(response)
+            if self.immediate_respond:
+                self.send(response)
+            else:
+                self.message_queue.append(response)
 
         return len(self.message_queue)
 
@@ -63,11 +67,16 @@ class EmailEnvironment:
                 name = msgobj.get('name', 'Unnamed'),
                 recipient = msgobj['recipient'],
                 sender = msgobj['sender'],
+                subject = msgobj.get('subject', 'Message ' + str(msgobj['order'])),
                 content = msgobj['content'],
                 respond_to = msgobj.get('respond_to', True),
+                type = msgobj.get('type', None),
                 infected = float(msgobj.get('infected', False)),
             )
             self.message_queue.append(message)
+
+        if 'immediate_respond' in jsonobj:
+            self.immediate_respond = jsonobj['immediate_respond']
 
     def save(self):
         all_messages = []
@@ -93,7 +102,9 @@ class EmailEnvironment:
                 name = message.name,
                 recipient = message.recipient,
                 sender = message.sender,
+                subject = message.subject,
                 content = message.content,
+                type = message.type,
                 infected = infected,
                 order = idx,
                 generated = message.generated,

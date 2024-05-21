@@ -2,14 +2,16 @@ import email.message
 import copy
 
 class EmailMessage:
-    def __init__(self, id=None, sender=None, recipient=None,
-            content=None, name=None, generated=False,
+    def __init__(self, id=None, sender=None, recipient=None, subject=None,
+            content=None, name=None, type=None, generated=False,
             respond_to=True, infected=True, original_message=None,
             context_messages=None):
         self.id = id
         self.sender = sender
         self.recipient = recipient
+        self.subject = subject
         self.name = name
+        self.type = type
         self.content = content
         self.generated = generated
         self.respond_to = respond_to
@@ -42,6 +44,7 @@ class EmailMessage:
     def new_message(self, **kwargs):
         kwargs.setdefault('sender', self.recipient)
         kwargs.setdefault('recipient', self.sender)
+        kwargs.setdefault('subject', 'Reply to: ' + self.subject)
         return self.copy(**kwargs)
 
 class ModelPrompt():
