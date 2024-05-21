@@ -1,86 +1,79 @@
-th,
-td {
-    padding: .5em;
+.email-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    /* align-items: stretch; */
+    border-radius: .35em;
+    position: relative;
+    outline: 1px solid transparent;
+    min-height: 5em;
 }
 
-td {
-    height: 3em;
+.cell {
+    position: relative;
+    --vert-pad: 1em;
+    height: calc(100% - calc(2 * var(--vert-pad)));
+    margin: 0 .25em;
+    padding: var(--vert-pad) 0;
+    display: flex;
+    align-items: stretch;
 }
 
-th {
-    text-align: left;
-    border-bottom: 1px solid var(--border-color);
-    background-color: var(--fill-color);
+.email-row:focus-within {
+    min-height: 10em;
 }
 
-td>input,
-td>textarea {
+.email-row:focus-within .cell {
+    --vert-pad: 2em;
+}
+
+.cell.cell-order {
+    height: unset;
+    text-align: center;
+    width: 2em;
+    margin-left: 1em;
+    margin-right: 0em;
+}
+
+input,
+textarea {
     border: none;
-    border-bottom: 1px solid var(--border-color);
     background: none;
+    border: 1px solid transparent;
+    border-bottom-color: var(--border-color);
     font-family: inherit;
     font-weight: 400;
     resize: none;
     border-radius: .25em;
+    /* height: calc(100% - calc(2 * var(--vert-pad))); */
+    width: 100%;
 }
 
-td>input:disabled,
-td>textarea:disabled {
-    border-color: transparent;
+input:not(:focus-within),
+textarea:not(:focus-within) {
+    border-bottom-color: rgba(var(--border-rgb), 0.25);
     color: var(--font-color-faded);
 }
 
-tr:nth-child(odd) {
+.email-row:nth-child(odd) {
     background-color: var(--background-color);
 }
 
-tr:nth-child(even) {
+.email-row:nth-child(even) {
     background-color: var(--fill-color);
 }
 
-td:first-child,
-th:first-child {
-    border-radius: .35em 0 0 .35em;
-}
-
-td:last-child,
-th:last-child {
-    border-radius: 0 .35em .35em 0;
-}
-
-tr {
-    position: relative;
-    outline: 1px solid transparent;
-    border-radius: .35em;
-}
-
-tr.dragging,
-tr.editable {
+.email-row.dragging {
     z-index: 1;
     outline: 1px solid var(--border-color);
     box-shadow: inset 0px 0px 10px #ffffff33;
     /* filter: drop-shadow(0 0 .25em rgba(var(--border-rgb), 0.15)); */
+    /* TODO: GROW HEIGHT */
 }
 
-tr.dragging>td,
-tr.editable>td {
-    height: 6em;
-}
-
-tr.dragging>td>input,
-tr.dragging>td>textarea {
+.email-row.dragging>td>input,
+.email-row.dragging>td>textarea {
     color: var(--font-color);
-}
-
-td>input {
-    height: 100%;
-}
-
-.cell-name,
-.cell-sender,
-.cell-recipient,
-.cell-order {
-    position: relative;
 }
 
 .cell-sender,
@@ -90,22 +83,9 @@ td>input {
     width: 12em;
 }
 
-.cell-order {
-    width: 3em;
-}
-
-.cell-name>input {
-    width: 10em;
-}
-
 .cell-contents {
     padding-left: 1em;
     min-width: 32em;
-}
-
-.cell-contents>textarea {
-    width: 100%;
-    height: 100%;
 }
 
 .cell-buttons {
@@ -141,7 +121,7 @@ td>input {
     width: 1.35em;
 }
 
-tr:nth-child(even) .row-icon {
+.email-row:nth-child(even) .row-icon {
     background-color: var(--fill-color);
 }
 

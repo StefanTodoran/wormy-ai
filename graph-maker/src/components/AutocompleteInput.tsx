@@ -6,7 +6,7 @@ interface Props {
     value: string,
     setValue: (newValue: string) => void,
     candidates: string[],
-    disabled: boolean,
+    disabled?: boolean,
 }
 
 export default function AutocompleteInput({
@@ -19,6 +19,8 @@ export default function AutocompleteInput({
     const [selected, setSelected] = useState(0);
     const localRef = useRef<HTMLInputElement>(null);
     const ref = giveRef || localRef;
+
+    console.log("candidates", candidates);
 
     const validCandidates = candidates.filter(candidate => {
         const invariantCandidate = candidate.toLowerCase();
@@ -40,7 +42,7 @@ export default function AutocompleteInput({
                 evt.preventDefault();
             }
             if (evt.key === "ArrowDown") {
-                setSelected(Math.min(autoCompleteCandidates.current.length, selected + 1));
+                setSelected(Math.min(autoCompleteCandidates.current.length - 1, selected + 1));
                 evt.preventDefault();
             }
         };

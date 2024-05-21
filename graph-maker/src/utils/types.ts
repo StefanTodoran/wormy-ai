@@ -2,23 +2,26 @@ export interface EmailEntry {
     name: string,
     sender: string,
     recipient: string,
+    subject: string,
     content: string,
-    template: string,
     infected: boolean,
+    type: string,
 }
 
 export interface Email {
     sender: string,
+    subject: string,
     recipient: string,
     content: string,
     order: number,
+    type: string,
 }
 
 export interface Templates {
     names: string[],
-    contents: ContentTemplate[],
+    templates: { [key: string] : ContentTemplate[]},
     domains: string[],
-    payloads: string[],
+    payloads: ContentTemplate[],
 }
 
 interface ContentTemplate {

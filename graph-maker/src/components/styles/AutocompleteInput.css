@@ -13,8 +13,8 @@
     white-space: nowrap;
 }
 
-td:focus-within .auto-complete,
-td:focus .auto-complete {
+:focus-within>.auto-complete,
+:focus>.auto-complete {
     opacity: 1;
 }
 
@@ -31,8 +31,8 @@ td:focus .auto-complete {
     opacity: 0.8;
 }
 
-tr:last-of-type .auto-complete,
-tr:last-child .auto-complete {
+:last-of-type .auto-complete,
+:last-child .auto-complete {
     top: unset;
     bottom: calc(100% - .5em);
 }

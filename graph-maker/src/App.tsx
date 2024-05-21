@@ -6,7 +6,7 @@ import DropdownButton from "./components/DropdownButton";
 
 import { findLastIndex, getFilledOutTemplate, pickRandomListItem, randomEmailAddress } from "./utils/misc";
 import { downloadAsJSON, handleFileUpload, triggerFileUpload } from "./utils/files";
-import { EmailEntry, Templates } from "./utils/types";
+import { Email, EmailEntry, Templates } from "./utils/types";
 
 import AddIcon from "./assets/add-icon.svg";
 import GraphIcon from "./assets/graph-icon.svg";
@@ -47,7 +47,6 @@ function App() {
 
     const [emails, setEmails] = useState<EmailEntry[]>([]);
     const names = emails.map(email => email.name);
-    // const uniqueNames = [...new Set(names)];
     
     const emailsSet = new Set<string>();
     emails.forEach(email => {
@@ -56,7 +55,6 @@ function App() {
     });
     const allEmails: string[] = [...emailsSet];
     
-    const [editing, setEditing] = useState(-1);
     const [dragging, setDragging] = useState(-1);
 
     useEffect(() => {
@@ -83,7 +81,7 @@ function App() {
 
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
-                const emailElements = document.querySelectorAll("tbody > tr") as NodeListOf<HTMLElement>;
+                const emailElements = document.querySelectorAll(".email-row") as NodeListOf<HTMLElement>;
                 const targetIndex = parseInt(accumulatedDigits) - 1;
                 let target = emailElements[targetIndex];
                 accumulatedDigits = "";
@@ -92,7 +90,7 @@ function App() {
                 if (targetIndex >= emailElements.length) target = emailElements[emailElements.length - 1];
 
                 // @ts-expect-error The element will exist.
-                target.querySelector(".edit-entry-btn").focus({ preventScroll: true });
+                target.querySelector(".row-icon").focus({ preventScroll: true });
                 target.scrollIntoView();
             }, 250);
         };
@@ -101,28 +99,18 @@ function App() {
         return () => window.removeEventListener("keydown", navigationHandler);
     }, []);
 
-    const changeEditing = (target: number) => {
-        if (editing === target) {
-            setEditing(-1);
-            return;
-        }
-        setEditing(target);
-        setDragging(-1);
-    };
-
     const changeDragging = (target: number) => {
         if (dragging === target) {
             setDragging(-1);
             return;
         }
         setDragging(target);
-        setEditing(-1);
     };
 
     const getExistingSender = () => pickRandomListItem(names, [], true);
     const getNewSender = () => pickRandomListItem(templates!.names, names, true);
 
-    const addNewEmail = (name: string, infected?: boolean) => {
+    const addNewEmail = (name: string, infected?: boolean, type?: string) => {
         const existing = emails.findIndex(email => email.name === name);
         const sender = existing === -1 ? randomEmailAddress(name, templates!.domains) : emails[existing].sender;
 
@@ -141,17 +129,21 @@ function App() {
         }
 
         let template;
+        const types = Object.keys(templates!.templates);
+        const useType = type || pickRandomListItem(types);
+
         if (infected) template = pickRandomListItem(templates!.payloads);
-        else template = pickRandomListItem(templates!.contents).body;
-        const content = getFilledOutTemplate(template, name, recipientName);
+        else template = pickRandomListItem(templates!.templates[useType]);
+        const content = getFilledOutTemplate(template.body, name, recipientName);
 
         const entry: EmailEntry = {
             name: name,
             sender: sender,
             recipient: recipient,
+            subject: template.subject,
             content: content,
-            template: template,
             infected: !!infected,
+            type: useType,
         };
         setEmails([...emails, entry]);
     };
@@ -174,7 +166,6 @@ function App() {
         newEmails.splice(targetIndex, 1);
         setEmails(newEmails);
         setDragging(-1);
-        setEditing(-1);
 
         const deleteButtons = document.querySelectorAll(".delete-entry-btn");
         if (targetIndex > 0) (deleteButtons[targetIndex - 1] as HTMLElement).focus();
@@ -197,12 +188,14 @@ function App() {
     };
 
     const downloadTable = () => {
-        const exportEmails = emails.map((email, idx) => {
+        const exportEmails: Email[] = emails.map((email, idx) => {
             return {
                 sender: email.sender,
                 recipient: email.recipient,
                 content: email.content,
+                subject: email.subject,
                 infected: email.infected,
+                type: email.type,
                 order: idx,
             };
         });
@@ -215,29 +208,19 @@ function App() {
     const formatName = (rawName: string) => {
         const words = rawName.split("_").map(word => word[0].toUpperCase() + word.slice(1));
         const prettyName = words.join(" ");
-        return prettyName;
+        return '"' + prettyName + '"';
     };
 
-    const highlightEmail = emails[editing] || emails[dragging];
+    const highlightEmail = emails[dragging];
 
     return (
         <>
+            {/* <th id="table-name">{tableName && formatName(tableName)}</th> */}
+            
             {
                 view === AppView.TABLE &&
                 <div id="table-wrap">
-                    <table id="emails-table">
-                        <thead>
-                            <tr>
-                                {/* <th>Name</th> */}
-                                <th>Sender</th>
-                                <th>Recipient</th>
-                                <th>Order</th>
-                                <th>Contents</th>
-                                <th id="table-name">{tableName && formatName(tableName)}</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
+                    <div id="emails-table">
                             {emails.map((email, idx) => <EmailRow
                                 key={idx}
                                 email={email}
@@ -245,10 +228,6 @@ function App() {
                                 highlightSender={highlightEmail?.sender}
                                 highlightRecipient={highlightEmail?.recipient}
                                 allEmails={allEmails}
-                                // allNames={uniqueNames}
-                                editable={idx === editing}
-                                startEditing={() => changeEditing(idx)}
-                                endEditing={() => changeEditing(-1)}
                                 updateEmail={(newEmail) => updateTargetEmail(idx, newEmail)}
                                 deleteEmail={() => deleteTargetEmail(idx)}
                                 dragging={idx === dragging}
@@ -256,12 +235,9 @@ function App() {
                                 swapUp={() => swapEmailOrder(idx, idx - 1)}
                                 swapDown={() => swapEmailOrder(idx, idx + 1)}
                             />)}
-                        </tbody>
-
                         {emails.length === 0 && <p id="no-emails">No emails to display.</p>}
-                    </table>
-
-                    <div>
+                    </div>
+                    <div id="buttons-wrap">
                         <DropdownButton
                             id="add-entry-btn"
                             src={AddIcon}

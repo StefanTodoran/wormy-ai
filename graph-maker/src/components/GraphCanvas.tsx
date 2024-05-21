@@ -146,7 +146,8 @@ export default function GraphCanvas({ emails }: Props) {
             const darkMode = isDarkMode();
             if (darkMode) context.fillStyle = "rgba(26,26,26,0.75)";
             else context.fillStyle = "rgba(243,243,243,0.75)";
-            context.fillRect(0, 0, dims.width, dims.height); // Clear prev frame
+            context.fillRect(0, 0, dims.width, dims.height);
+            // context.clearRect(0, 0, dims.width, dims.height);
 
             doTimestep();
             graphEdges.current.forEach((edge, idx) => {

@@ -51,7 +51,7 @@ button:active {
     min-width: 80vw; */
 }
 
-#table-wrap>div {
+#buttons-wrap {
     margin-top: 1em;
     display: flex;
     flex-direction: row;
@@ -68,25 +68,18 @@ button:active {
     text-align: right;
 }
 
-table {
+#emails-table {
     background-color: var(--background-color);
-    border-collapse: collapse;
-    display: block;
+    display: flex;
+    flex-direction: column;
     height: 80vh;
+    max-width: 90vw;
     overflow-y: scroll;
-    overflow-x: hidden;
     border-radius: .5em;
     padding: .5em;
     border: 1px solid rgba(var(--border-rgb), 0.15);
     scroll-behavior: smooth;
     width: 100%;
-}
-
-tbody:before {
-    content: "-";
-    display: block;
-    line-height: 3px;
-    color: transparent;
 }
 
 @media (prefers-color-scheme: light) {

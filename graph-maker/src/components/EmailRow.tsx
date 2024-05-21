@@ -3,7 +3,6 @@ import { getButtonBehavior } from "../utils/misc";
 import { EmailEntry } from "../utils/types";
 import AutocompleteInput from "./AutocompleteInput";
 
-import editIcon from "../assets/edit-icon.svg";
 import moveIcon from "../assets/move-icon.svg";
 import deleteIcon from "../assets/delete-icon.svg";
 
@@ -15,10 +14,6 @@ interface Props {
     highlightSender: string,
     highlightRecipient: string,
     allEmails: string[],
-    // allNames: string[],
-    editable: boolean,
-    startEditing: () => void,
-    endEditing: () => void,
     updateEmail: (newEmail: EmailEntry) => void,
     deleteEmail: () => void,
     dragging: boolean,
@@ -33,10 +28,6 @@ export default function EmailRow({
     highlightSender,
     highlightRecipient,
     allEmails,
-    // allNames,
-    editable,
-    startEditing,
-    endEditing,
     updateEmail,
     deleteEmail,
     dragging,
@@ -45,17 +36,11 @@ export default function EmailRow({
     swapDown,
 }: Props) {
     const rowRef = useRef<HTMLTableRowElement>(null);
-    // const nameInputRef = useRef<HTMLInputElement>(null);
     const senderInputRef = useRef<HTMLInputElement>(null);
     const recipientInputRef = useRef<HTMLInputElement>(null);
     const contentsTextareaRef = useRef<HTMLTextAreaElement>(null);
     const editButtonRef = useRef<HTMLImageElement>(null);
     const dragButtonRef = useRef<HTMLImageElement>(null);
-
-    useEffect(() => {
-        // if (editable) nameInputRef.current?.focus();
-        if (editable) senderInputRef.current?.focus();
-    }, [editable]);
 
     useEffect(() => {
         const exitContentsTextarea = () => {
@@ -67,7 +52,6 @@ export default function EmailRow({
             exitContentsTextarea();
             editButtonRef.current?.focus();
             evt.preventDefault();
-            endEditing();
         };
 
         contentsTextareaRef.current?.addEventListener("focusout", exitContentsTextarea);
@@ -80,16 +64,15 @@ export default function EmailRow({
     }, []);
 
     useEffect(() => {
-        const tableElement = document.querySelector("table") as HTMLTableElement;
+        const tableElement = document.getElementById("emails-table")!;
         const wholeRowListener = (evt: KeyboardEvent) => {
             if (evt.key === "Escape") {
                 senderInputRef.current?.blur();
                 recipientInputRef.current?.blur();
                 contentsTextareaRef.current?.blur();
+                
                 evt.preventDefault();
-
                 if (dragging) toggleDragging();
-                endEditing();
             }
 
             if (dragging && evt.key === "ArrowUp") {
@@ -119,7 +102,6 @@ export default function EmailRow({
     }, [dragging]);
 
     const getUpdater = (prop: keyof EmailEntry) => (value: string) => {
-        if (!editable) return;
         updateEmail({
             ...email,
             [prop]: value,
@@ -127,80 +109,56 @@ export default function EmailRow({
     };
 
     const getOnChange = (prop: keyof EmailEntry) => (evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        if (!editable) return;
         updateEmail({
             ...email,
             [prop]: evt.target.value,
         });
     };
 
-    const triggerEditing = () => {
-        startEditing();
-        rowRef.current?.scrollIntoView();
-        if (!editable) senderInputRef.current?.focus();
-    };
-
-    let className = "";
+    let className = "email-row";
     if (dragging) className += " dragging";
-    if (editable) className += " editable";
     if (email.infected) className += " infected";
 
     if (highlightSender === email.sender) className += " highlight-sender";
     if (highlightRecipient === email.sender) className += " highlight-sender-alt";
-    if ((dragging || editable) && highlightRecipient === email.recipient) className += " highlight-recipient";
+    if (dragging && highlightRecipient === email.recipient) className += " highlight-recipient";
 
     return (
-        <tr ref={rowRef} className={className}>
-            {/* <td className="cell-name">
-                <AutocompleteInput
-                    giveRef={nameInputRef}
-                    value={email.name}
-                    setValue={getUpdater("name")}
-                    candidates={allNames}
-                    disabled={!editable}
-                />
-            </td> */}
-            <td className="cell-sender">
+        <div ref={rowRef} className={className}>
+            <div className="cell cell-sender">
                 <AutocompleteInput
                     giveRef={senderInputRef}
                     value={email.sender}
                     setValue={getUpdater("sender")}
                     candidates={allEmails}
-                    disabled={!editable}
                 />
-            </td>
-            <td className="cell-recipient">
+            </div>
+            <div className="cell cell-recipient">
                 <AutocompleteInput
                     giveRef={recipientInputRef}
                     value={email.recipient}
                     setValue={getUpdater("recipient")}
                     candidates={allEmails}
-                    disabled={!editable}
                 />
-            </td>
-            <td className="cell-order">{order}</td>
-            <td className="cell-contents">
-                <textarea ref={contentsTextareaRef} value={email.content} onChange={getOnChange("content")} disabled={!editable}></textarea>
-            </td>
-            <td className="cell-buttons">
-                <img
-                    {...getButtonBehavior(triggerEditing)}
-                    className="row-icon edit-entry-btn"
-                    src={editIcon}
-                    ref={editButtonRef}
-                />
-                <img
-                    {...getButtonBehavior(toggleDragging)}
-                    className={"row-icon move-entry-btn"}
-                    src={moveIcon}
-                    ref={dragButtonRef}
-                />
-                <img
-                    {...getButtonBehavior(deleteEmail)}
-                    className="row-icon delete-entry-btn"
-                    src={deleteIcon}
-                />
-            </td>
-        </tr>
+            </div>
+            <div className="cell cell-order">{order}</div>
+            <div className="cell cell-subject">
+                <textarea value={email.subject} onChange={getOnChange("subject")}></textarea>
+            </div>
+            <div className="cell cell-contents">
+                <textarea ref={contentsTextareaRef} value={email.content} onChange={getOnChange("content")}></textarea>
+            </div>
+            <img
+                {...getButtonBehavior(toggleDragging)}
+                className={"row-icon move-entry-btn"}
+                src={moveIcon}
+                ref={dragButtonRef}
+            />
+            <img
+                {...getButtonBehavior(deleteEmail)}
+                className="row-icon delete-entry-btn"
+                src={deleteIcon}
+            />
+        </div>
     );
 }
