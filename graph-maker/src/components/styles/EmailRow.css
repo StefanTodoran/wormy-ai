@@ -2,14 +2,16 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    padding: 0 .5em;
     /* align-items: stretch; */
     border-radius: .35em;
     position: relative;
     outline: 1px solid transparent;
-    min-height: 5em;
+    min-height: 6em;
 }
 
 .cell {
+    flex: 6;
     position: relative;
     --vert-pad: 1em;
     height: calc(100% - calc(2 * var(--vert-pad)));
@@ -24,19 +26,19 @@
 }
 
 .email-row:focus-within .cell {
-    --vert-pad: 2em;
+    --vert-pad: 1.5em;
 }
 
 .cell.cell-order {
     height: unset;
     text-align: center;
-    width: 2em;
     margin-left: 1em;
     margin-right: 0em;
+    flex: 1;
 }
 
-input,
-textarea {
+.cell input,
+.cell textarea {
     border: none;
     background: none;
     border: 1px solid transparent;
@@ -49,8 +51,8 @@ textarea {
     width: 100%;
 }
 
-input:not(:focus-within),
-textarea:not(:focus-within) {
+.cell input:not(:focus-within),
+.cell textarea:not(:focus-within) {
     border-bottom-color: rgba(var(--border-rgb), 0.25);
     color: var(--font-color-faded);
 }
@@ -80,12 +82,15 @@ textarea:not(:focus-within) {
 .cell-recipient,
 .cell-order {
     text-align: center;
-    width: 12em;
+    /* width: 12em; */
 }
 
 .cell-contents {
-    padding-left: 1em;
-    min-width: 32em;
+    flex: 16;
+}
+
+.cell-subject {
+    flex: 10;
 }
 
 .cell-buttons {

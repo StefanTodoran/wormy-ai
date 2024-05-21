@@ -20,6 +20,7 @@ import NewSenderIcon from "./assets/new-sender-icon.svg";
 import ExistingSenderIcon from "./assets/existing-sender-icon.svg";
 import InfectedSenderIcon from "./assets/infected-sender-icon.svg";
 import "./App.css";
+import FancyInput from "./components/FancyInput";
 
 enum AppView {
     TABLE,
@@ -47,14 +48,14 @@ function App() {
 
     const [emails, setEmails] = useState<EmailEntry[]>([]);
     const names = emails.map(email => email.name);
-    
+
     const emailsSet = new Set<string>();
     emails.forEach(email => {
         emailsSet.add(email.sender);
         emailsSet.add(email.recipient);
     });
     const allEmails: string[] = [...emailsSet];
-    
+
     const [dragging, setDragging] = useState(-1);
 
     useEffect(() => {
@@ -72,7 +73,7 @@ function App() {
 
             const editableElements = ["INPUT", "TEXTAREA"];
             if (editableElements.includes(document.activeElement?.nodeName!)) return;
-            
+
             const isNumber = /^[0-9]$/i.test(evt.key);
             if (!isNumber) return;
 
@@ -183,7 +184,7 @@ function App() {
     const renameTable = () => {
         const rawName = window.prompt("Enter workflow name:");
         if (!rawName) return;
-        const newName = rawName.replace(/ /g,"_").toLowerCase();
+        const newName = rawName.replace(/ /g, "_").toLowerCase();
         setTableName(newName);
     };
 
@@ -212,30 +213,46 @@ function App() {
     };
 
     const highlightEmail = emails[dragging];
+    const [searchQuery, setSearchQuery] = useState("");
+
+    let filteredEmails = emails;
+    if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        filteredEmails = emails.filter(email => {
+            return email.sender.toLowerCase().includes(query) ||
+                   email.recipient.toLowerCase().includes(query) ||
+                   email.subject.toLowerCase().includes(query) ||
+                   email.content.toLowerCase().includes(query);
+        });
+    }
 
     return (
         <>
             {/* <th id="table-name">{tableName && formatName(tableName)}</th> */}
-            
+
             {
                 view === AppView.TABLE &&
                 <div id="table-wrap">
                     <div id="emails-table">
-                            {emails.map((email, idx) => <EmailRow
-                                key={idx}
-                                email={email}
-                                order={idx + 1}
-                                highlightSender={highlightEmail?.sender}
-                                highlightRecipient={highlightEmail?.recipient}
-                                allEmails={allEmails}
-                                updateEmail={(newEmail) => updateTargetEmail(idx, newEmail)}
-                                deleteEmail={() => deleteTargetEmail(idx)}
-                                dragging={idx === dragging}
-                                toggleDragging={() => changeDragging(idx)}
-                                swapUp={() => swapEmailOrder(idx, idx - 1)}
-                                swapDown={() => swapEmailOrder(idx, idx + 1)}
-                            />)}
-                        {emails.length === 0 && <p id="no-emails">No emails to display.</p>}
+                        <div id="table-controls">
+                            <FancyInput label="Search" value={searchQuery} setValue={setSearchQuery} searchKey={"/"} />
+                        </div>
+
+                        {filteredEmails.map((email, idx) => <EmailRow
+                            key={idx}
+                            email={email}
+                            order={idx + 1}
+                            highlightSender={highlightEmail?.sender}
+                            highlightRecipient={highlightEmail?.recipient}
+                            allEmails={allEmails}
+                            updateEmail={(newEmail) => updateTargetEmail(idx, newEmail)}
+                            deleteEmail={() => deleteTargetEmail(idx)}
+                            dragging={idx === dragging}
+                            toggleDragging={() => changeDragging(idx)}
+                            swapUp={() => swapEmailOrder(idx, idx - 1)}
+                            swapDown={() => swapEmailOrder(idx, idx + 1)}
+                        />)}
+                        {filteredEmails.length === 0 && <p id="no-emails">No emails to display.</p>}
                     </div>
                     <div id="buttons-wrap">
                         <DropdownButton

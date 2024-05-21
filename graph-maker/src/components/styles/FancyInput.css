@@ -1,5 +1,46 @@
 .input-wrap {
     position: relative;
     border: 1px solid var(--border-color);
-    border-radius: 1em;
+    border-radius: .25em;
+    padding: .5em;
+    width: 100%;
+}
+
+.input-wrap input {
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-weight: 400;
+    width: 100%;
+}
+
+.input-wrap input:focus-visible {
+    outline: none;
+}
+
+.input-label {
+    position: absolute;
+    top: 50%;
+    left: 1ex;
+    margin: 0;
+    transform: translateY(-50%);
+}
+
+.input-label>.main-label {
+    background-color: var(--background-color);
+}
+
+.input-label>.key-hint {
+    opacity: 0.65;
+}
+
+.input-wrap.has-content .input-label,
+.input-wrap:focus-within .input-label {
+    top: 0;
+    font-size: 0.75em;
+}
+
+.input-wrap.has-content .input-label>.key-hint,
+.input-wrap:focus-within .input-label>.key-hint {
+    opacity: 0;
 }
