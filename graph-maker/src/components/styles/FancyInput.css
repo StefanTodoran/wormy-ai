@@ -1,0 +1,5 @@
+.input-wrap {
+    position: relative;
+    border: 1px solid var(--border-color);
+    border-radius: 1em;
+}
