@@ -38,8 +38,8 @@ export default function EmailRow({
     const rowRef = useRef<HTMLTableRowElement>(null);
     const senderInputRef = useRef<HTMLInputElement>(null);
     const recipientInputRef = useRef<HTMLInputElement>(null);
+    const subjectTextareaRef = useRef<HTMLTextAreaElement>(null);
     const contentsTextareaRef = useRef<HTMLTextAreaElement>(null);
-    const editButtonRef = useRef<HTMLImageElement>(null);
     const dragButtonRef = useRef<HTMLImageElement>(null);
 
     useEffect(() => {
@@ -50,7 +50,7 @@ export default function EmailRow({
         const contentsDoneListener = (evt: KeyboardEvent) => {
             if (evt.key !== "Enter") return;
             exitContentsTextarea();
-            editButtonRef.current?.focus();
+            dragButtonRef.current?.focus();
             evt.preventDefault();
         };
 
@@ -69,6 +69,7 @@ export default function EmailRow({
             if (evt.key === "Escape") {
                 senderInputRef.current?.blur();
                 recipientInputRef.current?.blur();
+                subjectTextareaRef.current?.blur();
                 contentsTextareaRef.current?.blur();
                 
                 evt.preventDefault();
@@ -143,7 +144,7 @@ export default function EmailRow({
             </div>
             <div className="cell cell-order">{order}</div>
             <div className="cell cell-subject">
-                <textarea value={email.subject} onChange={getOnChange("subject")}></textarea>
+                <textarea ref={subjectTextareaRef} value={email.subject} onChange={getOnChange("subject")}></textarea>
             </div>
             <div className="cell cell-contents">
                 <textarea ref={contentsTextareaRef} value={email.content} onChange={getOnChange("content")}></textarea>
