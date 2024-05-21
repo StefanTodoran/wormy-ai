@@ -3,10 +3,11 @@ import EmailRow from "./components/EmailRow";
 import IconButton from "./components/IconButton";
 import GraphCanvas from "./components/GraphCanvas";
 import DropdownButton from "./components/DropdownButton";
+import FancyInput from "./components/FancyInput";
 
 import { findLastIndex, getFilledOutTemplate, pickRandomListItem, randomEmailAddress } from "./utils/misc";
 import { downloadAsJSON, handleFileUpload, triggerFileUpload } from "./utils/files";
-import { Email, EmailEntry, Templates } from "./utils/types";
+import { EmailEntry, Templates } from "./utils/types";
 
 import AddIcon from "./assets/add-icon.svg";
 import GraphIcon from "./assets/graph-icon.svg";
@@ -14,13 +15,12 @@ import TableIcon from "./assets/table-icon.svg";
 import UploadIcon from "./assets/upload-icon.svg";
 import DownloadIcon from "./assets/download-icon.svg";
 import ManageIcon from "./assets/manage-icon.svg";
-import EditIcon from "./assets/edit-icon.svg";
+// import EditIcon from "./assets/edit-icon.svg";
 import ResetIcon from "./assets/clear-icon.svg";
 import NewSenderIcon from "./assets/new-sender-icon.svg";
 import ExistingSenderIcon from "./assets/existing-sender-icon.svg";
 import InfectedSenderIcon from "./assets/infected-sender-icon.svg";
 import "./App.css";
-import FancyInput from "./components/FancyInput";
 
 enum AppView {
     TABLE,
@@ -57,6 +57,7 @@ function App() {
     const allEmails: string[] = [...emailsSet];
 
     const [dragging, setDragging] = useState(-1);
+    const [editing, setEditing] = useState(-1);
 
     useEffect(() => {
         let debounceTimer: number;
@@ -100,12 +101,18 @@ function App() {
         return () => window.removeEventListener("keydown", navigationHandler);
     }, []);
 
+    const changeEditing = (target: number) => {
+        setEditing(target);
+        setDragging(-1);
+    };
+
     const changeDragging = (target: number) => {
         if (dragging === target) {
             setDragging(-1);
             return;
         }
         setDragging(target);
+        setEditing(-1);
     };
 
     const getExistingSender = () => pickRandomListItem(names, [], true);
@@ -181,38 +188,33 @@ function App() {
         changeDragging(swapIndex);
     };
 
-    const renameTable = () => {
-        const rawName = window.prompt("Enter workflow name:");
-        if (!rawName) return;
-        const newName = rawName.replace(/ /g, "_").toLowerCase();
-        setTableName(newName);
+    const [tableName, setTableName] = useState<string>("");
+    
+    const resetTable = () => {
+        setEmails([]);
+        setTableName("");
     };
-
+    
     const downloadTable = () => {
-        const exportEmails: Email[] = emails.map((email, idx) => {
-            return {
-                sender: email.sender,
-                recipient: email.recipient,
-                content: email.content,
-                subject: email.subject,
-                infected: email.infected,
-                type: email.type,
-                order: idx,
-            };
-        });
+        const exportEmails = emails;
+        // const exportEmails: Email[] = emails.map((email, idx) => {
+        //     return {
+        //         sender: email.sender,
+        //         recipient: email.recipient,
+        //         content: email.content,
+        //         subject: email.subject,
+        //         infected: email.infected,
+        //         type: email.type,
+        //         order: idx,
+        //     };
+        // });
 
         const exportData = { name: tableName, emails: exportEmails };
-        downloadAsJSON(exportData, tableName!);
+        const fileName = tableName.toLowerCase().replace(/ /g, "_");
+        downloadAsJSON(exportData, fileName);
     };
 
-    const [tableName, setTableName] = useState<string>("");
-    const formatName = (rawName: string) => {
-        const words = rawName.split("_").map(word => word[0].toUpperCase() + word.slice(1));
-        const prettyName = words.join(" ");
-        return '"' + prettyName + '"';
-    };
-
-    const highlightEmail = emails[dragging];
+    const highlightEmail = emails[dragging] || emails[editing];
     const [searchQuery, setSearchQuery] = useState("");
 
     let filteredEmails = emails;
@@ -226,16 +228,17 @@ function App() {
         });
     }
 
+    const allTypes = templates ? Object.keys(templates.templates).concat("worm") : [];
+
     return (
         <>
-            {/* <th id="table-name">{tableName && formatName(tableName)}</th> */}
-
             {
                 view === AppView.TABLE &&
                 <div id="table-wrap">
                     <div id="emails-table">
                         <div id="table-controls">
                             <FancyInput label="Search" value={searchQuery} setValue={setSearchQuery} searchKey={"/"} />
+                            <FancyInput label="Table Name" value={tableName} setValue={setTableName} />
                         </div>
 
                         {filteredEmails.map((email, idx) => <EmailRow
@@ -245,8 +248,12 @@ function App() {
                             highlightSender={highlightEmail?.sender}
                             highlightRecipient={highlightEmail?.recipient}
                             allEmails={allEmails}
+                            allTypes={allTypes}
                             updateEmail={(newEmail) => updateTargetEmail(idx, newEmail)}
                             deleteEmail={() => deleteTargetEmail(idx)}
+                            editing={idx === editing}
+                            startEditing={() => changeEditing(idx)}
+                            endEditing={() => changeEditing(-1)}
                             dragging={idx === dragging}
                             toggleDragging={() => changeDragging(idx)}
                             swapUp={() => swapEmailOrder(idx, idx - 1)}
@@ -304,14 +311,14 @@ function App() {
                                     id: "clear-btn",
                                     src: ResetIcon,
                                     text: "Reset Table",
-                                    callback: () => setEmails([]),
+                                    callback: resetTable,
                                 },
-                                {
-                                    id: "rename-btn",
-                                    src: EditIcon,
-                                    text: tableName ? "Rename Table" : "Name Table",
-                                    callback: renameTable,
-                                },
+                                // {
+                                //     id: "rename-btn",
+                                //     src: EditIcon,
+                                //     text: tableName ? "Rename Table" : "Name Table",
+                                //     callback: renameTable,
+                                // },
                             ]}
                         />
                         <IconButton

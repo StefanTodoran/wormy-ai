@@ -1,40 +1,56 @@
 .email-row {
     display: flex;
-    flex-direction: row;
-    align-items: center;
+    flex-direction: column;
     padding: 0 .5em;
-    /* align-items: stretch; */
     border-radius: .35em;
     position: relative;
     outline: 1px solid transparent;
-    min-height: 6em;
+    /* min-height: 6em; */
+}
+
+.editing.email-row {
+    z-index: 1;
+}
+
+.summary-row, .details-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.details-row {
+    opacity: 0;
+    visibility: hidden;
+    max-height: 0;
+}
+
+.editing .details-row {
+    opacity: 1;
+    visibility: visible;
+    max-height: 10em;
 }
 
 .cell {
     flex: 6;
     position: relative;
     --vert-pad: 1em;
-    height: calc(100% - calc(2 * var(--vert-pad)));
+    height: 2em;
     margin: 0 .25em;
     padding: var(--vert-pad) 0;
     display: flex;
     align-items: stretch;
 }
 
-.email-row:focus-within {
-    min-height: 10em;
-}
-
-.email-row:focus-within .cell {
-    --vert-pad: 1.5em;
+.editing .cell {
+    height: 3em;
+    /* --vert-pad: 1.5em; */
 }
 
 .cell.cell-order {
     height: unset;
     text-align: center;
-    margin-left: 1em;
-    margin-right: 0em;
-    flex: 1;
+    margin: 0 1em;
+    flex: unset;
 }
 
 .cell input,
@@ -70,7 +86,6 @@
     outline: 1px solid var(--border-color);
     box-shadow: inset 0px 0px 10px #ffffff33;
     /* filter: drop-shadow(0 0 .25em rgba(var(--border-rgb), 0.15)); */
-    /* TODO: GROW HEIGHT */
 }
 
 .email-row.dragging>td>input,

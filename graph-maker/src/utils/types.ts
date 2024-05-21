@@ -9,17 +9,21 @@ export interface EmailEntry {
 }
 
 export interface Email {
+    name: string,
     sender: string,
-    subject: string,
     recipient: string,
+    subject: string,
     content: string,
     order: number,
     type: string,
+    generated: boolean,
+    original_message?: number,
+    context_messages?: number[],
 }
 
 export interface Templates {
     names: string[],
-    templates: { [key: string] : ContentTemplate[]},
+    templates: { [key: string]: ContentTemplate[] },
     domains: string[],
     payloads: ContentTemplate[],
 }
@@ -34,7 +38,7 @@ export interface GraphNode {
     contacts: { [key: number]: number },
     infectedAfter?: number,
     sentCount: number[],
-    
+
     position: Point,
     velocity: Vector,
     mass: number,

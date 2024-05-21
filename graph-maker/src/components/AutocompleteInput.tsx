@@ -7,6 +7,7 @@ interface Props {
     setValue: (newValue: string) => void,
     candidates: string[],
     disabled?: boolean,
+    showCandidatesWhenEmpty?: boolean,
 }
 
 export default function AutocompleteInput({
@@ -15,12 +16,11 @@ export default function AutocompleteInput({
     setValue,
     candidates,
     disabled,
+    showCandidatesWhenEmpty,
 }: Props) {
     const [selected, setSelected] = useState(0);
     const localRef = useRef<HTMLInputElement>(null);
     const ref = giveRef || localRef;
-
-    console.log("candidates", candidates);
 
     const validCandidates = candidates.filter(candidate => {
         const invariantCandidate = candidate.toLowerCase();
@@ -29,6 +29,10 @@ export default function AutocompleteInput({
     });
     const autoCompleteCandidates = useRef<string[]>([]);
     autoCompleteCandidates.current = validCandidates;
+
+    useEffect(() => {
+        setSelected(Math.max(0, Math.min(autoCompleteCandidates.current.length - 1, selected)));
+    }, [value]);
 
     useEffect(() => {
         const autoCompleteListener = (evt: KeyboardEvent) => {
@@ -59,12 +63,12 @@ export default function AutocompleteInput({
     return (
         <>
             <input
-                ref={giveRef}
+                ref={ref}
                 value={value}
                 onChange={onChange}
                 disabled={disabled} />
             {
-                value && autoCompleteCandidates.current.length > 0 &&
+                (showCandidatesWhenEmpty || value) && autoCompleteCandidates.current.length > 0 &&
                 <div className="auto-complete">
                     {validCandidates.map((candidate, idx) => {
                         const alreadyWritten = candidate.slice(0, value.length);

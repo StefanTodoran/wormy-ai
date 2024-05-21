@@ -82,7 +82,6 @@ button:active {
 }
 
 #table-controls {
-    padding: .5em;
     display: flex;
     flex-direction: row;
     margin-bottom: .5em;

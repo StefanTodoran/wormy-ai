@@ -3,6 +3,7 @@
     border: 1px solid var(--border-color);
     border-radius: .25em;
     padding: .5em;
+    margin: .5em;
     width: 100%;
 }
 
@@ -24,6 +25,7 @@
     left: 1ex;
     margin: 0;
     transform: translateY(-50%);
+    pointer-events: none;
 }
 
 .input-label>.main-label {

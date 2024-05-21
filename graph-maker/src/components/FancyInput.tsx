@@ -7,7 +7,7 @@ interface Props {
     value: string,
     setValue: (newValue: string) => void,
     disabled?: boolean,
-    searchKey: string,
+    searchKey?: string,
 }
 
 export default function FancyInput({
@@ -22,6 +22,8 @@ export default function FancyInput({
     const ref = giveRef || localRef;
 
     useEffect(() => {
+        if (!searchKey) return;
+
         const jumpListener = (evt: KeyboardEvent) => {
             if (evt.ctrlKey && evt.key === searchKey) {
                 ref.current?.focus();
@@ -45,7 +47,8 @@ export default function FancyInput({
     return (
         <div className={className}>
             <p className="input-label">
-                <span className="main-label">{label}</span> <span className="key-hint">(ctrl + {searchKey})</span>
+                <span className="main-label">{label}</span>
+                {searchKey && <>{" "}<span className="key-hint">(ctrl + {searchKey})</span></>}
             </p>
             <input
                 ref={ref}

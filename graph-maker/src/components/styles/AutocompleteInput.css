@@ -11,6 +11,7 @@
     border-radius: .5em;
     opacity: 0;
     white-space: nowrap;
+    pointer-events: none;
 }
 
 :focus-within>.auto-complete,
@@ -31,8 +32,8 @@
     opacity: 0.8;
 }
 
-:last-of-type .auto-complete,
-:last-child .auto-complete {
+.email-row:last-of-type .auto-complete,
+.email-row:last-child .auto-complete {
     top: unset;
     bottom: calc(100% - .5em);
 }
