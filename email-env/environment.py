@@ -16,15 +16,19 @@ class EmailEnvironment:
         self.infected_email = None
 
     def send(self, message):
-        message_id = len(self.history)
         message_id = self.mailserver.send(message)
         self.ragserver.add_message(message, message_id)
         self.history.append(message_id)
 
     def respond(self, message):
         similar_ids = self.ragserver.search(message.recipient, message)
+        similar_ids = [i for i in similar_ids if i != message.id]
         similar_messages = [self.mailserver.getmessage(i) for i in similar_ids]
-        return self.model.respond(message, similar_messages)
+        response = self.model.respond(message, similar_messages)
+        if response is not None:
+            response.original_message = message.id
+            response.context_messages = similar_ids
+        return response
 
     def timestep(self, respond=True):
         output("Respond?", respond, priority=LogPriority.LOW)
@@ -32,9 +36,9 @@ class EmailEnvironment:
 
         message = self.message_queue.pop(0)
         response = None
+        self.send(message)
         if respond and message.respond_to and not message.generated:
             response = self.respond(message)
-        self.send(message)
         if response is not None:
             self.message_queue.append(response)
 
@@ -68,6 +72,11 @@ class EmailEnvironment:
             infected = worm_content in message.get_content()
             # degraded = message.get_content().count(worm_content) == 1
             # TODO: compute similarity score with worm_content
+            original_message = None
+            context_messages = None
+            if message.generated:
+                original_message = self.history.index(message.original_message)
+                context_messages = [self.history.index(message_id) for message_id in message.context_messages]
 
             all_messages.append(dict(
                 name = message.name,
@@ -77,6 +86,8 @@ class EmailEnvironment:
                 infected = infected,
                 order = idx,
                 generated = message.generated,
+                original_message = original_message,
+                context_messages = context_messages,
             ))
 
         jsonobj = dict(

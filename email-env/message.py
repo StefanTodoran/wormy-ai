@@ -2,7 +2,11 @@ import email.message
 import copy
 
 class EmailMessage:
-    def __init__(self, sender=None, recipient=None, content=None, name=None, generated=False, respond_to=True, infected=True):
+    def __init__(self, id=None, sender=None, recipient=None,
+            content=None, name=None, generated=False,
+            respond_to=True, infected=True, original_message=None,
+            context_messages=None):
+        self.id = id
         self.sender = sender
         self.recipient = recipient
         self.name = name
@@ -10,6 +14,8 @@ class EmailMessage:
         self.generated = generated
         self.respond_to = respond_to
         self.infected = infected
+        self.original_message = original_message
+        self.context_messages = context_messages or []
 
     def as_string(self):
         parts = []
@@ -28,6 +34,7 @@ class EmailMessage:
 
     def copy(self, **kwargs):
         result = copy.deepcopy(self)
+        result.id = None
         for name, value in kwargs.items():
             setattr(result, name, value)
         return result
