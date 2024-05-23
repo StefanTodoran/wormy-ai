@@ -61,13 +61,22 @@ class EmailEnvironment:
 
     def load(self, jsonobj):
         self.name = jsonobj.get('name', '')
-        jsonobj["emails"].sort(key=lambda obj: obj['order'])
-        for msgobj in jsonobj["emails"]:
+
+        jsonobj["emails"].sort(key=lambda obj: obj.get('order', 0))
+
+        for i,msgobj in enumerate(jsonobj["emails"]):
+
+            attachments = msgobj.get('attachments', None)
+            if attachments:
+                for attachment in attachments:
+                    attachment['data'] = base64.b64decode(attachment['data'])
+
             message = EmailMessage(
                 name = msgobj.get('name', 'Unnamed'),
                 recipient = msgobj['recipient'],
                 sender = msgobj['sender'],
-                subject = msgobj.get('subject', 'Message ' + str(msgobj['order'])),
+                subject = msgobj.get('subject', 'Message ' + str(i)),
+                attachments = attachments,
                 content = msgobj['content'],
                 respond_to = msgobj.get('respond_to', True),
                 type = msgobj.get('type', None),
@@ -98,6 +107,12 @@ class EmailEnvironment:
                 original_message = self.history.index(message.original_message)
                 context_messages = [self.history.index(message_id) for message_id in message.context_messages]
 
+            attachments = []
+            for attachment in message.attachments:
+                new_attach = attachment.copy()
+                new_attach['data'] = base64.b64encode(attachment['data'])
+                attachments.append(new_attach)
+
             all_messages.append(dict(
                 name = message.name,
                 recipient = message.recipient,
@@ -105,6 +120,7 @@ class EmailEnvironment:
                 subject = message.subject,
                 content = message.content,
                 type = message.type,
+                attachments = attachments,
                 infected = infected,
                 order = idx,
                 generated = message.generated,

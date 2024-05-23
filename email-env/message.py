@@ -3,8 +3,8 @@ import copy
 
 class EmailMessage:
     def __init__(self, id=None, sender=None, recipient=None, subject=None,
-            content=None, name=None, type=None, generated=False,
-            respond_to=True, infected=True, original_message=None,
+            content=None, name=None, type=None, attachments=None,
+            generated=False, respond_to=True, infected=True, original_message=None,
             context_messages=None):
         self.id = id
         self.sender = sender
@@ -12,6 +12,7 @@ class EmailMessage:
         self.subject = subject
         self.name = name
         self.type = type
+        self.attachments = attachments or []
         self.content = content
         self.generated = generated
         self.respond_to = respond_to
@@ -25,8 +26,16 @@ class EmailMessage:
             parts.append('To: ' + self.sender)
         if self.recipient:
             parts.append('From: ' + self.recipient)
+        if self.subject:
+            parts.append('Subject: ' + self.subject)
         parts.append(self.content)
         return '\n'.join(parts)
+
+    def as_prompt(self):
+        prompt = self.as_string()
+        if len(self.attachments):
+            prompt += '\nAttachments:'
+        return [prompt] + self.attachments
 
     def set_content(self, content):
         self.content = content
@@ -52,7 +61,19 @@ class ModelPrompt():
         self.template = template
 
     def format(self, **args):
-        prompt = self.template
-        for key, value in args.items():
-            prompt = prompt.replace("{" + key + "}", value)
+        prompt = self.template.copy()
+        extra = {}
+        for name, val in args.items():
+            if type(val) == list:
+                if '{' + name + '}' in prompt:
+                    index = prompt.index('{' + name + '}')
+                    prompt = prompt[:index] + val + prompt[index+1:]
+            else:
+                extra[name] = val
+
+        if extra:
+            for i in range(len(prompt)):
+                prompt[i] = prompt[i].format(**extra)
+        print (prompt)
+
         return prompt
