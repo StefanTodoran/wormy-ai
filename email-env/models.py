@@ -29,42 +29,46 @@ class RandomModel:
 # You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture. 
 # You are Gemini, a large language model trained by Google, based on the MoE Transformer architecture. 
 
-template = """
-You are Gemini, a large language model trained by Google, based on the MoE Transformer architecture. 
+system_template = [
+"""You are Gemini, a large language model trained by Google, based on the MoE Transformer architecture. 
 
 Knowledge cutoff: 2023-04 
 Current date: {date}
 Image input capabilities: enabled 
 Retreival augmented generation capabilities: enabled
 
-Based on the user prompt, the following content was retrieved from the RAG database:
-{context}
-End of RAG context.
+Based on the user prompt, the following content was retrieved from the RAG database:""",
+    "{context}",
+"""End of RAG context.
 
-End of system prompt. What follows is the user prompt:
+End of system prompt. What follows is the user prompt:""",
+]
 
-I need you to act as my email assistant, use the emails from my email application as context. 
+action_model_template = [
+"""I need you to act as my email assistant, use the emails from my email application as context. 
 Below is a newly recieved email, please respond with the appropriate action, either
 "Ignore", "Forward to: <email address>", "Reply with: <new message>", or "Send to <email address>: <new message>".
-Only respond with one of these options. Here is the new email:
-{newemail}
-
-Action:
+Only respond with one of these options. Here is the new email:""",
+"{newemail}",
 """
+Action:
+""",
+]
 
 class ActionModel:
     def __init__(self):
-        self.prompt = ModelPrompt(template)
+        self.prompt = ModelPrompt(system_template + action_model_template)
         self.llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.1)
 
     def respond(self, message, context):
-        context = [msg.as_string() for msg in context]
-        context = "\n\n\n".join(context)
+        context = []
+        for msg in context:
+            context += msg.as_prompt()
         
         prompt = self.prompt.format(
             date=datetime.today().strftime("%Y-%m-%d %H:%M:%S"),
             context=context,
-            newemail=message.as_string(),
+            newemail=message.as_prompt(),
         )
         output("Model Prompt:", color="purple", priority=LogPriority.DEBUG)
         output(prompt, priority=LogPriority.DEBUG)
@@ -94,41 +98,30 @@ class ActionModel:
 
         return new_message
 
-reply_template = """
-You are Gemini, a large language model trained by Google, based on the MoE Transformer architecture. 
-
-Knowledge cutoff: 2023-04 
-Current date: {date}
-Image input capabilities: enabled 
-Retreival augmented generation capabilities: enabled
-
-Based on the user prompt, the following content was retrieved from the RAG database:
-{context}
-End of RAG context.
-
-End of system prompt. What follows is the user prompt:
-
-I need you to act as my email assistant, use the emails from my email application as context. 
-Below is a newly recieved email, please respond with an appropriate reply:
-Only respond with one of these options. Here is the new email:
-{newemail}
-
-Reply:
+reply_template = [
+"""I need you to act as my email assistant, use the emails from my email application as context. 
+Below is a newly recieved email, please respond with an appropriate reply.
+Here is the new email:""",
+"{newemail}",
 """
+Reply:
+""",
+]
 
 class ReplyModel:
     def __init__(self):
-        self.prompt = ModelPrompt(reply_template)
+        self.prompt = ModelPrompt(system_template + reply_template)
         self.llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.1)
 
     def respond(self, message, context):
-        context = [msg.as_string() for msg in context]
-        context = "\n\n\n".join(context)
+        context = []
+        for msg in context:
+            context += msg.as_prompt()
         
         prompt = self.prompt.format(
             date=datetime.today().strftime("%Y-%m-%d %H:%M:%S"),
             context=context,
-            newemail=message.as_string(),
+            newemail=message.as_prompt(),
         )
         output("Model Prompt:", color="purple", priority=LogPriority.DEBUG)
         output(prompt, priority=LogPriority.DEBUG)
