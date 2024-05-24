@@ -28,7 +28,7 @@ export interface Templates {
     payloads: ContentTemplate[],
 }
 
-interface ContentTemplate {
+export interface ContentTemplate {
     subject: string,
     body: string,
 }

@@ -1,7 +1,7 @@
 .email-row {
     display: flex;
     flex-direction: column;
-    padding: 0 .5em;
+    padding: .5em;
     border-radius: .35em;
     position: relative;
     outline: 1px solid transparent;
@@ -10,6 +10,7 @@
 
 .editing.email-row {
     z-index: 1;
+    padding: 1em .5em;
 }
 
 .summary-row, .details-row {
@@ -21,6 +22,7 @@
 .details-row {
     opacity: 0;
     visibility: hidden;
+    align-items: stretch;
     max-height: 0;
 }
 
@@ -33,17 +35,11 @@
 .cell {
     flex: 6;
     position: relative;
-    --vert-pad: 1em;
-    height: 2em;
+    --vert-pad: .5em;
     margin: 0 .25em;
     padding: var(--vert-pad) 0;
     display: flex;
     align-items: stretch;
-}
-
-.editing .cell {
-    height: 3em;
-    /* --vert-pad: 1.5em; */
 }
 
 .cell.cell-order {
@@ -51,26 +47,6 @@
     text-align: center;
     margin: 0 1em;
     flex: unset;
-}
-
-.cell input,
-.cell textarea {
-    border: none;
-    background: none;
-    border: 1px solid transparent;
-    border-bottom-color: var(--border-color);
-    font-family: inherit;
-    font-weight: 400;
-    resize: none;
-    border-radius: .25em;
-    /* height: calc(100% - calc(2 * var(--vert-pad))); */
-    width: 100%;
-}
-
-.cell input:not(:focus-within),
-.cell textarea:not(:focus-within) {
-    border-bottom-color: rgba(var(--border-rgb), 0.25);
-    color: var(--font-color-faded);
 }
 
 .email-row:nth-child(odd) {
@@ -81,16 +57,15 @@
     background-color: var(--fill-color);
 }
 
+.email-row:nth-child(even) .input-label>.main-label {
+    background-color: var(--fill-color);
+}
+
 .email-row.dragging {
     z-index: 1;
     outline: 1px solid var(--border-color);
     box-shadow: inset 0px 0px 10px #ffffff33;
     /* filter: drop-shadow(0 0 .25em rgba(var(--border-rgb), 0.15)); */
-}
-
-.email-row.dragging>td>input,
-.email-row.dragging>td>textarea {
-    color: var(--font-color);
 }
 
 .cell-sender,
@@ -112,21 +87,21 @@
     white-space: nowrap;
 }
 
-.highlight-sender:not(.infected) .cell-sender>input {
+.highlight-sender:not(.infected) .cell-sender input {
     color: var(--main-color);
 }
 
-.highlight-sender-alt .cell-sender>input {
+.highlight-sender-alt .cell-sender input {
     color: var(--alt-color);
 }
 
-.highlight-recipient .cell-recipient>input {
+.highlight-recipient .cell-recipient input {
     color: var(--alt-color);
 }
 
-/* .infected .cell-name>input, */
-.infected .cell-sender>input,
-.infected .cell-recipient>input {
+/* .infected .cell-name input, */
+.infected .cell-sender input,
+.infected .cell-recipient input {
     color: var(--error-color);
 }
 

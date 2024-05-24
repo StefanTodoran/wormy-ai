@@ -1,10 +1,12 @@
 .auto-complete {
     position: absolute;
     font-size: 0.8rem;
-    padding: .25em .75em;
-    left: 50%;
-    transform: translateX(-50%);
-    top: calc(100% - .5em);
+    /* padding: .25em .75em; */
+    padding: .5em .75em;
+    left: .5em;
+    /* left: 50%;
+    transform: translateX(-50%); */
+    top: calc(100% + .5em);
     border: 1px solid var(--border-color);
     filter: drop-shadow(0 0 .25em #ffffff11);
     background-color: var(--background-color);
@@ -12,6 +14,8 @@
     opacity: 0;
     white-space: nowrap;
     pointer-events: none;
+    z-index: 1;
+    text-align: left;
 }
 
 :focus-within>.auto-complete,
@@ -30,6 +34,10 @@
 .auto-complete span.hint {
     font-size: 0.8em;
     opacity: 0.8;
+}
+
+.auto-complete div.hidden-options-indicator {
+    /* height: 1px; */
 }
 
 .email-row:last-of-type .auto-complete,

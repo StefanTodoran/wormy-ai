@@ -8,6 +8,7 @@ import moveIcon from "../assets/move-icon.svg";
 import deleteIcon from "../assets/delete-icon.svg";
 
 import "./styles/EmailRow.css";
+import FancyInput from "./FancyInput";
 
 interface Props {
     email: EmailEntry,
@@ -44,20 +45,19 @@ export default function EmailRow({
     swapUp,
     swapDown,
 }: Props) {
-    const rowRef = useRef<HTMLTableRowElement>(null);
-    const senderInputRef = useRef<HTMLInputElement>(null);
-    const recipientInputRef = useRef<HTMLInputElement>(null);
-
-    const subjectTextareaRef = useRef<HTMLTextAreaElement>(null);
-    const contentsTextareaRef = useRef<HTMLTextAreaElement>(null);
+    const rowRef = useRef<HTMLDivElement>(null);
+    const senderRef = useRef<HTMLInputElement>(null);
+    const recipientRef = useRef<HTMLInputElement>(null);
+    const subjectRef = useRef<HTMLInputElement>(null);
+    const contentsRef = useRef<HTMLTextAreaElement>(null);
 
     const editButtonRef = useRef<HTMLImageElement>(null);
     const dragButtonRef = useRef<HTMLImageElement>(null);
 
     useEffect(() => {
         const exitContentsTextarea = () => {
-            contentsTextareaRef.current?.blur();
-            contentsTextareaRef.current?.scrollTo(0, 0);
+            contentsRef.current?.blur();
+            contentsRef.current?.scrollTo(0, 0);
         };
         const contentsDoneListener = (evt: KeyboardEvent) => {
             if (evt.key !== "Enter") return;
@@ -67,12 +67,12 @@ export default function EmailRow({
             endEditing();
         };
 
-        contentsTextareaRef.current?.addEventListener("focusout", exitContentsTextarea);
-        contentsTextareaRef.current?.addEventListener("keydown", contentsDoneListener);
+        contentsRef.current?.addEventListener("focusout", exitContentsTextarea);
+        contentsRef.current?.addEventListener("keydown", contentsDoneListener);
 
         return () => {
-            contentsTextareaRef.current?.removeEventListener("focusout", exitContentsTextarea);
-            contentsTextareaRef.current?.removeEventListener("keydown", contentsDoneListener);
+            contentsRef.current?.removeEventListener("focusout", exitContentsTextarea);
+            contentsRef.current?.removeEventListener("keydown", contentsDoneListener);
         };
     }, []);
 
@@ -146,7 +146,8 @@ export default function EmailRow({
                 <div className="cell cell-order">{order}</div>
                 <div className="cell cell-sender">
                     <AutocompleteInput
-                        giveRef={senderInputRef}
+                        label="Sender"
+                        giveRef={senderRef}
                         value={email.sender}
                         setValue={getUpdater("sender")}
                         candidates={allEmails}
@@ -155,7 +156,8 @@ export default function EmailRow({
                 </div>
                 <div className="cell cell-recipient">
                     <AutocompleteInput
-                        giveRef={recipientInputRef}
+                        label="Recipient"
+                        giveRef={recipientRef}
                         value={email.recipient}
                         setValue={getUpdater("recipient")}
                         candidates={allEmails}
@@ -163,12 +165,13 @@ export default function EmailRow({
                     />
                 </div>
                 <div className="cell cell-subject">
-                    <textarea
-                        ref={subjectTextareaRef}
+                    <FancyInput
+                        label="Subject"
+                        giveRef={subjectRef}
                         value={email.subject}
-                        onChange={getOnChange("subject")}
-                        disabled={!editing}>
-                    </textarea>
+                        setValue={getUpdater("subject")}
+                        disabled={!editing}
+                    />
                 </div>
                 <img
                     {...getButtonBehavior(toggleEditing)}
@@ -192,14 +195,21 @@ export default function EmailRow({
             <div className="details-row">
                 <div className="cell cell-type">
                     <AutocompleteInput
+                        label="Type"
                         value={email.type}
                         setValue={getUpdater("type")}
                         candidates={allTypes}
-                        showCandidatesWhenEmpty
                     />
                 </div>
                 <div className="cell cell-contents">
-                    <textarea ref={contentsTextareaRef} value={email.content} onChange={getOnChange("content")}></textarea>
+                    <FancyInput
+                        label="Body"
+                        giveRef={contentsRef}
+                        value={email.content}
+                        setValue={getUpdater("content")}
+                        disabled={!editing}
+                        useTextarea
+                    />
                 </div>
             </div>
         </div>

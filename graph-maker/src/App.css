@@ -104,10 +104,6 @@ button:active {
         content: url("./assets/new-sender-icon-dark.svg");
     }
 
-    #existing-sender-btn>img {
-        content: url("./assets/existing-sender-icon-dark.svg");
-    }
-
     #infected-sender-btn>img {
         content: url("./assets/infected-sender-icon-dark.svg");
     }

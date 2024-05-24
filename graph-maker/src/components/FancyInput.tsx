@@ -2,12 +2,14 @@ import { useEffect, useRef } from "react";
 import "./styles/FancyInput.css";
 
 interface Props {
-    giveRef?: React.RefObject<HTMLInputElement>,
+    giveRef?: React.RefObject<any>,
     label: string,
     value: string,
     setValue: (newValue: string) => void,
     disabled?: boolean,
     searchKey?: string,
+    useTextarea?: boolean,
+    children?: React.ReactNode,
 }
 
 export default function FancyInput({
@@ -17,8 +19,10 @@ export default function FancyInput({
     setValue,
     disabled,
     searchKey,
+    useTextarea,
+    children,
 }: Props) {
-    const localRef = useRef<HTMLInputElement>(null);
+    const localRef = useRef<any>(null);
     const ref = giveRef || localRef;
 
     useEffect(() => {
@@ -36,7 +40,7 @@ export default function FancyInput({
         };
     }, []);
 
-    const onChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    const onChange = (evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         if (disabled) return;
         setValue(evt.target.value);
     };
@@ -50,12 +54,25 @@ export default function FancyInput({
                 <span className="main-label">{label}</span>
                 {searchKey && <>{" "}<span className="key-hint">(ctrl + {searchKey})</span></>}
             </p>
-            <input
-                ref={ref}
-                value={value}
-                onChange={onChange}
-                disabled={disabled}
-            />
+
+            {
+                useTextarea ?
+                    <textarea
+                        ref={ref}
+                        value={value}
+                        onChange={onChange}
+                        disabled={disabled}
+                    />
+                    :
+                    <input
+                        ref={ref}
+                        value={value}
+                        onChange={onChange}
+                        disabled={disabled}
+                    />
+            }
+
+            {children}
         </div>
     );
 }

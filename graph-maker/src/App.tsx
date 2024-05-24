@@ -4,6 +4,8 @@ import IconButton from "./components/IconButton";
 import GraphCanvas from "./components/GraphCanvas";
 import DropdownButton from "./components/DropdownButton";
 import FancyInput from "./components/FancyInput";
+import Modal from "./components/Modal";
+import NewEmail from "./components/NewEmail";
 
 import { findLastIndex, getFilledOutTemplate, pickRandomListItem, randomEmailAddress } from "./utils/misc";
 import { downloadAsJSON, handleFileUpload, triggerFileUpload } from "./utils/files";
@@ -15,11 +17,8 @@ import TableIcon from "./assets/table-icon.svg";
 import UploadIcon from "./assets/upload-icon.svg";
 import DownloadIcon from "./assets/download-icon.svg";
 import ManageIcon from "./assets/manage-icon.svg";
-// import EditIcon from "./assets/edit-icon.svg";
 import ResetIcon from "./assets/clear-icon.svg";
-import NewSenderIcon from "./assets/new-sender-icon.svg";
-import ExistingSenderIcon from "./assets/existing-sender-icon.svg";
-import InfectedSenderIcon from "./assets/infected-sender-icon.svg";
+
 import "./App.css";
 
 enum AppView {
@@ -189,12 +188,12 @@ function App() {
     };
 
     const [tableName, setTableName] = useState<string>("");
-    
+
     const resetTable = () => {
         setEmails([]);
         setTableName("");
     };
-    
+
     const downloadTable = () => {
         const exportEmails = emails;
         // const exportEmails: Email[] = emails.map((email, idx) => {
@@ -222,13 +221,14 @@ function App() {
         const query = searchQuery.toLowerCase();
         filteredEmails = emails.filter(email => {
             return email.sender.toLowerCase().includes(query) ||
-                   email.recipient.toLowerCase().includes(query) ||
-                   email.subject.toLowerCase().includes(query) ||
-                   email.content.toLowerCase().includes(query);
+                email.recipient.toLowerCase().includes(query) ||
+                email.subject.toLowerCase().includes(query) ||
+                email.content.toLowerCase().includes(query);
         });
     }
 
     const allTypes = templates ? Object.keys(templates.templates).concat("worm") : [];
+    const [modalOpen, setModalOpen] = useState(false);
 
     return (
         <>
@@ -262,32 +262,11 @@ function App() {
                         {filteredEmails.length === 0 && <p id="no-emails">No emails to display.</p>}
                     </div>
                     <div id="buttons-wrap">
-                        <DropdownButton
+                        <IconButton
                             id="add-entry-btn"
-                            src={AddIcon}
                             text="Add Entry"
-                            options={[
-                                {
-                                    id: "new-sender-btn",
-                                    src: NewSenderIcon,
-                                    text: "New Sender",
-                                    callback: () => addNewEmail(getNewSender()),
-                                },
-                                {
-                                    id: "existing-sender-btn",
-                                    src: ExistingSenderIcon,
-                                    text: "Existing Sender",
-                                    callback: () => addNewEmail(getExistingSender()),
-                                    disabled: emails.length < 2,
-                                },
-                                {
-                                    id: "infected-sender-btn",
-                                    src: InfectedSenderIcon,
-                                    text: "Infected Email",
-                                    // TODO: Maybe the sender should be a special reserved sender?
-                                    callback: () => addNewEmail(getNewSender(), true),
-                                },
-                            ]}
+                            src={AddIcon}
+                            onClick={() => setModalOpen(true)} 
                         />
                         <DropdownButton
                             id="manage-table-btn"
@@ -344,6 +323,18 @@ function App() {
                     />
                 </div>
             }
+
+            {templates && <Modal open={modalOpen}>
+                <NewEmail
+                    maxOrder={emails.length}
+                    insertEmail={() => { }}
+                    toggleModal={() => setModalOpen(false)}
+                    allEmails={allEmails}
+                    allTypes={allTypes}
+                    existingNames={names}
+                    templates={templates}
+                />
+            </Modal>}
 
             <a id="downloader" style={{ display: "none" }}></a>
             <input

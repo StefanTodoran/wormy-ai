@@ -1,32 +1,42 @@
 import { useEffect, useRef, useState } from "react";
+import FancyInput from "./FancyInput";
 import "./styles/AutocompleteInput.css";
 
 interface Props {
+    label: string,
     giveRef?: React.RefObject<HTMLInputElement>,
     value: string,
     setValue: (newValue: string) => void,
     candidates: string[],
     disabled?: boolean,
-    showCandidatesWhenEmpty?: boolean,
+    truncateCandidates?: number,
+    hideCandidatesWhenEmpty?: boolean,
 }
 
 export default function AutocompleteInput({
+    label,
     giveRef,
     value,
     setValue,
     candidates,
     disabled,
-    showCandidatesWhenEmpty,
+    truncateCandidates,
+    hideCandidatesWhenEmpty,
 }: Props) {
     const [selected, setSelected] = useState(0);
     const localRef = useRef<HTMLInputElement>(null);
     const ref = giveRef || localRef;
 
+    const [sliceStart, setSliceStart] = useState(0);
+    const sliceEnd = Math.min(candidates.length, sliceStart + (truncateCandidates || 10));
+    const hiddenOptions = sliceEnd < candidates.length;
+
     const validCandidates = candidates.filter(candidate => {
         const invariantCandidate = candidate.toLowerCase();
         const invariantValue = value.toLowerCase();
         return invariantCandidate.startsWith(invariantValue) && invariantCandidate !== invariantValue;
-    });
+    }).slice(sliceStart, sliceEnd);
+
     const autoCompleteCandidates = useRef<string[]>([]);
     autoCompleteCandidates.current = validCandidates;
 
@@ -42,10 +52,13 @@ export default function AutocompleteInput({
                 evt.preventDefault();
             }
             if (evt.key === "ArrowUp") {
+                console.log(selected);
+                if (selected === 0 && sliceStart > 0) setSliceStart(sliceStart - 1);
                 setSelected(Math.max(0, selected - 1));
                 evt.preventDefault();
             }
             if (evt.key === "ArrowDown") {
+                if (selected + sliceStart >= sliceEnd - 1) setSliceStart(sliceStart + 1);
                 setSelected(Math.min(autoCompleteCandidates.current.length - 1, selected + 1));
                 evt.preventDefault();
             }
@@ -53,35 +66,38 @@ export default function AutocompleteInput({
 
         ref.current?.addEventListener("keydown", autoCompleteListener);
         return () => ref.current?.removeEventListener("keydown", autoCompleteListener);
-    }, [selected, setValue]);
-
-    const onChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
-        if (disabled) return;
-        setValue(evt.target.value);
-    };
+    }, [selected, setValue, sliceStart, setSliceStart]);
 
     return (
         <>
-            <input
-                ref={ref}
+            <FancyInput
+                label={label}
+                giveRef={ref}
                 value={value}
-                onChange={onChange}
-                disabled={disabled} />
-            {
-                (showCandidatesWhenEmpty || value) && autoCompleteCandidates.current.length > 0 &&
-                <div className="auto-complete">
-                    {validCandidates.map((candidate, idx) => {
-                        const alreadyWritten = candidate.slice(0, value.length);
-                        const toComplete = candidate.slice(value.length);
+                setValue={setValue}
+                disabled={disabled}
+            >
+                {
+                    (!hideCandidatesWhenEmpty || value) && autoCompleteCandidates.current.length > 0 &&
+                    <div className="auto-complete">
+                        {sliceStart !== 0 && <div className="hidden-options-indicator">...</div>}
+                        
+                        {validCandidates.map((candidate, idx) => {
+                            const alreadyWritten = candidate.slice(0, value.length);
+                            const toComplete = candidate.slice(value.length);
 
-                        return <div key={idx} className={idx === selected ? "selected" : ""}>
-                            <span className="already-written">{alreadyWritten!}</span>
-                            <span className="to-complete">{toComplete!}</span>
-                        </div>;
-                    })}
-                    <span className="hint">(Enter to autocomplete)</span>
-                </div>
-            }
+                            return <div key={idx} className={idx === selected ? "selected" : ""}>
+                                <span className="already-written">{alreadyWritten!}</span>
+                                <span className="to-complete">{toComplete!}</span>
+                            </div>;
+                        })}
+
+                        {hiddenOptions && <div className="hidden-options-indicator">...</div>}
+
+                        <span className="hint">(Enter to autocomplete)</span>
+                    </div>
+                }
+            </FancyInput>
         </>
     );
 }

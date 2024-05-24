@@ -1,0 +1,28 @@
+.new-email {
+    display: flex;
+    flex-direction: column;
+    padding: 1em .5em;
+    border-radius: .35em;
+    background-color: var(--fill-color);
+    border: 1px solid var(--border-color);
+}
+
+.new-email .row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.new-email .row>* {
+    width: unset;
+}
+
+.new-email .cell {
+    flex: 1;
+}
+
+.new-email .cell.cell-order {
+    flex: .5;
+    margin: 0 .25em;
+}
