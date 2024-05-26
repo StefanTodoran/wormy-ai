@@ -7,7 +7,7 @@ import FancyInput from "./components/FancyInput";
 import Modal from "./components/Modal";
 import NewEmail from "./components/NewEmail";
 
-import { findLastIndex, getFilledOutTemplate, pickRandomListItem, randomEmailAddress } from "./utils/misc";
+// import { findLastIndex, getFilledOutTemplate, pickRandomListItem, randomEmailAddress } from "./utils/misc";
 import { downloadAsJSON, handleFileUpload, triggerFileUpload } from "./utils/files";
 import { EmailEntry, Templates } from "./utils/types";
 
@@ -114,9 +114,13 @@ function App() {
         setEditing(-1);
     };
 
-    const getExistingSender = () => pickRandomListItem(names, [], true);
-    const getNewSender = () => pickRandomListItem(templates!.names, names, true);
+    const insertNewEmail = (index: number, email: EmailEntry) => {
+        const newEmails = [...emails];
+        newEmails.splice(index, 0, email);
+        setEmails(newEmails);
+    };
 
+    /*
     const addNewEmail = (name: string, infected?: boolean, type?: string) => {
         const existing = emails.findIndex(email => email.name === name);
         const sender = existing === -1 ? randomEmailAddress(name, templates!.domains) : emails[existing].sender;
@@ -154,6 +158,7 @@ function App() {
         };
         setEmails([...emails, entry]);
     };
+    */
 
     const updateTargetEmail = (targetIndex: number, newEmail: EmailEntry) => {
         const newEmails = [...emails];
@@ -327,7 +332,7 @@ function App() {
             {templates && <Modal open={modalOpen}>
                 <NewEmail
                     maxOrder={emails.length}
-                    insertEmail={() => { }}
+                    insertEmail={insertNewEmail}
                     toggleModal={() => setModalOpen(false)}
                     allEmails={allEmails}
                     allTypes={allTypes}

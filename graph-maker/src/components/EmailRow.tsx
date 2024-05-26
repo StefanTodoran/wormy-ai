@@ -124,13 +124,6 @@ export default function EmailRow({
         });
     };
 
-    const getOnChange = (prop: keyof EmailEntry) => (evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        updateEmail({
-            ...email,
-            [prop]: evt.target.value,
-        });
-    };
-
     let className = "email-row";
     if (editing) className += " editing";
     if (dragging) className += " dragging";

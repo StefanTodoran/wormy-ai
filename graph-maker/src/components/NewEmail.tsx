@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ContentTemplate, EmailEntry, Templates } from "../utils/types";
+import { getButtonBehavior, pickRandomListItem, randomEmailAddress } from "../utils/misc";
+
 import AutocompleteInput from "./AutocompleteInput";
 import FancyInput from "./FancyInput";
 import IconButton from "./IconButton";
@@ -7,9 +9,7 @@ import IconButton from "./IconButton";
 import refreshIcon from "../assets/refresh-icon.svg";
 import confirmIcon from "../assets/confirm-icon.svg";
 import deleteIcon from "../assets/delete-icon.svg";
-
 import "./styles/NewEmail.css";
-import { getButtonBehavior, pickRandomListItem, randomEmailAddress } from "../utils/misc";
 
 interface Props {
     maxOrder: number,
@@ -47,7 +47,7 @@ export default function NewEmail({
     const changeOrder = (rawNewOrder: string) => {
         const newOrder = parseInt(rawNewOrder.replace(/\D/g, ""));
         if (Number.isNaN(newOrder)) setOrder(0);
-        else setOrder(Math.max(0, Math.min(newOrder, maxOrder)));
+        else setOrder(Math.max(0, Math.min(newOrder, maxOrder + 1)));
     };
 
     const getUpdater = (prop: keyof EmailEntry) => (value: string) => {

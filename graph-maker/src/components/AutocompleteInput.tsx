@@ -28,20 +28,23 @@ export default function AutocompleteInput({
     const ref = giveRef || localRef;
 
     const [sliceStart, setSliceStart] = useState(0);
-    const sliceEnd = Math.min(candidates.length, sliceStart + (truncateCandidates || 10));
-    const hiddenOptions = sliceEnd < candidates.length;
-
-    const validCandidates = candidates.filter(candidate => {
+    const candidatesShown = truncateCandidates || 10;
+    const sliceEnd = Math.min(candidates.length, sliceStart + candidatesShown);
+    
+    let validCandidates = candidates.filter(candidate => {
         const invariantCandidate = candidate.toLowerCase();
         const invariantValue = value.toLowerCase();
         return invariantCandidate.startsWith(invariantValue) && invariantCandidate !== invariantValue;
-    }).slice(sliceStart, sliceEnd);
+    });
+    const hiddenOptions = sliceEnd < validCandidates.length;
+    validCandidates = validCandidates.slice(sliceStart, sliceEnd);
 
     const autoCompleteCandidates = useRef<string[]>([]);
     autoCompleteCandidates.current = validCandidates;
 
     useEffect(() => {
         setSelected(Math.max(0, Math.min(autoCompleteCandidates.current.length - 1, selected)));
+        setSliceStart(0);
     }, [value]);
 
     useEffect(() => {
@@ -58,7 +61,7 @@ export default function AutocompleteInput({
                 evt.preventDefault();
             }
             if (evt.key === "ArrowDown") {
-                if (selected + sliceStart >= sliceEnd - 1) setSliceStart(sliceStart + 1);
+                if (selected + sliceStart >= sliceEnd - 1 && sliceStart < candidates.length - candidatesShown) setSliceStart(sliceStart + 1);
                 setSelected(Math.min(autoCompleteCandidates.current.length - 1, selected + 1));
                 evt.preventDefault();
             }
