@@ -26,3 +26,17 @@
     flex: .5;
     margin: 0 .25em;
 }
+
+@media (prefers-color-scheme: light) {
+    img.randomize-sender-btn {
+        content: url("../../assets/refresh-icon-dark.svg");
+    }
+
+    .cancel-entry-btn>img {
+        content: url("../../assets/delete-icon-dark.svg");
+    }
+
+    .confirm-entry-btn>img {
+        content: url("../../assets/confirm-icon-dark.svg");
+    }
+}

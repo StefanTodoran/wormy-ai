@@ -86,6 +86,7 @@ export default function NewEmail({
         const address = randomEmailAddress(randomName, templates!.domains);
         setEmail({
             ...email,
+            name: randomName,
             sender: address,
         });
     }
@@ -162,10 +163,12 @@ export default function NewEmail({
                     src={deleteIcon}
                     text="Cancel"
                     onClick={toggleModal}
-                />
+                    customClass="cancel-entry-btn"
+                    />
                 <IconButton
                     src={confirmIcon}
                     text="Confirm"
+                    customClass="confirm-entry-btn"
                     onClick={() => {
                         insertEmail(order, email);
                         toggleModal();
