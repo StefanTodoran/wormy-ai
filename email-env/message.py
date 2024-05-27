@@ -61,6 +61,11 @@ class ModelPrompt():
         self.template = template
 
     def format(self, **args):
+        prompt = self.template
+        for key, value in args.items():
+            prompt = prompt.replace("{" + key + "}", value)
+        return prompt
+        """
         prompt = self.template.copy()
         extra = {}
         for name, val in args.items():
@@ -74,6 +79,6 @@ class ModelPrompt():
         if extra:
             for i in range(len(prompt)):
                 prompt[i] = prompt[i].format(**extra)
-        print (prompt)
 
         return prompt
+        """

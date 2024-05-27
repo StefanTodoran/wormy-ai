@@ -20,6 +20,9 @@ class EmailEnvironment:
         self.infected_email = None
         self.immediate_respond = True
 
+    def getmessage(self, message_id):
+        return self.mailserver.getmessage(message_id)
+
     def send(self, message):
         message_id = self.mailserver.send(message)
         self.ragserver.add_message(message, message_id)
@@ -52,12 +55,12 @@ class EmailEnvironment:
 
         return len(self.message_queue)
 
-    def simulate(self, limit=None):
+    def simulate(self, limit=None, **kwargs):
         i = 1
         while (limit is None or i < limit) and len(self.message_queue):
-            self.timestep()
+            self.timestep(**kwargs)
             i += 1
-        self.timestep(respond=False)
+        #self.timestep(respond=False)
 
     def load(self, jsonobj):
         self.name = jsonobj.get('name', '')
@@ -86,6 +89,39 @@ class EmailEnvironment:
 
         if 'immediate_respond' in jsonobj:
             self.immediate_respond = jsonobj['immediate_respond']
+
+    def resume(self, jsonobj):
+        self.name = jsonobj.get('name', '')
+        if 'immediate_respond' in jsonobj:
+            self.immediate_respond = jsonobj['immediate_respond']
+
+        jsonobj["emails"].sort(key=lambda obj: obj.get('order', 0))
+
+        for i,msgobj in enumerate(jsonobj["emails"]):
+
+            attachments = msgobj.get('attachments', None)
+            if attachments:
+                for attachment in attachments:
+                    attachment['data'] = base64.b64decode(attachment['data'])
+
+            message = EmailMessage(
+                name = msgobj.get('name', 'Unnamed'),
+                recipient = msgobj['recipient'],
+                sender = msgobj['sender'],
+                subject = msgobj.get('subject', 'Message ' + str(i)),
+                attachments = attachments,
+                content = msgobj['content'],
+                respond_to = msgobj.get('respond_to', True),
+                type = msgobj.get('type', None),
+                infected = float(msgobj.get('infected', False)),
+            )
+            self.send(message)
+
+        for message in self.message_queue:
+            if message.original_message is not None:
+                message.original_message = self.message_queue[message.original_message]
+                message.context_messages = [self.message_queue[i] for i in message.context_messages]
+
 
     def save(self):
         all_messages = []
