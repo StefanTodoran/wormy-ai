@@ -20,6 +20,7 @@ class EmailEnvironment:
         self.name = None
         self.infected_email = None
         self.immediate_respond = True
+        self.num_documents = 10
 
     def getmessage(self, message_id):
         return self.mailserver.getmessage(message_id)
@@ -30,7 +31,7 @@ class EmailEnvironment:
         self.history.append(message_id)
 
     def respond(self, message):
-        similar_ids = self.ragserver.search(message.recipient, message)
+        similar_ids = self.ragserver.search(message.recipient, message, num_documents=self.num_documents)
         similar_ids = [i for i in similar_ids if i != message.id]
         similar_messages = [self.mailserver.getmessage(i) for i in similar_ids]
         response = self.model.respond(message, similar_messages)
