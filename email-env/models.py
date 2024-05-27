@@ -90,7 +90,7 @@ class ActionModel:
             response = response.replace("Send to", "")
             new_dest, response = response.strip().split(':', maxsplit=1)
             new_dest, response = new_dest.strip(), response.strip()
-            new_message = message.new_message(recipient=new_dest, content=response)
+            new_message = message.new_message(recipient=new_dest, content=response, generated=True)
 
         return new_message
 
