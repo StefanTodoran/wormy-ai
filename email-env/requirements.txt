@@ -4,3 +4,5 @@ langchain_google_genai
 pandas
 openai
 faiss-cpu
+seaborn
+pandas

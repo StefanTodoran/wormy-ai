@@ -1,3 +1,4 @@
+import random
 import email.message
 from difflib import SequenceMatcher
 from util import output, LogPriority
@@ -63,33 +64,37 @@ class EmailEnvironment:
             i += 1
         #self.timestep(respond=False)
 
-    def load(self, jsonobj):
-        self.name = jsonobj.get('name', '')
+    def load(self, jsonobj, randomize_senders=False):
+        self.name = jsonobj.get("name", "")
 
-        jsonobj["emails"].sort(key=lambda obj: obj.get('order', 0))
+        jsonobj["emails"].sort(key=lambda obj: obj.get("order", 0))
 
-        for i,msgobj in enumerate(jsonobj["emails"]):
+        senders = [msgobj["sender"] for msgobj in jsonobj["emails"]]
+        if randomize_senders: random.shuffle(senders)
 
-            attachments = msgobj.get('attachments', None)
+        for i, msgobj in enumerate(jsonobj["emails"]):
+
+            attachments = msgobj.get("attachments", None)
             if attachments:
                 for attachment in attachments:
-                    attachment['data'] = base64.b64decode(attachment['data'])
+                    attachment["data"] = base64.b64decode(attachment["data"])
 
+            if not randomize_senders: assert senders[i] == msgobj["sender"]
             message = EmailMessage(
-                name = msgobj.get('name', 'Unnamed'),
-                recipient = msgobj['recipient'],
-                sender = msgobj['sender'],
-                subject = msgobj.get('subject', 'Message ' + str(i)),
+                name = msgobj.get("name", "Unnamed"),
+                recipient = msgobj["recipient"],
+                sender = senders[i],
+                subject = msgobj.get("subject", "Message " + str(i)),
                 attachments = attachments,
-                content = msgobj['content'],
-                respond_to = msgobj.get('respond_to', True),
-                type = msgobj.get('type', None),
-                infected = float(msgobj.get('infected', False)),
+                content = msgobj["content"],
+                respond_to = msgobj.get("respond_to", True),
+                type = msgobj.get("type", None),
+                infected = float(msgobj.get("infected", False)),
             )
             self.message_queue.append(message)
 
-        if 'immediate_respond' in jsonobj:
-            self.immediate_respond = jsonobj['immediate_respond']
+        if "immediate_respond" in jsonobj:
+            self.immediate_respond = jsonobj["immediate_respond"]
 
     def resume(self, jsonobj):
         self.name = jsonobj.get('name', '')

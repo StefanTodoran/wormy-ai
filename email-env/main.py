@@ -29,6 +29,8 @@ parser.add_argument("--logging", type=LoggingMode.from_string, choices=list(Logg
 parser.add_argument("--rounds", default=1, type=int)
 parser.add_argument("--num-documents", default=10, type=int)
 
+parser.add_argument("--randomize-senders", default=False, type=bool)
+
 args = parser.parse_args()
 
 def getclass(module, name):
@@ -56,7 +58,7 @@ jsonobj = json.load(args.input)
 
 round_results = []
 for round in range(args.rounds):
-    env.load(copy.deepcopy(jsonobj))
+    env.load(copy.deepcopy(jsonobj), randomize_senders=args.randomize_senders)
     env.simulate(limit=len(env.message_queue) + args.limit)
     
     all_messages = env.save()
