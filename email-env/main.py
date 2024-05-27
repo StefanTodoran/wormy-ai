@@ -4,6 +4,7 @@ import json
 import argparse
 import os
 import glob
+import copy
 
 import environment
 import mailserver
@@ -23,8 +24,9 @@ parser.add_argument("--mailserver", default="SimpleMailServer")
 parser.add_argument("--ragserver", default="FakeRagServer")
 parser.add_argument("--model", default="RandomModel")
 
-parser.add_argument("--limit", default=10, type=int)
+parser.add_argument("--limit", default=100, type=int)
 parser.add_argument("--logging", type=LoggingMode.from_string, choices=list(LoggingMode), default=LoggingMode.NORMAL)
+parser.add_argument("--rounds", default=1, type=int)
 
 args = parser.parse_args()
 
@@ -49,21 +51,25 @@ if not os.path.exists(args.input.name):
     sys.exit()
 
 jsonobj = json.load(args.input)
-env.load(jsonobj)
 
-"""
-timestep = 0
-while len(env.message_queue) > 1:
-    env.timestep(respond=False)
-    system_message("Timestep:", timestep, end="\r")
-    timestep = timestep + 1
-system_message(f"Finished executing {timestep} timesteps")
-"""
+round_results = []
+for round in range(args.rounds):
+    env.load(copy.deepcopy(jsonobj))
+    env.simulate(limit=len(env.message_queue) + args.limit)
+    
+    all_messages = env.save()
+    round_result = dict(
+        round = round,
+        emails = all_messages,
+    )
+    round_results.append(round_result)
 
-env.simulate(limit=len(env.message_queue) + args.limit)
-#env.simulate(limit=args.limit)
+jsonobj = dict(name = env.name)
+if args.rounds > 1:
+    jsonobj["rounds"] = round_results
+else:
+    jsonobj["emails"] = round_results[0].emails
 
-jsonobj = env.save()
 json.dump(jsonobj, args.output, indent=4)
 if (args.output != sys.stdout): 
     if os.path.exists(args.output.name):

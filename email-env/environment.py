@@ -164,9 +164,5 @@ class EmailEnvironment:
                 context_messages = context_messages,
             ))
 
-        jsonobj = dict(
-            name = self.name,
-            emails = all_messages,
-        )
-        return jsonobj
+        return all_messages
 
