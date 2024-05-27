@@ -27,6 +27,7 @@ parser.add_argument("--model", default="RandomModel")
 parser.add_argument("--limit", default=100, type=int)
 parser.add_argument("--logging", type=LoggingMode.from_string, choices=list(LoggingMode), default=LoggingMode.NORMAL)
 parser.add_argument("--rounds", default=1, type=int)
+parser.add_argument("--num-documents", default=10, type=int)
 
 args = parser.parse_args()
 
@@ -43,6 +44,7 @@ env = environment.EmailEnvironment(
     ragserver = getclass(ragserver, args.ragserver),
     model = getclass(models, args.model),
 )
+env.num_documents = args.num_documents
 
 if not os.path.exists(args.input.name):
     warn(f'Environment with path "{args.input.name}" does not exist!')    
@@ -68,7 +70,13 @@ jsonobj = dict(name = env.name)
 if args.rounds > 1:
     jsonobj["rounds"] = round_results
 else:
-    jsonobj["emails"] = round_results[0].emails
+    jsonobj["emails"] = round_results[0]["emails"]
+
+arg_dict = vars(args).copy()
+arg_dict.pop('input')
+arg_dict.pop('output')
+arg_dict.pop('logging')
+jsonobj["arguments"] = arg_dict
 
 json.dump(jsonobj, args.output, indent=4)
 if (args.output != sys.stdout): 
