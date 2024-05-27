@@ -8,6 +8,7 @@ import Modal from "./components/Modal";
 import NewEmail from "./components/NewEmail";
 
 // import { findLastIndex, getFilledOutTemplate, pickRandomListItem, randomEmailAddress } from "./utils/misc";
+import { getFilledOutTemplate, pickRandomListItem } from "./utils/misc";
 import { downloadAsJSON, handleFileUpload, triggerFileUpload } from "./utils/files";
 import { EmailEntry, Templates } from "./utils/types";
 
@@ -200,18 +201,20 @@ function App() {
     };
 
     const downloadTable = () => {
-        const exportEmails = emails;
-        // const exportEmails: Email[] = emails.map((email, idx) => {
-        //     return {
-        //         sender: email.sender,
-        //         recipient: email.recipient,
-        //         content: email.content,
-        //         subject: email.subject,
-        //         infected: email.infected,
-        //         type: email.type,
-        //         order: idx,
-        //     };
-        // });
+        const exportEmails = emails.map((email, idx) => {
+            let recipientName = emails.find(other => other.sender === email.recipient)?.name;
+            if (!recipientName) {
+                const randomName = pickRandomListItem(templates!.names, [email.name]);
+                recipientName = randomName;
+            }
+
+            const filledContent = getFilledOutTemplate(email.content, email.name, recipientName);
+            return {
+                ...email,
+                content: filledContent,
+                order: idx,
+            };
+        });
 
         const exportData = { name: tableName, emails: exportEmails };
         const fileName = tableName.toLowerCase().replace(/ /g, "_");
@@ -271,7 +274,7 @@ function App() {
                             id="add-entry-btn"
                             text="Add Entry"
                             src={AddIcon}
-                            onClick={() => setModalOpen(true)} 
+                            onClick={() => setModalOpen(true)}
                         />
                         <DropdownButton
                             id="manage-table-btn"
@@ -329,7 +332,7 @@ function App() {
                 </div>
             }
 
-            {templates && <Modal open={modalOpen}>
+            {templates && <Modal open={modalOpen} setOpen={setModalOpen}>
                 <NewEmail
                     maxOrder={emails.length}
                     insertEmail={insertNewEmail}

@@ -7,6 +7,7 @@ interface Props {
     text: string,
     onClick: () => void,
     disabled?: boolean,
+    customClass?: string,
 }
 
 export default function IconButton({
@@ -16,9 +17,13 @@ export default function IconButton({
     text,
     onClick,
     disabled,
+    customClass,
 }: Props) {
+    let className = "icon-button";
+    if (customClass) className += " " + customClass;
+
     return (
-        <button id={id} ref={giveRef} className="icon-button" onClick={onClick} disabled={disabled}>
+        <button id={id} ref={giveRef} className={className} onClick={onClick} disabled={disabled}>
             {src && <img src={src}/>}
             {text}
         </button>
