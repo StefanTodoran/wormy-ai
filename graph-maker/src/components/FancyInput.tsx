@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import "./styles/FancyInput.css";
 
-interface Props {
+export interface FancyInputProps {
     giveRef?: React.RefObject<any>,
     label: string,
     value: string,
@@ -9,6 +9,7 @@ interface Props {
     disabled?: boolean,
     searchKey?: string,
     useTextarea?: boolean,
+    customClass?: string,
     children?: React.ReactNode,
 }
 
@@ -20,8 +21,9 @@ export default function FancyInput({
     disabled,
     searchKey,
     useTextarea,
+    customClass,
     children,
-}: Props) {
+}: FancyInputProps) {
     const localRef = useRef<any>(null);
     const ref = giveRef || localRef;
 
@@ -47,6 +49,7 @@ export default function FancyInput({
 
     let className = "input-wrap";
     if (value) className += " has-content";
+    if (customClass) className += " " + customClass;
 
     return (
         <div className={className}>

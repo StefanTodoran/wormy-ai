@@ -10,6 +10,7 @@ import refreshIcon from "../assets/refresh-icon.svg";
 import confirmIcon from "../assets/confirm-icon.svg";
 import deleteIcon from "../assets/delete-icon.svg";
 import "./styles/NewEmail.css";
+import NumericInput from "./NumericInput";
 
 interface Props {
     maxOrder: number,
@@ -42,13 +43,7 @@ export default function NewEmail({
         infected: false,
         type: "",
     });
-
     const [order, setOrder] = useState(maxOrder);
-    const changeOrder = (rawNewOrder: string) => {
-        const newOrder = parseInt(rawNewOrder.replace(/\D/g, ""));
-        if (Number.isNaN(newOrder)) setOrder(0);
-        else setOrder(Math.max(0, Math.min(newOrder, maxOrder + 1)));
-    };
 
     const getUpdater = (prop: keyof EmailEntry) => (value: string) => {
         setEmail({
@@ -100,11 +95,14 @@ export default function NewEmail({
         <div className={className}>
             <div className="row">
                 <div className="cell cell-order">
-                    <FancyInput
+                    <NumericInput
                         giveRef={firstInput}
                         label="Order"
-                        value={order.toString()}
-                        setValue={changeOrder}
+                        value={order}
+                        setValue={setOrder}
+                        minValue={0}
+                        maxValue={maxOrder}
+                        showSteppers
                     />
                 </div>
                 <div className="cell cell-sender">

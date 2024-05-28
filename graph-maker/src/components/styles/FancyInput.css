@@ -7,6 +7,10 @@
     width: 100%;
 }
 
+.input-wrap.quarter-length {
+    width: 25%;
+}
+
 .input-wrap textarea,
 .input-wrap input {
     border: none;
@@ -30,6 +34,7 @@
     margin: 0;
     transform: translateY(-50%);
     pointer-events: none;
+    white-space: nowrap;
 }
 
 .input-label>.main-label {

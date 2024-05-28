@@ -4,13 +4,14 @@ import IconButton from "./components/IconButton";
 import GraphCanvas from "./components/GraphCanvas";
 import DropdownButton from "./components/DropdownButton";
 import FancyInput from "./components/FancyInput";
+import NumericInput from "./components/NumericInput";
 import Modal from "./components/Modal";
 import NewEmail from "./components/NewEmail";
 
 // import { findLastIndex, getFilledOutTemplate, pickRandomListItem, randomEmailAddress } from "./utils/misc";
 import { downloadAsJSON, handleFileUpload, triggerFileUpload } from "./utils/files";
 import { createRandomName, getFilledOutTemplate } from "./utils/misc";
-import { EmailEntry, Templates } from "./utils/types";
+import { EmailEntry, SimulationRound, Templates } from "./utils/types";
 
 import AddIcon from "./assets/add-icon.svg";
 import GraphIcon from "./assets/graph-icon.svg";
@@ -48,8 +49,15 @@ function App() {
     };
     useEffect(fetchTemplates, []);
 
+    const [shownRound, setShownRound] = useState(0);
+    const [rounds, setRounds] = useState<SimulationRound[]>([]);
+
     const [emails, setEmails] = useState<EmailEntry[]>([]);
     const names = emails.map(email => email.name);
+
+    useEffect(() => {
+        if (shownRound < rounds.length) setEmails(rounds[shownRound].emails);
+    }, [shownRound]);
 
     const emailsSet = new Set<string>();
     emails.forEach(email => {
@@ -205,7 +213,11 @@ function App() {
 
     const resetTable = () => {
         setEmails([]);
+        setRounds([]);
+        setShownRound(0)
         setTableName("");
+        setDragging(-1);
+        setEditing(-1);
     };
 
     const downloadTable = () => {
@@ -255,6 +267,19 @@ function App() {
                         <div id="table-controls">
                             <FancyInput label="Search" value={searchQuery} setValue={setSearchQuery} searchKey={"/"} />
                             <FancyInput label="Table Name" value={tableName} setValue={setTableName} />
+
+                            {
+                                rounds.length > 0 &&
+                                <NumericInput
+                                    label="Simulation Round"
+                                    value={shownRound}
+                                    setValue={setShownRound}
+                                    minValue={0}
+                                    maxValue={rounds.length - 1}
+                                    customClass="quarter-length"
+                                    showSteppers
+                                />
+                            }
                         </div>
 
                         {filteredEmails.map((email, idx) => <EmailRow
@@ -364,8 +389,14 @@ function App() {
                 type="file"
                 style={{ display: "none" }}
                 onInput={() => handleFileUpload((fileData: any) => {
-                    setTableName(fileData.name);
-                    setEmails(fileData.emails);
+                    if ("rounds" in fileData) {
+                        setTableName(fileData.name);
+                        setRounds(fileData.rounds);
+                        setEmails(fileData.rounds[0].emails);
+                    } else {
+                        setTableName(fileData.name);
+                        setEmails(fileData.emails);
+                    }
                 })}
             />
         </>

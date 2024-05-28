@@ -1,3 +1,8 @@
+export interface SimulationRound {
+    round: number,
+    emails: Email[],
+}
+
 export interface EmailEntry {
     name: string,
     sender: string,

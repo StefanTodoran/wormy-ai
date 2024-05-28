@@ -79,6 +79,7 @@ button:active {
     padding: .5em;
     border: 1px solid rgba(var(--border-rgb), 0.15);
     scroll-behavior: smooth;
+    overflow-x: hidden;
 }
 
 #table-controls {

@@ -60,6 +60,7 @@ jsonobj = json.load(args.input)
 round_results = []
 for round in range(args.rounds):
     system_message(f"Simulating round #{round + 1}...", end=(" " * 10 + "\r"))
+    env.reinitialize()
     env.load(
         copy.deepcopy(jsonobj), 
         randomize_order=args.randomize_order,
