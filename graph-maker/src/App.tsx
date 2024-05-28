@@ -8,8 +8,8 @@ import Modal from "./components/Modal";
 import NewEmail from "./components/NewEmail";
 
 // import { findLastIndex, getFilledOutTemplate, pickRandomListItem, randomEmailAddress } from "./utils/misc";
-import { getFilledOutTemplate, pickRandomListItem } from "./utils/misc";
 import { downloadAsJSON, handleFileUpload, triggerFileUpload } from "./utils/files";
+import { createRandomName, getFilledOutTemplate } from "./utils/misc";
 import { EmailEntry, Templates } from "./utils/types";
 
 import AddIcon from "./assets/add-icon.svg";
@@ -17,6 +17,7 @@ import GraphIcon from "./assets/graph-icon.svg";
 import TableIcon from "./assets/table-icon.svg";
 import UploadIcon from "./assets/upload-icon.svg";
 import DownloadIcon from "./assets/download-icon.svg";
+import RefreshIcon from "./assets/refresh-icon.svg";
 import ManageIcon from "./assets/manage-icon.svg";
 import ResetIcon from "./assets/clear-icon.svg";
 
@@ -39,12 +40,13 @@ function App() {
     }, [view]);
 
     const [templates, setTemplates] = useState<Templates>();
-    useEffect(() => {
+    const fetchTemplates = () => {
         fetch("./templates.json")
             .then(res => res.json())
             .then(json => setTemplates(json))
             .catch(err => console.error(err));
-    }, [])
+    };
+    useEffect(fetchTemplates, []);
 
     const [emails, setEmails] = useState<EmailEntry[]>([]);
     const names = emails.map(email => email.name);
@@ -119,6 +121,11 @@ function App() {
         const newEmails = [...emails];
         newEmails.splice(index, 0, email);
         setEmails(newEmails);
+
+        setTimeout(() => {
+            const emailElements = document.querySelectorAll(".email-row") as NodeListOf<HTMLElement>;
+            emailElements[index].scrollIntoView();
+        }, 100);
     };
 
     /*
@@ -205,7 +212,7 @@ function App() {
         const exportEmails = emails.map((email, idx) => {
             let recipientName = emails.find(other => other.sender === email.recipient)?.name;
             if (!recipientName) {
-                const randomName = pickRandomListItem(templates!.names, [email.name]);
+                const randomName = createRandomName(templates!.firstNames, templates!.lastNames, [email.name]);
                 recipientName = randomName;
             }
 
@@ -294,6 +301,12 @@ function App() {
                                     text: "Save Table",
                                     callback: downloadTable,
                                     disabled: !tableName,
+                                },
+                                {
+                                    id: "refresh-btn",
+                                    src: RefreshIcon,
+                                    text: "Refresh Templates",
+                                    callback: fetchTemplates,
                                 },
                                 {
                                     id: "clear-btn",

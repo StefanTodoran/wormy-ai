@@ -127,4 +127,8 @@ button:active {
     #rename-btn>img {
         content: url("./assets/edit-icon-dark.svg");
     }
+
+    #refresh-btn>img {
+        content: url("./assets/refresh-icon-dark.svg");
+    }
 }

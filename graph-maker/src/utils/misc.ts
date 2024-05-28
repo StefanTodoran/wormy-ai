@@ -36,6 +36,31 @@ function generateRandomNumberString(n: number): string {
     return ("" + number).substring(add);
 }
 
+function getShuffledArray<T>(arr: T[]) {
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+}
+
+export function createRandomName(firstNames: string[], lastNames: string[], existingNames: string[]) {
+    const randomFirstNames = getShuffledArray(firstNames);
+    const randomLastNames = getShuffledArray(lastNames);
+
+    for (let i = 0; i < randomFirstNames.length; i++) {
+        for (let j = 0; j < randomLastNames.length; j++) {
+            const candidate = randomFirstNames[i] + " " + randomLastNames[j];
+            if (!existingNames.includes(candidate)) {
+                return candidate;
+            }
+        }
+    }
+
+    throw new Error("All unique name combinations have been used! Fallback not yet implemented.");
+}
+
 export function randomEmailAddress(name: string, domains: string[], existing?: string[]) {
     const newAddress = generateEmailAddress(
         name,

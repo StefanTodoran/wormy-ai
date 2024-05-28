@@ -25,7 +25,8 @@ export interface Email {
 }
 
 export interface Templates {
-    names: string[],
+    firstNames: string[],
+    lastNames: string[],
     templates: { [key: string]: ContentTemplate[] },
     domains: string[],
     payloads: PayloadTemplate[],

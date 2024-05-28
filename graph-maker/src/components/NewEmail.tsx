@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ContentTemplate, EmailEntry, PayloadTemplate, Templates } from "../utils/types";
-import { getButtonBehavior, pickRandomListItem, randomEmailAddress } from "../utils/misc";
+import { createRandomName, getButtonBehavior, randomEmailAddress } from "../utils/misc";
 
 import AutocompleteInput from "./AutocompleteInput";
 import FancyInput from "./FancyInput";
@@ -84,7 +84,7 @@ export default function NewEmail({
     };
 
     const randomizeEmailAdress = () => {
-        const randomName = pickRandomListItem(templates.names, existingNames);
+        const randomName = createRandomName(templates.firstNames, templates.lastNames, existingNames);
         const address = randomEmailAddress(randomName, templates!.domains);
         setEmail({
             ...email,
@@ -175,6 +175,9 @@ export default function NewEmail({
                         insertEmail(order, email);
                         toggleModal();
                     }}
+                    disabled={(
+                        !email.sender || !email.recipient || !email.type || !email.subject || !email.content
+                    )}
                 />
             </div>
         </div>
