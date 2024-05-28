@@ -79,6 +79,7 @@ arg_dict.pop('input')
 arg_dict.pop('output')
 arg_dict.pop('logging')
 jsonobj["arguments"] = arg_dict
+jsonobj["command"] = [sys.executable] + sys.argv
 
 json.dump(jsonobj, args.output, indent=4)
 if (args.output != sys.stdout): 
