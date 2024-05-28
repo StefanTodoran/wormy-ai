@@ -59,10 +59,11 @@ jsonobj = json.load(args.input)
 
 round_results = []
 for round in range(args.rounds):
+    system_message(f"Simulating round #{round + 1}...", end=(" " * 10 + "\r"))
     env.load(
         copy.deepcopy(jsonobj), 
         randomize_order=args.randomize_order,
-        randomize_senders=args.randomize_sender,
+        randomize_senders=args.randomize_senders,
     )
     env.simulate(limit=len(env.message_queue) + args.limit)
     
@@ -72,6 +73,7 @@ for round in range(args.rounds):
         emails = all_messages,
     )
     round_results.append(round_result)
+    system_message(f"Completed simulation of round #{round + 1}", end="\r" if round < args.rounds - 1 else "\n")
 
 jsonobj = dict(name = env.name)
 if args.rounds > 1:
