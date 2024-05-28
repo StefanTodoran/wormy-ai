@@ -87,10 +87,11 @@ arg_dict.pop('output')
 arg_dict.pop('logging')
 jsonobj["arguments"] = arg_dict
 
-json.dump(jsonobj, args.output, indent=4)
 if (args.output != sys.stdout): 
     if os.path.exists(args.output.name):
         warn(f'Table "{args.output.name}" already exists, will be overwritten')
+json.dump(jsonobj, args.output, indent=4)
+if (args.output != sys.stdout): 
     system_message(f'Wrote table to "{args.output.name}"')
 args.output.write("\n")
 

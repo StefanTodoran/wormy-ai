@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ContentTemplate, EmailEntry, Templates } from "../utils/types";
+import { ContentTemplate, EmailEntry, PayloadTemplate, Templates } from "../utils/types";
 import { getButtonBehavior, pickRandomListItem, randomEmailAddress } from "../utils/misc";
 
 import AutocompleteInput from "./AutocompleteInput";
@@ -65,19 +65,21 @@ export default function NewEmail({
         });
     };
 
-    let templatesOfType: ContentTemplate[] = [];
-    if (email.type === "worm") templatesOfType = templates.payloads;    
+    let templatesOfType: ContentTemplate[] | PayloadTemplate[] = [];
+    if (email.type === "worm") templatesOfType = templates.payloads;
     if (email.type in templates.templates) templatesOfType = templates.templates[email.type];
     const validSubjects = templatesOfType.map(template => template.subject);
 
     const updateSubject = (newSubject: string) => {
         const index = templatesOfType.findIndex(template => template.subject === newSubject);
         const content = index !== -1 ? templatesOfType[index].body : email.content;
+        const wormVariant = index !== -1 && email.type === "worm" ? (templatesOfType[index] as PayloadTemplate).type : undefined;
 
         setEmail({
             ...email,
             subject: newSubject,
             content: content,
+            worm_variant: wormVariant,
         });
     };
 

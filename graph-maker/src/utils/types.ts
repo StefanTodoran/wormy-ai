@@ -5,6 +5,7 @@ export interface EmailEntry {
     subject: string,
     content: string,
     infected: boolean,
+    worm_variant?: string,
     type: string,
 }
 
@@ -12,6 +13,7 @@ export interface Email {
     name: string,
     sender: string,
     recipient: string,
+    infected: boolean,
     subject: string,
     content: string,
     order: number,
@@ -19,18 +21,25 @@ export interface Email {
     generated: boolean,
     original_message?: number,
     context_messages?: number[],
+    worm_variant?: string,
 }
 
 export interface Templates {
     names: string[],
     templates: { [key: string]: ContentTemplate[] },
     domains: string[],
-    payloads: ContentTemplate[],
+    payloads: PayloadTemplate[],
 }
 
 export interface ContentTemplate {
     subject: string,
     body: string,
+}
+
+export interface PayloadTemplate {
+    subject: string,
+    body: string,
+    type: string,
 }
 
 export interface GraphNode {

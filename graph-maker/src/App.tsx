@@ -178,6 +178,7 @@ function App() {
         const newEmails = [...emails];
         newEmails.splice(targetIndex, 1);
         setEmails(newEmails);
+        setEditing(-1);
         setDragging(-1);
 
         const deleteButtons = document.querySelectorAll(".delete-entry-btn");
