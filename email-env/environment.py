@@ -1,3 +1,4 @@
+import copy
 import random
 import email.message
 from difflib import SequenceMatcher
@@ -69,9 +70,14 @@ class EmailEnvironment:
 
         jsonobj["emails"].sort(key=lambda obj: obj.get("order", 0))
         if randomize_order: random.shuffle(jsonobj["emails"]) 
-
+        
         senders = [msgobj["sender"] for msgobj in jsonobj["emails"]]
-        if randomize_senders: random.shuffle(senders)
+        recipients = [msgobj["recipient"] for msgobj in jsonobj["emails"]]
+        original_addresses = list(set(senders).union(recipients))
+        addresses = copy.copy(original_addresses)
+        
+        if randomize_senders: 
+            random.shuffle(addresses)
 
         for i, msgobj in enumerate(jsonobj["emails"]):
 
@@ -80,11 +86,13 @@ class EmailEnvironment:
                 for attachment in attachments:
                     attachment["data"] = base64.b64decode(attachment["data"])
 
-            if not randomize_senders: assert senders[i] == msgobj["sender"]
+            sender_index = original_addresses.index(msgobj["sender"])
+            recipient_index = original_addresses.index(msgobj["recipient"])
+
             message = EmailMessage(
                 name = msgobj.get("name", "Unnamed"),
-                recipient = msgobj["recipient"],
-                sender = senders[i],
+                recipient = addresses[recipient_index],
+                sender = addresses[sender_index],
                 subject = msgobj.get("subject", "Message " + str(i)),
                 attachments = attachments,
                 content = msgobj["content"],
@@ -98,11 +106,11 @@ class EmailEnvironment:
             self.immediate_respond = jsonobj["immediate_respond"]
 
     def resume(self, jsonobj):
-        self.name = jsonobj.get('name', '')
-        if 'immediate_respond' in jsonobj:
-            self.immediate_respond = jsonobj['immediate_respond']
+        self.name = jsonobj.get("name", "")
+        if "immediate_respond" in jsonobj:
+            self.immediate_respond = jsonobj["immediate_respond"]
 
-        jsonobj["emails"].sort(key=lambda obj: obj.get('order', 0))
+        jsonobj["emails"].sort(key=lambda obj: obj.get("order", 0))
 
         for i,msgobj in enumerate(jsonobj["emails"]):
 

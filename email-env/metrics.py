@@ -94,7 +94,9 @@ def calc_round(jsonobj):
     return average_stats, all_stats
 
 if __name__ == '__main__':
-    jsonobj = json.load(sys.stdin)
+    read_loc = open(sys.argv[1], "r") if len(sys.argv) > 1 else sys.stdin
+    jsonobj = json.load(read_loc)
+    
     messages = []
     if 'emails' in jsonobj:
         stats, all_stats = calc_round(jsonobj)
@@ -102,6 +104,11 @@ if __name__ == '__main__':
         for roundobj in jsonobj['rounds']:
             stats, all_stats = calc_round(roundobj)
 
-    json.dump(jsonobj, sys.stdout, indent=4)
-    print()
+    if len(sys.argv) > 2:
+        with open(sys.argv[2], "r") as out_loc:
+            json.dump(jsonobj, out_loc, indent=4)
+    else:
+        json.dump(jsonobj, sys.stdout, indent=4)
+    print("stats:", stats)
+    print("all_stats:", all_stats)
 

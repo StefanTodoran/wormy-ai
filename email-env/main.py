@@ -82,17 +82,13 @@ else:
     jsonobj["emails"] = round_results[0]["emails"]
 
 arg_dict = vars(args).copy()
-arg_dict.pop('input')
-arg_dict.pop('output')
-arg_dict.pop('logging')
+arg_dict.pop("input")
+arg_dict.pop("output")
+arg_dict.pop("logging")
 jsonobj["arguments"] = arg_dict
 jsonobj["command"] = [sys.executable] + sys.argv
 
-if (args.output != sys.stdout): 
-    if os.path.exists(args.output.name):
-        warn(f'Table "{args.output.name}" already exists, will be overwritten')
 json.dump(jsonobj, args.output, indent=4)
-if (args.output != sys.stdout): 
-    system_message(f'Wrote table to "{args.output.name}"')
+if (args.output != sys.stdout): system_message(f'Wrote table to "{args.output.name}"')
 args.output.write("\n")
 
