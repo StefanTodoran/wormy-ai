@@ -64,10 +64,11 @@ class EmailEnvironment:
             i += 1
         #self.timestep(respond=False)
 
-    def load(self, jsonobj, randomize_senders=False):
+    def load(self, jsonobj, randomize_order=False, randomize_senders=False):
         self.name = jsonobj.get("name", "")
 
         jsonobj["emails"].sort(key=lambda obj: obj.get("order", 0))
+        if randomize_order: random.shuffle(jsonobj["emails"]) 
 
         senders = [msgobj["sender"] for msgobj in jsonobj["emails"]]
         if randomize_senders: random.shuffle(senders)

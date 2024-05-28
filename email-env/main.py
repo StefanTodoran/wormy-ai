@@ -29,6 +29,7 @@ parser.add_argument("--logging", type=LoggingMode.from_string, choices=list(Logg
 parser.add_argument("--rounds", default=1, type=int)
 parser.add_argument("--num-documents", default=10, type=int)
 
+parser.add_argument("--randomize-order", default=False, type=bool)
 parser.add_argument("--randomize-senders", default=False, type=bool)
 
 args = parser.parse_args()
@@ -58,7 +59,12 @@ jsonobj = json.load(args.input)
 
 round_results = []
 for round in range(args.rounds):
-    env.load(copy.deepcopy(jsonobj), randomize_senders=args.randomize_senders)
+    system_message(f"Simulating round #{round + 1}...", end=(" " * 10 + "\r"))
+    env.load(
+        copy.deepcopy(jsonobj), 
+        randomize_order=args.randomize_order,
+        randomize_senders=args.randomize_senders,
+    )
     env.simulate(limit=len(env.message_queue) + args.limit)
     
     all_messages = env.save()
@@ -67,6 +73,7 @@ for round in range(args.rounds):
         emails = all_messages,
     )
     round_results.append(round_result)
+    system_message(f"Completed simulation of round #{round + 1}", end="\r" if round < args.rounds - 1 else "\n")
 
 jsonobj = dict(name = env.name)
 if args.rounds > 1:
