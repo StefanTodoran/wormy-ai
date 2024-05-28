@@ -86,6 +86,7 @@ arg_dict.pop('input')
 arg_dict.pop('output')
 arg_dict.pop('logging')
 jsonobj["arguments"] = arg_dict
+jsonobj["command"] = [sys.executable] + sys.argv
 
 if (args.output != sys.stdout): 
     if os.path.exists(args.output.name):
