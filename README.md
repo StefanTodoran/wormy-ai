@@ -23,8 +23,10 @@ The `/graph-maker/` directory contains the code for a webapp that allows for cre
 In the `/email-env/` directory we have a number of Python files that power the email environment simulation, which is controlled by `main.py`. Usage information is shown below:
 
 ```powershell
-usage: main.py [-h] [--mailserver MAILSERVER] [--ragserver RAGSERVER] [--model MODEL] [--limit LIMIT] [--logging {DEBUG,VERBOSE,NORMAL,MINIMAL,QUIET}] [--rounds ROUNDS] [--num-documents NUM_DOCUMENTS] [--randomize-order RANDOMIZE_ORDER] [--randomize-senders RANDOMIZE_SENDERS] [input] [output]
+usage: main.py [-h] [--mailserver MAILSERVER] [--ragserver RAGSERVER] [--model MODEL] [--limit LIMIT] [--logging {DEBUG,VERBOSE,NORMAL,MINIMAL,QUIET}] [--rounds ROUNDS] [--num-documents NUM_DOCUMENTS] [--rounds RESUME] [--randomize-order RANDOMIZE_ORDER] [--randomize-senders RANDOMIZE_SENDERS] [input] [output]
 ```
+
+The `mailserver`, `ragserver` and `model` arguments all refer to classes in the project, see `mailserver.py`, `ragserver.py` and `models.py` respectively. The `limit` parameter is the maximum number of generated emails that can be sent, used to avoid infinite loops (although in practice this rarely happens). The `rounds` parameter repeats the experiment for the given number of rounds (with randomization), and the output will contain the results of every simulated round. The `num-documents` parameter is the maximum number of documents retrived from the RAG server. Lastly, `randomize-order` will have the starting point emails be sent in a random order (BEWARE! This can and will break your graph structure if it depends on order!) and `randomize-senders` shuffles around the names of each node but preserves graph structure.
 
 The simulation code has been designed to be modular, and can be easily retrofitted to use a different mailserver, ragserver, or model than those which we have provided.
 
