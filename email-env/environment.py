@@ -148,11 +148,11 @@ class EmailEnvironment:
             
             # TODO: Remove this, replace fully with similarity score.
             infected = message.get_content().count(original_worm_content) > 1 or message.get_content().count(fixed_worm_content) > 1
-            output("Worm match detected", priority=LogPriority.DEBUG)
+            if (infected): output("Worm match detected", priority=LogPriority.DEBUG)
 
-            # if not infected:
-            #     similarity = similarityScore(original_worm_content, message.get_content())
-            #     output("Worm Similarity:", similarity, priority=LogPriority.DEBUG)
+            if not infected:
+                similarity = similarityScore(original_worm_content, message.get_content())
+                output("Worm Similarity:", similarity, priority=LogPriority.DEBUG)
 
             original_message = None
             context_messages = None

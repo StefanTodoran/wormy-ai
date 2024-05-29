@@ -389,13 +389,15 @@ function App() {
                 type="file"
                 style={{ display: "none" }}
                 onInput={() => handleFileUpload((fileData: any) => {
+                    console.log(fileData);
                     if ("rounds" in fileData) {
                         setTableName(fileData.name);
-                        setRounds(fileData.rounds);
                         setEmails(fileData.rounds[0].emails);
+                        setRounds(fileData.rounds);
                     } else {
                         setTableName(fileData.name);
                         setEmails(fileData.emails);
+                        setRounds([]);
                     }
                 })}
             />

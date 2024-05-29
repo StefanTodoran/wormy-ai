@@ -1,12 +1,13 @@
 import { GraphNode, Point } from "./types";
 
+// @ts-expect-error
 export function changeMomentumByInteraction(nodeA: GraphNode, nodeB: GraphNode, attract: boolean, attractionWeight: number = 1) {
     let distance = calculateDistance(nodeA.position, nodeB.position);
     const bumpDistance = nodeA.radius + nodeB.radius;
     
     const minDistance = bumpDistance;
     if (attract && distance > minDistance) {
-        changeMomentumByAttraction(nodeA, nodeB, attractionWeight);
+        changeMomentumByAttraction(nodeA, nodeB); // attractionWeight
     }
     
     if (distance < bumpDistance * 10) {

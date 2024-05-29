@@ -30,26 +30,37 @@ export default function PlayPauseControls({
     };
 
     useEffect(() => {
+        let draggingSlider = false;
+        
+        const handleDragStart = (evt: MouseEvent) => {
+            draggingSlider = true;
+            handleMouseInteract(evt);
+        };
+        const handleDragEnd = () => draggingSlider = false;
+
         const handleMouseInteract = (evt: MouseEvent) => {
+            if (!draggingSlider) return;
             const bounds = progressBarRef.current!.getBoundingClientRect();
             const percentage = (evt.clientX - bounds.left) / bounds.width;
-            if (evt.buttons === 1) setScrubberPosition(Math.round(percentage * maxTimestamp));
-        }
+            if (evt.buttons === 1) setScrubberPosition(
+                Math.max(0, Math.min(maxTimestamp, Math.round(percentage * maxTimestamp)))
+            );
+        };
 
         const handleKeypress = (evt: KeyboardEvent) => {
             if (evt.key === "ArrowLeft") skipBackward();
             if (evt.key === "ArrowRight") skipForward();
         };
 
-        progressBarRef.current?.addEventListener("mousemove", handleMouseInteract);
-        progressBarRef.current?.addEventListener("mousedown", handleMouseInteract);
-        progressBarRef.current?.addEventListener("mouseup", handleMouseInteract);
+        addEventListener("mousemove", handleMouseInteract);
+        progressBarRef.current?.addEventListener("mousedown", handleDragStart);
+        addEventListener("mouseup", handleDragEnd);
         addEventListener("keydown", handleKeypress);
 
         return () => {
-            progressBarRef.current?.removeEventListener("mousemove", handleMouseInteract);
-            progressBarRef.current?.removeEventListener("mousedown", handleMouseInteract);
-            progressBarRef.current?.removeEventListener("mouseup", handleMouseInteract);
+            removeEventListener("mousemove", handleMouseInteract);
+            progressBarRef.current?.removeEventListener("mousedown", handleDragStart);
+            removeEventListener("mouseup", handleDragEnd);
             removeEventListener("keydown", handleKeypress);
         }
     }, []);
