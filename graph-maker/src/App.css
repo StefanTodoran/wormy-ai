@@ -79,6 +79,7 @@ button:active {
     padding: .5em;
     border: 1px solid rgba(var(--border-rgb), 0.15);
     scroll-behavior: smooth;
+    overflow-x: hidden;
 }
 
 #table-controls {
@@ -126,5 +127,9 @@ button:active {
 
     #rename-btn>img {
         content: url("./assets/edit-icon-dark.svg");
+    }
+
+    #refresh-btn>img {
+        content: url("./assets/refresh-icon-dark.svg");
     }
 }

@@ -4,19 +4,21 @@ import IconButton from "./components/IconButton";
 import GraphCanvas from "./components/GraphCanvas";
 import DropdownButton from "./components/DropdownButton";
 import FancyInput from "./components/FancyInput";
+import NumericInput from "./components/NumericInput";
 import Modal from "./components/Modal";
 import NewEmail from "./components/NewEmail";
 
 // import { findLastIndex, getFilledOutTemplate, pickRandomListItem, randomEmailAddress } from "./utils/misc";
-import { getFilledOutTemplate, pickRandomListItem } from "./utils/misc";
 import { downloadAsJSON, handleFileUpload, triggerFileUpload } from "./utils/files";
-import { EmailEntry, Templates } from "./utils/types";
+import { createRandomName, getFilledOutTemplate } from "./utils/misc";
+import { EmailEntry, SimulationRound, Templates } from "./utils/types";
 
 import AddIcon from "./assets/add-icon.svg";
 import GraphIcon from "./assets/graph-icon.svg";
 import TableIcon from "./assets/table-icon.svg";
 import UploadIcon from "./assets/upload-icon.svg";
 import DownloadIcon from "./assets/download-icon.svg";
+import RefreshIcon from "./assets/refresh-icon.svg";
 import ManageIcon from "./assets/manage-icon.svg";
 import ResetIcon from "./assets/clear-icon.svg";
 
@@ -39,15 +41,23 @@ function App() {
     }, [view]);
 
     const [templates, setTemplates] = useState<Templates>();
-    useEffect(() => {
+    const fetchTemplates = () => {
         fetch("./templates.json")
             .then(res => res.json())
             .then(json => setTemplates(json))
             .catch(err => console.error(err));
-    }, [])
+    };
+    useEffect(fetchTemplates, []);
+
+    const [shownRound, setShownRound] = useState(0);
+    const [rounds, setRounds] = useState<SimulationRound[]>([]);
 
     const [emails, setEmails] = useState<EmailEntry[]>([]);
     const names = emails.map(email => email.name);
+
+    useEffect(() => {
+        if (shownRound < rounds.length) setEmails(rounds[shownRound].emails);
+    }, [shownRound]);
 
     const emailsSet = new Set<string>();
     emails.forEach(email => {
@@ -119,6 +129,11 @@ function App() {
         const newEmails = [...emails];
         newEmails.splice(index, 0, email);
         setEmails(newEmails);
+
+        setTimeout(() => {
+            const emailElements = document.querySelectorAll(".email-row") as NodeListOf<HTMLElement>;
+            emailElements[index].scrollIntoView();
+        }, 100);
     };
 
     /*
@@ -178,6 +193,7 @@ function App() {
         const newEmails = [...emails];
         newEmails.splice(targetIndex, 1);
         setEmails(newEmails);
+        setEditing(-1);
         setDragging(-1);
 
         const deleteButtons = document.querySelectorAll(".delete-entry-btn");
@@ -197,14 +213,18 @@ function App() {
 
     const resetTable = () => {
         setEmails([]);
+        setRounds([]);
+        setShownRound(0)
         setTableName("");
+        setDragging(-1);
+        setEditing(-1);
     };
 
     const downloadTable = () => {
         const exportEmails = emails.map((email, idx) => {
             let recipientName = emails.find(other => other.sender === email.recipient)?.name;
             if (!recipientName) {
-                const randomName = pickRandomListItem(templates!.names, [email.name]);
+                const randomName = createRandomName(templates!.firstNames, templates!.lastNames, [email.name]);
                 recipientName = randomName;
             }
 
@@ -247,6 +267,19 @@ function App() {
                         <div id="table-controls">
                             <FancyInput label="Search" value={searchQuery} setValue={setSearchQuery} searchKey={"/"} />
                             <FancyInput label="Table Name" value={tableName} setValue={setTableName} />
+
+                            {
+                                rounds.length > 0 &&
+                                <NumericInput
+                                    label="Simulation Round"
+                                    value={shownRound}
+                                    setValue={setShownRound}
+                                    minValue={0}
+                                    maxValue={rounds.length - 1}
+                                    customClass="quarter-length"
+                                    showSteppers
+                                />
+                            }
                         </div>
 
                         {filteredEmails.map((email, idx) => <EmailRow
@@ -293,6 +326,12 @@ function App() {
                                     text: "Save Table",
                                     callback: downloadTable,
                                     disabled: !tableName,
+                                },
+                                {
+                                    id: "refresh-btn",
+                                    src: RefreshIcon,
+                                    text: "Refresh Templates",
+                                    callback: fetchTemplates,
                                 },
                                 {
                                     id: "clear-btn",
@@ -350,8 +389,16 @@ function App() {
                 type="file"
                 style={{ display: "none" }}
                 onInput={() => handleFileUpload((fileData: any) => {
-                    setTableName(fileData.name);
-                    setEmails(fileData.emails);
+                    console.log(fileData);
+                    if ("rounds" in fileData) {
+                        setTableName(fileData.name);
+                        setEmails(fileData.rounds[0].emails);
+                        setRounds(fileData.rounds);
+                    } else {
+                        setTableName(fileData.name);
+                        setEmails(fileData.emails);
+                        setRounds([]);
+                    }
                 })}
             />
         </>

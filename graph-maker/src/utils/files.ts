@@ -27,12 +27,15 @@ export function handleFileUpload(stateCallback: (fileData: any) => void) {
             const data = new Uint8Array(event.target.result);
             json = String.fromCharCode(...data);
         }
-        
-        // TODO: Probably remove this step after fixing our results files.
-        json.emails.forEach((email: any) => {
-            if (!email.type) email.type = "";
-        });
 
+        if ("emails" in json) {
+            // This is for backwards compatibility with a couple old envs
+            // which didn't set the type string.
+            json.emails.forEach((email: any) => {
+                if (!email.type) email.type = "";
+            });
+        }
+        
         stateCallback(json);
     }
 

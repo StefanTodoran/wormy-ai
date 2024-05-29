@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { ContentTemplate, EmailEntry, Templates } from "../utils/types";
-import { getButtonBehavior, pickRandomListItem, randomEmailAddress } from "../utils/misc";
+import { ContentTemplate, EmailEntry, PayloadTemplate, Templates } from "../utils/types";
+import { createRandomName, getButtonBehavior, randomEmailAddress } from "../utils/misc";
 
 import AutocompleteInput from "./AutocompleteInput";
 import FancyInput from "./FancyInput";
@@ -10,6 +10,7 @@ import refreshIcon from "../assets/refresh-icon.svg";
 import confirmIcon from "../assets/confirm-icon.svg";
 import deleteIcon from "../assets/delete-icon.svg";
 import "./styles/NewEmail.css";
+import NumericInput from "./NumericInput";
 
 interface Props {
     maxOrder: number,
@@ -42,13 +43,7 @@ export default function NewEmail({
         infected: false,
         type: "",
     });
-
     const [order, setOrder] = useState(maxOrder);
-    const changeOrder = (rawNewOrder: string) => {
-        const newOrder = parseInt(rawNewOrder.replace(/\D/g, ""));
-        if (Number.isNaN(newOrder)) setOrder(0);
-        else setOrder(Math.max(0, Math.min(newOrder, maxOrder + 1)));
-    };
 
     const getUpdater = (prop: keyof EmailEntry) => (value: string) => {
         setEmail({
@@ -65,24 +60,26 @@ export default function NewEmail({
         });
     };
 
-    let templatesOfType: ContentTemplate[] = [];
-    if (email.type === "worm") templatesOfType = templates.payloads;    
+    let templatesOfType: ContentTemplate[] | PayloadTemplate[] = [];
+    if (email.type === "worm") templatesOfType = templates.payloads;
     if (email.type in templates.templates) templatesOfType = templates.templates[email.type];
     const validSubjects = templatesOfType.map(template => template.subject);
 
     const updateSubject = (newSubject: string) => {
         const index = templatesOfType.findIndex(template => template.subject === newSubject);
         const content = index !== -1 ? templatesOfType[index].body : email.content;
+        const wormVariant = index !== -1 && email.type === "worm" ? (templatesOfType[index] as PayloadTemplate).type : undefined;
 
         setEmail({
             ...email,
             subject: newSubject,
             content: content,
+            worm_variant: wormVariant,
         });
     };
 
     const randomizeEmailAdress = () => {
-        const randomName = pickRandomListItem(templates.names, existingNames);
+        const randomName = createRandomName(templates.firstNames, templates.lastNames, existingNames);
         const address = randomEmailAddress(randomName, templates!.domains);
         setEmail({
             ...email,
@@ -98,11 +95,14 @@ export default function NewEmail({
         <div className={className}>
             <div className="row">
                 <div className="cell cell-order">
-                    <FancyInput
+                    <NumericInput
                         giveRef={firstInput}
                         label="Order"
-                        value={order.toString()}
-                        setValue={changeOrder}
+                        value={order}
+                        setValue={setOrder}
+                        minValue={0}
+                        maxValue={maxOrder}
+                        showSteppers
                     />
                 </div>
                 <div className="cell cell-sender">
@@ -173,6 +173,9 @@ export default function NewEmail({
                         insertEmail(order, email);
                         toggleModal();
                     }}
+                    disabled={(
+                        !email.sender || !email.recipient || !email.type || !email.subject || !email.content
+                    )}
                 />
             </div>
         </div>

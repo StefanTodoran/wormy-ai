@@ -59,8 +59,14 @@ jsonobj = json.load(args.input)
 
 round_results = []
 for round in range(args.rounds):
-    system_message(f"Simulating round #{round + 1}...")
-    #system_message(f"Simulating round #{round + 1}...", end=(" " * 10 + "\r"))
+    #system_message(f"Simulating round #{round + 1}...")
+    system_message(f"Simulating round #{round + 1}...", end=(" " * 10 + "\r"))
+    env = environment.EmailEnvironment(
+        mailserver = getclass(mailserver, args.mailserver),
+        ragserver = getclass(ragserver, args.ragserver),
+        model = getclass(models, args.model),
+    )
+
     env.load(
         copy.deepcopy(jsonobj), 
         randomize_order=args.randomize_order,
@@ -83,16 +89,13 @@ else:
     jsonobj["emails"] = round_results[0]["emails"]
 
 arg_dict = vars(args).copy()
-arg_dict.pop('input')
-arg_dict.pop('output')
-arg_dict.pop('logging')
+arg_dict.pop("input")
+arg_dict.pop("output")
+arg_dict.pop("logging")
 jsonobj["arguments"] = arg_dict
 jsonobj["command"] = [sys.executable] + sys.argv
 
 json.dump(jsonobj, args.output, indent=4)
-if (args.output != sys.stdout): 
-    if os.path.exists(args.output.name):
-        warn(f'Table "{args.output.name}" already exists, will be overwritten')
-    system_message(f'Wrote table to "{args.output.name}"')
+if (args.output != sys.stdout): system_message(f'Wrote table to "{args.output.name}"')
 args.output.write("\n")
 

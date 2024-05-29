@@ -1,0 +1,17 @@
+.decrement-button,
+.increment-button {
+    position: absolute;
+    right: 0;
+    font-size: .35em;
+    /* padding: 0.6em 1.2em;
+    margin: 0.5em 0.5em; */
+    background: none;
+}
+
+.decrement-button {
+    bottom: 0;
+}
+
+.increment-button {
+    top: 0;
+}
