@@ -24,14 +24,14 @@ parser.add_argument("--mailserver", default="SimpleMailServer")
 parser.add_argument("--ragserver", default="FakeRagServer")
 parser.add_argument("--model", default="RandomModel")
 
-parser.add_argument("--limit", default=100, type=int)
+parser.add_argument("--limit", default=100, type=int, help="The maximum number of emails to generate.")
 parser.add_argument("--logging", type=LoggingMode.from_string, choices=list(LoggingMode), default=LoggingMode.NORMAL)
-parser.add_argument("--rounds", default=1, type=int)
-parser.add_argument("--num-documents", default=10, type=int)
-parser.add_argument("--resume", default=False, type=bool)
+parser.add_argument("--rounds", default=1, type=int, help="The number of times to run the simulation.")
+parser.add_argument("--num-documents", default=10, type=int, help="The maximum number of context emails to fetch from the RAG server.")
 
-parser.add_argument("--randomize-order", default=False, type=bool)
-parser.add_argument("--randomize-senders", default=False, type=bool)
+parser.add_argument("--resume", action=argparse.BooleanOptionalAction, help="Whether to start the simulation anew or keep going from the last saved round.")
+parser.add_argument("--randomize-order", action=argparse.BooleanOptionalAction, help="Whether to randomize the order of emails in the starting environment.")
+parser.add_argument("--randomize-senders", action=argparse.BooleanOptionalAction, help="Whether to shuffle the names of the senders (does not affect graph structure).")
 
 args = parser.parse_args()
 

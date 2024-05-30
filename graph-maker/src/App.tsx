@@ -259,6 +259,31 @@ function App() {
     const allTypes = templates ? Object.keys(templates.templates).concat("worm") : [];
     const [modalOpen, setModalOpen] = useState(false);
 
+    let odd = false;
+    const emailsContent = emails.map((email, idx) => {
+        if (filteredEmails[idx]) odd = !odd;
+        return <EmailRow
+            key={idx}
+            email={email}
+            order={idx + 1}
+            highlightSender={highlightEmail?.sender}
+            highlightRecipient={highlightEmail?.recipient}
+            allEmails={allEmails}
+            allTypes={allTypes}
+            updateEmail={(newEmail) => updateTargetEmail(idx, newEmail)}
+            deleteEmail={() => deleteTargetEmail(idx)}
+            editing={idx === editing}
+            startEditing={() => changeEditing(idx)}
+            endEditing={() => changeEditing(-1)}
+            dragging={idx === dragging}
+            toggleDragging={() => changeDragging(idx)}
+            swapUp={() => swapEmailOrder(idx, idx - 1)}
+            swapDown={() => swapEmailOrder(idx, idx + 1)}
+            collapsed={!filteredEmails[idx]}
+            odd={odd}
+        />
+    });
+
     return (
         <>
             {
@@ -287,25 +312,7 @@ function App() {
                             filteredEmails.length === 0 ?
                                 <p id="no-emails">No emails to display.</p>
                                 :
-                                emails.map((email, idx) => <EmailRow
-                                    key={idx}
-                                    email={email}
-                                    order={idx + 1}
-                                    highlightSender={highlightEmail?.sender}
-                                    highlightRecipient={highlightEmail?.recipient}
-                                    allEmails={allEmails}
-                                    allTypes={allTypes}
-                                    updateEmail={(newEmail) => updateTargetEmail(idx, newEmail)}
-                                    deleteEmail={() => deleteTargetEmail(idx)}
-                                    editing={idx === editing}
-                                    startEditing={() => changeEditing(idx)}
-                                    endEditing={() => changeEditing(-1)}
-                                    dragging={idx === dragging}
-                                    toggleDragging={() => changeDragging(idx)}
-                                    swapUp={() => swapEmailOrder(idx, idx - 1)}
-                                    swapDown={() => swapEmailOrder(idx, idx + 1)}
-                                    collapsed={!filteredEmails[idx]}
-                                />)
+                                emailsContent
                         }
                     </div>
                     <div id="buttons-wrap">

@@ -30,7 +30,7 @@ The `mailserver`, `ragserver` and `model` arguments all refer to classes in the 
 
 The `limit` parameter is the maximum number of generated emails that can be sent, used to avoid infinite loops (although in practice this rarely happens). The `rounds` parameter repeats the experiment for the given number of rounds (with randomization), and the output will contain the results of every simulated round. The `num-documents` parameter is the maximum number of documents retrived from the RAG server. 
 
-Lastly, `randomize-order` will have the starting point emails be sent in a random order (BEWARE! This can and will break your graph structure if it depends on order!) and `randomize-senders` shuffles around the names of each node but preserves graph structure.
+Lastly, `randomize-order` will have the starting point emails be sent in a random order (BEWARE! This can and will break your graph structure if it depends on order!) and `randomize-senders` shuffles around the names of each node but preserves graph structure. All this information is also provided in the command usage, and can be found by running `python main.py -h`.
 
 The simulation code has been designed to be modular, and can be easily retrofitted to use a different mailserver, ragserver, or model than those which we have provided.
 
@@ -104,33 +104,33 @@ For ease of use, a number of commands to run various experiments are listed belo
 
 ### `Long line`
 ```powershell
-python .\main.py .\envs\long_line_with_original_worm.json .\out\long_line_with_original_worm.json --model ActionModel --ragserver FAISSRagServer --rounds 10  --randomize-senders True
+python .\main.py .\envs\long_line_with_original_worm.json .\out\long_line_with_original_worm.json --model ActionModel --ragserver FAISSRagServer --rounds 10  --randomize-senders
 ```
 ```powershell
-python .\main.py .\envs\long_line_with_fixed_worm.json .\out\long_line_with_fixed_worm.json --model ActionModel --ragserver FAISSRagServer --rounds 10  --randomize-senders True
+python .\main.py .\envs\long_line_with_fixed_worm.json .\out\long_line_with_fixed_worm.json --model ActionModel --ragserver FAISSRagServer --rounds 10  --randomize-senders
 ```
 ```powershell
-python .\main.py .\envs\long_line_with_single_worm.json .\out\long_line_with_single_worm.json --model ActionModel --ragserver FAISSRagServer --rounds 10  --randomize-senders True
+python .\main.py .\envs\long_line_with_single_worm.json .\out\long_line_with_single_worm.json --model ActionModel --ragserver FAISSRagServer --rounds 10  --randomize-senders
 ```
 ```powershell
-python .\main.py .\envs\long_line_with_friendly_worm.json .\out\long_line_with_friendly_worm.json --model ActionModel --ragserver FAISSRagServer --rounds 10  --randomize-senders True
+python .\main.py .\envs\long_line_with_friendly_worm.json .\out\long_line_with_friendly_worm.json --model ActionModel --ragserver FAISSRagServer --rounds 10  --randomize-senders
 ```
 ```powershell
-python .\main.py .\envs\long_line_with_business_worm.json .\out\long_line_with_business_worm.json --model ActionModel --ragserver FAISSRagServer --rounds 10  --randomize-senders True
+python .\main.py .\envs\long_line_with_business_worm.json .\out\long_line_with_business_worm.json --model ActionModel --ragserver FAISSRagServer --rounds 10  --randomize-senders
 ```
 
 ### `Reply rate by email type`
 
 ```powershell
-python .\main.py .\envs\reply_rate_by_email_type.json .\out\reply_rate_by_email_type.json --model ActionModel --ragserver FAISSRagServer --rounds 20 --randomize-order True --randomize-senders True
+python .\main.py .\envs\reply_rate_by_email_type.json .\out\reply_rate_by_email_type.json --model ActionModel --ragserver FAISSRagServer --rounds 20 --randomize-order --randomize-senders
 ```
 
 ### `Reply rate by domain`
 ```powershell
-python .\main.py .\envs\reply_rate_by_domain.json .\out\reply_rate_by_domain.json --model ActionModel --ragserver FAISSRagServer --rounds 20 --randomize-order True --randomize-senders True
+python .\main.py .\envs\reply_rate_by_domain.json .\out\reply_rate_by_domain.json --model ActionModel --ragserver FAISSRagServer --rounds 20 --randomize-order --randomize-senders
 ```
 
 ### `Grid spread test`
 ```powershell
-python .\main.py .\envs\original_worm_grid.json .\out\original_worm_grid.json --model ActionModel --ragserver FAISSRagServer --rounds 20 --randomize-order True --randomize-senders True
+python .\main.py .\envs\original_worm_grid.json .\out\original_worm_grid.json --model ActionModel --ragserver FAISSRagServer --rounds 20 --randomize-senders
 ```

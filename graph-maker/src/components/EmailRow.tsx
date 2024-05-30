@@ -27,6 +27,7 @@ interface Props {
     swapUp: () => void,
     swapDown: () => void,
     collapsed?: boolean,
+    odd?: boolean,
 }
 
 export default function EmailRow({
@@ -46,6 +47,7 @@ export default function EmailRow({
     swapUp,
     swapDown,
     collapsed,
+    odd,
 }: Props) {
     const rowRef = useRef<HTMLDivElement>(null);
     const senderRef = useRef<HTMLInputElement>(null);
@@ -131,6 +133,9 @@ export default function EmailRow({
     if (dragging) className += " dragging";
     if (email.infected) className += " infected";
     if (collapsed) className += " collapsed";
+
+    if (odd) className += " odd-row";
+    else className += " even-row";
 
     if (highlightSender === email.sender) className += " highlight-sender";
     if (highlightRecipient === email.sender) className += " highlight-sender-alt";

@@ -71,8 +71,10 @@ class ActionModel:
 
         try:
             response = self.llm.invoke(prompt)
-        except:
+        except Exception as err:
+            output("Error:", err, color="red", priority=LogPriority.MAX)
             output("Invoke failed:", prompt, color="red", priority=LogPriority.MAX)
+        
         output("Model Response:", color="purple", priority=LogPriority.DEBUG)
         output(response.content, priority=LogPriority.DEBUG)
         response = response.content

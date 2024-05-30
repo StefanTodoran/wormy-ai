@@ -50,15 +50,15 @@
     flex: unset;
 }
 
-.email-row:nth-child(odd) {
+.email-row.even-row {
     background-color: var(--background-color);
 }
 
-.email-row:nth-child(even) {
+.email-row.odd-row {
     background-color: var(--fill-color);
 }
 
-.email-row:nth-child(even) .input-label>.main-label {
+.email-row.odd-row .input-label>.main-label {
     background-color: var(--fill-color);
 }
 
@@ -117,7 +117,7 @@
     width: 1.35em;
 }
 
-.email-row:nth-child(even) .row-icon {
+.email-row.odd-row .row-icon {
     background-color: var(--fill-color);
 }
 
