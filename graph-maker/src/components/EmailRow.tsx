@@ -2,13 +2,13 @@ import { useEffect, useRef } from "react";
 import { getButtonBehavior } from "../utils/misc";
 import { EmailEntry } from "../utils/types";
 import AutocompleteInput from "./AutocompleteInput";
+import FancyInput from "./FancyInput";
 
 import editIcon from "../assets/edit-icon.svg";
 import moveIcon from "../assets/move-icon.svg";
 import deleteIcon from "../assets/delete-icon.svg";
 
 import "./styles/EmailRow.css";
-import FancyInput from "./FancyInput";
 
 interface Props {
     email: EmailEntry,
@@ -26,6 +26,7 @@ interface Props {
     toggleDragging: () => void,
     swapUp: () => void,
     swapDown: () => void,
+    collapsed?: boolean,
 }
 
 export default function EmailRow({
@@ -44,6 +45,7 @@ export default function EmailRow({
     toggleDragging,
     swapUp,
     swapDown,
+    collapsed,
 }: Props) {
     const rowRef = useRef<HTMLDivElement>(null);
     const senderRef = useRef<HTMLInputElement>(null);
@@ -128,6 +130,7 @@ export default function EmailRow({
     if (editing) className += " editing";
     if (dragging) className += " dragging";
     if (email.infected) className += " infected";
+    if (collapsed) className += " collapsed";
 
     if (highlightSender === email.sender) className += " highlight-sender";
     if (highlightRecipient === email.sender) className += " highlight-sender-alt";

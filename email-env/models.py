@@ -69,7 +69,10 @@ class ActionModel:
         output("Model Prompt:", color="purple", priority=LogPriority.DEBUG)
         output(prompt, priority=LogPriority.DEBUG)
 
-        response = self.llm.invoke(prompt)
+        try:
+            response = self.llm.invoke(prompt)
+        except:
+            output("Invoke failed:", prompt, color="red", priority=LogPriority.MAX)
         output("Model Response:", color="purple", priority=LogPriority.DEBUG)
         output(response.content, priority=LogPriority.DEBUG)
         response = response.content

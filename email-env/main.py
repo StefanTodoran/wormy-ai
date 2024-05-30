@@ -86,6 +86,8 @@ if args.resume:
     with open(args.output, "r") as results_file:
         prev_results = json.load(results_file)
         round_results = prev_results["rounds"]
+    system_message(f"Resumed simulation from round #{len(round_results)}")
+
 starting_round = len(round_results)
 
 for curr_round in range(starting_round, args.rounds):

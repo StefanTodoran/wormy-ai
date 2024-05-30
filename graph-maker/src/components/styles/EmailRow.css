@@ -5,6 +5,7 @@
     border-radius: .35em;
     position: relative;
     outline: 1px solid transparent;
+    max-height: 15em;
     /* min-height: 6em; */
 }
 
@@ -140,4 +141,16 @@
     .delete-entry-btn {
         content: url("../../assets/delete-icon-dark.svg");
     }
+}
+
+.email-row.collapsed {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.email-row.collapsed * {
+    opacity: 0;
+    visibility: hidden;
 }

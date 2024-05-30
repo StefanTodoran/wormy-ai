@@ -244,13 +244,14 @@ function App() {
     const highlightEmail = emails[dragging] || emails[editing];
     const [searchQuery, setSearchQuery] = useState("");
 
-    let filteredEmails = emails;
+    let filteredEmails: boolean[] = new Array(emails.length).fill(true);
     if (searchQuery) {
         const query = searchQuery.toLowerCase();
-        filteredEmails = emails.filter(email => {
+        filteredEmails = emails.map(email => {
             return email.sender.toLowerCase().includes(query) ||
                 email.recipient.toLowerCase().includes(query) ||
                 email.subject.toLowerCase().includes(query) ||
+                email.type.toLowerCase().includes(query) ||
                 email.content.toLowerCase().includes(query);
         });
     }
@@ -282,25 +283,30 @@ function App() {
                             }
                         </div>
 
-                        {filteredEmails.map((email, idx) => <EmailRow
-                            key={idx}
-                            email={email}
-                            order={idx + 1}
-                            highlightSender={highlightEmail?.sender}
-                            highlightRecipient={highlightEmail?.recipient}
-                            allEmails={allEmails}
-                            allTypes={allTypes}
-                            updateEmail={(newEmail) => updateTargetEmail(idx, newEmail)}
-                            deleteEmail={() => deleteTargetEmail(idx)}
-                            editing={idx === editing}
-                            startEditing={() => changeEditing(idx)}
-                            endEditing={() => changeEditing(-1)}
-                            dragging={idx === dragging}
-                            toggleDragging={() => changeDragging(idx)}
-                            swapUp={() => swapEmailOrder(idx, idx - 1)}
-                            swapDown={() => swapEmailOrder(idx, idx + 1)}
-                        />)}
-                        {filteredEmails.length === 0 && <p id="no-emails">No emails to display.</p>}
+                        {
+                            filteredEmails.length === 0 ?
+                                <p id="no-emails">No emails to display.</p>
+                                :
+                                emails.map((email, idx) => <EmailRow
+                                    key={idx}
+                                    email={email}
+                                    order={idx + 1}
+                                    highlightSender={highlightEmail?.sender}
+                                    highlightRecipient={highlightEmail?.recipient}
+                                    allEmails={allEmails}
+                                    allTypes={allTypes}
+                                    updateEmail={(newEmail) => updateTargetEmail(idx, newEmail)}
+                                    deleteEmail={() => deleteTargetEmail(idx)}
+                                    editing={idx === editing}
+                                    startEditing={() => changeEditing(idx)}
+                                    endEditing={() => changeEditing(-1)}
+                                    dragging={idx === dragging}
+                                    toggleDragging={() => changeDragging(idx)}
+                                    swapUp={() => swapEmailOrder(idx, idx - 1)}
+                                    swapDown={() => swapEmailOrder(idx, idx + 1)}
+                                    collapsed={!filteredEmails[idx]}
+                                />)
+                        }
                     </div>
                     <div id="buttons-wrap">
                         <IconButton
