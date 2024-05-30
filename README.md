@@ -130,7 +130,15 @@ python .\main.py .\envs\reply_rate_by_email_type.json .\out\reply_rate_by_email_
 python .\main.py .\envs\reply_rate_by_domain.json .\out\reply_rate_by_domain.json --model ActionModel --ragserver FAISSRagServer --rounds 20 --randomize-order --randomize-senders
 ```
 
-### `Grid spread test`
+### `Reply rate by worm variant`
 ```powershell
-python .\main.py .\envs\original_worm_grid.json .\out\original_worm_grid.json --model ActionModel --ragserver FAISSRagServer --rounds 20 --randomize-senders
+python .\main.py .\envs\worm_reply_rate.json .\out\worm_reply_rate.json --model ActionModel --ragserver FAISSRagServer --rounds 20 --randomize-order --randomize-senders --num-documents 0
+```
+
+### `Grid spread`
+```powershell
+python .\main.py .\envs\original_worm_grid.json .\out\original_worm_grid.json --model ActionModel --ragserver FAISSRagServer --rounds 5 --randomize-senders
+```
+```powershell
+python .\main.py .\envs\strong_worm_grid.json .\out\strong_worm_grid.json --model ActionModel --ragserver FAISSRagServer --rounds 5 --randomize-senders
 ```

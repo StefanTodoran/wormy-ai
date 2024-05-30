@@ -159,6 +159,7 @@ class EmailEnvironment:
                 generated = message.generated,
                 original_message = original_message,
                 context_messages = context_messages,
+                worm_variant = message.worm_variant,
             ))
 
         return all_messages
