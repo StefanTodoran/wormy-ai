@@ -13,7 +13,7 @@ def similarityScore(a, b):
     return SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
 class EmailEnvironment:
-    def __init__(self, mailserver, ragserver, model, message_queue=None):
+    def __init__(self, mailserver, ragserver, model, message_queue=None, num_documents=10):
         self.mailserver = mailserver
         self.ragserver = ragserver
         self.model = model
@@ -22,7 +22,7 @@ class EmailEnvironment:
         self.name = None
         self.infected_email = None
         self.immediate_respond = True
-        self.num_documents = 10
+        self.num_documents = num_documents
 
     def getmessage(self, message_id):
         return self.mailserver.getmessage(message_id)

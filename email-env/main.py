@@ -43,13 +43,6 @@ def getclass(module, name):
 
 set_logging_mode(args.logging)
 
-env = environment.EmailEnvironment(
-    mailserver = getclass(mailserver, args.mailserver),
-    ragserver = getclass(ragserver, args.ragserver),
-    model = getclass(models, args.model),
-)
-env.num_documents = args.num_documents
-
 if not os.path.exists(args.input):
     warn(f'Environment with path "{args.input}" does not exist!')    
     envs = glob.glob("./envs/*.json")
@@ -96,6 +89,7 @@ for curr_round in range(starting_round, args.rounds):
         mailserver = getclass(mailserver, args.mailserver),
         ragserver = getclass(ragserver, args.ragserver),
         model = getclass(models, args.model),
+        num_documents = args.num_documents,
     )
 
     env.load(
