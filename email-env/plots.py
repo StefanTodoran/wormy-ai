@@ -27,24 +27,28 @@ def comparison_graph(jsonobjs):
 
     fig.savefig('plots/{}.png'.format(sys.argv[1].replace('/', '_').replace('.json', '')))
 
-def time_graph(jsonobj):
+def time_graph(jsonobjs):
     stat_names = 'retrieval replication recall_rate precision'.split()
     pretty_names = ['Retrieval rate', 'Replication rate', 'Recall rate', 'Precision']
     stat_names = ['payload_correct']
-    pretty_names = ['Payload correct']
+    pretty_names = ['Number of emails in infected message']
 
     fig, axes = plt.subplots(nrows=len(stat_names), figsize=(6, 5*len(stat_names)), squeeze=False)
 
-    for i in range(len(stat_names)):
-        num_docs = []
-        values = []
-        for message in jsonobj['emails']:
-            if stat_names[i] in message['metrics']:
-                values.append(message['metrics'][stat_names[i]])
-        axes[i,0].plot(values)
-        axes[i,0].set_xlabel('Time')
-        axes[i,0].set_ylabel(pretty_names[i])
+    for jsonobj in jsonobjs:
+        metrics = [msg['metrics'] for msg in jsonobj['emails']]
+
+        for i in range(len(stat_names)):
+            num_docs = []
+            values = []
+            for stats in metrics:
+                if stat_names[i] in stats:
+                    values.append(stats[stat_names[i]])
+            axes[i,0].plot(values, alpha=0.5)
+            axes[i,0].set_xlabel('Timepoint in worm propagation')
+            axes[i,0].set_ylabel(pretty_names[i])
+            axes[i,0].set_title('Number of payload emails accumulated by the worm (8 trials)')
 
     fig.savefig('plots/{}.png'.format(sys.argv[1].replace('/', '_').replace('.json', '_time')))
 
-time_graph(jsonobjs[0])
+time_graph(jsonobjs)

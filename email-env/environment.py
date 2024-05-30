@@ -104,6 +104,16 @@ class EmailEnvironment:
             )
             self.message_queue.append(message)
 
+        """
+        senders = list(set([msg.sender for msg in self.message_queue] + [msg.recipient for msg in self.message_queue]))
+        new_senders = senders.copy()
+        random.shuffle(new_senders)
+        sender_mapping = dict(zip(senders, new_senders))
+        for message in self.message_queue:
+            message.sender = sender_mapping[message.sender]
+            message.recipient = sender_mapping[message.recipient]
+        """
+
         if "immediate_respond" in jsonobj:
             self.immediate_respond = jsonobj["immediate_respond"]
 
