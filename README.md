@@ -134,8 +134,14 @@ python .\main.py .\envs\reply_rate_by_domain.json .\out\reply_rate_by_domain.jso
 ```powershell
 python .\main.py .\envs\worm_reply_rate.json .\out\worm_reply_rate.json --model ActionModel --ragserver FAISSRagServer --rounds 20 --randomize-order --randomize-senders --num-documents 0
 ```
+```powershell
+python .\main.py .\envs\worm_reply_rate_alt.json .\out\worm_reply_rate_alt.json --model ActionModel --ragserver FAISSRagServer --rounds 20 --randomize-order --randomize-senders --num-documents 0
+```
 
 ### `Grid spread`
+```powershell
+python .\main.py .\envs\friendly_worm_grid.json .\out\friendly_worm_grid.json --model ActionModel --ragserver FAISSRagServer --rounds 5 --randomize-senders
+```
 ```powershell
 python .\main.py .\envs\original_worm_grid.json .\out\original_worm_grid.json --model ActionModel --ragserver FAISSRagServer --rounds 5 --randomize-senders
 ```
